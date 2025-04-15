@@ -1,0 +1,68 @@
+﻿lib/
+├── main.dart
+├── app/
+│   ├── app.dart                  # Root widget, router setup if needed
+│   └── theme.dart                # Theme & style definitions
+├── models/
+│   ├── customer.dart
+│   ├── scale.dart
+│   ├── service_report.dart
+│   ├── weight_test_result.dart
+│   ├── work_order.dart
+│   └── [model_name].g.dart       # Isar-generated files
+├── services/
+│   ├── isar_service.dart
+│   ├── sync_service.dart         # Optional: syncing to cloud/server
+│   └── auth_service.dart         # Optional: if login is added later
+├── providers/
+│   ├── isar_providers.dart       # Isar + shared providers
+│   ├── work_order_provider.dart
+│   ├── service_report_provider.dart
+│   └── scale_provider.dart
+├── controllers/
+│   ├── work_order_form_controller.dart
+│   ├── service_report_form_controller.dart
+│   └── weight_test_form_controller.dart
+├── pages/
+│   ├── home_page.dart
+│   ├── dashboard_page.dart
+│   ├── create_customer_page.dart
+│   ├── create_work_order_page.dart
+│   ├── create_service_report_page.dart
+│   ├── manage_scales_page.dart
+│   ├── service_report_form_page.dart
+│   ├── view_reports_page.dart
+│   └── view_weight_test_page.dart
+├── forms/
+│   ├── checklists/
+│   │   └── stp_checklist_form.dart
+│   ├── inspections/
+│   │   ├── bulk_inspection_form.dart
+│   │   └── lft_inspection_page.dart
+│   ├── repairs/
+│   │   ├── parts_used.dart
+│   │   └── repair_form.dart
+│   └── weight/
+│       └── weight_test_form.dart
+├── widgets/
+│   ├── common/
+│   │   ├── snackbar.dart
+│   │   └── tile_button.dart
+│   ├── work_order/
+│   │   ├── address_section.dart
+│   │   ├── additional_contacts.dart
+│   │   ├── billing_section.dart
+│   │   ├── contact_section.dart
+│   │   ├── customer_dropdown.dart
+│   │   ├── description_field.dart
+│   │   ├── save_work_order_button.dart
+│   │   └── work_order_number_display.dart
+│   └── service_report/
+│       ├── base_section.dart
+│       ├── configuration_toggle.dart
+│       ├── indicator_section.dart
+│       ├── load_cell_section.dart
+│       ├── scale_capacity_section.dart
+│       ├── scale_selection_dialog.dart
+│       ├── scale_type_selector.dart
+│       └── work_order_dropdown.dart

@@ -1,0 +1,17 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\lib",
+    "\\lib\\controllers",
+    "\\lib\\data",
+    "\\lib\\data\\tables",
+    "\\lib\\models",
+    "\\lib\\pages",
+    "\\lib\\providers",
+    "\\lib\\utils",
+    "\\lib\\widgets",
+    "\\test"
+  ],
+  "SelectedNode": "\\lib\\data\\daos\\customer_dao.dart",
+  "PreviewInSolutionExplorer": false
+}
