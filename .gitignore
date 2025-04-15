@@ -1,0 +1,6 @@
+build/
+.dart_tool/
+.packages
+.flutter-plugins
+flutter_export_environment.sh
+windows/flutter/ephemeral/
