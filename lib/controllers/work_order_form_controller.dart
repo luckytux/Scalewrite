@@ -1,35 +1,40 @@
 // File: lib/controllers/work_order_form_controller.dart
+
 import 'package:flutter/material.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:intl/intl.dart';
 import '../data/database.dart';
 import '../data/daos/work_order_dao.dart';
 import '../data/daos/customer_dao.dart';
+import '../data/daos/contact_dao.dart';
 
 class WorkOrderFormController extends ChangeNotifier {
   final WorkOrderDao dao;
+  final ContactDao contactDao;
   final CustomerDao customerDao;
   final formKey = GlobalKey<FormState>();
 
-  // Work Order info
   String? workOrderNumber;
   int? selectedCustomerId;
 
-  // Text fields
-  final siteAddress = TextEditingController();
-  final siteCity = TextEditingController();
-  final siteProvince = TextEditingController();
-  final sitePostalCode = TextEditingController();
-  final billingAddress = TextEditingController();
-  final billingCity = TextEditingController();
-  final billingProvince = TextEditingController();
-  final billingPostalCode = TextEditingController();
   final gpsLocation = TextEditingController();
   final customerNotes = TextEditingController();
 
-  // Contact handling
+  final siteAddress = TextEditingController();
+  final siteCity = TextEditingController();
+  final siteProvince = TextEditingController();
+  final sitePostal = TextEditingController();
+
+  final billingAddress = TextEditingController();
+  final billingCity = TextEditingController();
+  final billingProvince = TextEditingController();
+  final billingPostal = TextEditingController();
+
+  bool customerFieldsEnabled = false;
+  bool showBilling = false;
+
   List<Contact> _contacts = [];
-  List<Contact> get activeContacts => _contacts.where((c) => !c.isMain).toList();
+  List<Contact> get contacts => List.unmodifiable(_contacts);
 
   Contact? get mainContact {
     try {
@@ -39,22 +44,50 @@ class WorkOrderFormController extends ChangeNotifier {
     }
   }
 
-  // UI toggles
-  bool showBillingFields = false;
+  WorkOrderFormController(this.dao, this.customerDao, this.contactDao);
 
-  WorkOrderFormController(this.dao, this.customerDao);
+  void enableCustomerEditing() {
+    customerFieldsEnabled = true;
+    notifyListeners();
+  }
 
-  void toggleBillingFields([bool? value]) {
-    showBillingFields = value ?? !showBillingFields;
+  void toggleBillingVisibility(bool value) {
+    showBilling = value;
     notifyListeners();
   }
 
   Future<void> selectCustomer(int? id) async {
     selectedCustomerId = id;
     workOrderNumber = _generateWorkOrderNumber();
-    _contacts = id != null
-        ? await customerDao.getContactsForCustomer(id)
-        : [];
+
+    if (id != null) {
+      final customer = await customerDao.getCustomerById(id);
+      if (customer != null) {
+        populateCustomerFields(customer);
+      }
+      _contacts = await contactDao.getContactsForCustomer(id);
+    } else {
+      _contacts = [];
+    }
+
+    notifyListeners();
+  }
+
+  void populateCustomerFields(Customer customer) {
+    gpsLocation.text = customer.gpsLocation ?? '';
+    customerNotes.text = customer.notes ?? '';
+
+    siteAddress.text = customer.siteAddress ?? '';
+    siteCity.text = customer.siteCity ?? '';
+    siteProvince.text = customer.siteProvince ?? '';
+    sitePostal.text = formatPostalCode(customer.sitePostalCode ?? '');
+
+    billingAddress.text = customer.billingAddress ?? '';
+    billingCity.text = customer.billingCity ?? '';
+    billingProvince.text = customer.billingProvince ?? '';
+    billingPostal.text = formatPostalCode(customer.billingPostalCode ?? '');
+
+    customerFieldsEnabled = false;
     notifyListeners();
   }
 
@@ -74,26 +107,48 @@ class WorkOrderFormController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateContact(Contact updated) {
+    final index = _contacts.indexWhere((c) => c.id == updated.id);
+    if (index != -1) {
+      _contacts[index] = updated;
+    }
+    notifyListeners();
+  }
+
   void makeMainContact(Contact contact) {
     _contacts = _contacts.map((c) {
       if (c.id == contact.id) {
-        return c.copyWith(isMain: true);
+        return c.copyWith(isMain: true, auditFlag: true);
       } else if (c.isMain) {
-        return c.copyWith(isMain: false);
+        return c.copyWith(isMain: false, auditFlag: true);
       }
       return c;
     }).toList();
+
+    _contacts.sort((a, b) {
+      if (a.isMain) return -1;
+      if (b.isMain) return 1;
+      return 0;
+    });
+
     notifyListeners();
   }
 
   void removeContact(Contact contact) {
+    final wasMain = contact.isMain;
     _contacts.removeWhere((c) => c.id == contact.id);
+
+    if (wasMain && _contacts.isNotEmpty) {
+      final first = _contacts.first;
+      _contacts[0] = first.copyWith(isMain: true, auditFlag: true);
+    }
+
     notifyListeners();
   }
 
   String _generateWorkOrderNumber() {
     final now = DateTime.now();
-    const uid = '101'; // Should be dynamically determined
+    const uid = '101'; // Replace with dynamic user ID logic if needed
     final formatter = DateFormat('yyyyMMdd-HHmm');
     return 'WO-$uid-${formatter.format(now)}';
   }
@@ -101,38 +156,68 @@ class WorkOrderFormController extends ChangeNotifier {
   Future<bool> save() async {
     if (!formKey.currentState!.validate()) return false;
 
-    final entry = WorkOrdersCompanion(
-      customerId: drift.Value(selectedCustomerId ?? 0),
-      workOrderNumber: drift.Value(workOrderNumber ?? _generateWorkOrderNumber()),
-      siteAddress: drift.Value(siteAddress.text),
-      siteCity: drift.Value(siteCity.text),
-      siteProvince: drift.Value(siteProvince.text),
-      sitePostalCode: drift.Value(sitePostalCode.text),
-      billingAddress: showBillingFields ? drift.Value(billingAddress.text) : const drift.Value.absent(),
-      billingCity: showBillingFields ? drift.Value(billingCity.text) : const drift.Value.absent(),
-      billingProvince: showBillingFields ? drift.Value(billingProvince.text) : const drift.Value.absent(),
-      billingPostalCode: showBillingFields ? drift.Value(billingPostalCode.text) : const drift.Value.absent(),
-      gpsLocation: drift.Value(gpsLocation.text),
-      customerNotes: drift.Value(customerNotes.text),
-      auditFlag: const drift.Value(true),
-    );
+    if (selectedCustomerId != null) {
+      final update = CustomersCompanion(
+        id: drift.Value(selectedCustomerId!),
+        gpsLocation: drift.Value(gpsLocation.text),
+        notes: drift.Value(customerNotes.text),
+        auditFlag: const drift.Value(true),
+        siteAddress: drift.Value(siteAddress.text),
+        siteCity: drift.Value(siteCity.text),
+        siteProvince: drift.Value(siteProvince.text),
+        sitePostalCode: drift.Value(cleanPostalCode(sitePostal.text)),
+        billingAddress: showBilling ? drift.Value(billingAddress.text) : const drift.Value.absent(),
+        billingCity: showBilling ? drift.Value(billingCity.text) : const drift.Value.absent(),
+        billingProvince: showBilling ? drift.Value(billingProvince.text) : const drift.Value.absent(),
+        billingPostalCode: showBilling ? drift.Value(cleanPostalCode(billingPostal.text)) : const drift.Value.absent(),
+      );
+      await customerDao.updateCustomer(update);
 
-    await dao.insertWorkOrder(entry);
+      for (final contact in _contacts) {
+        final companion = ContactsCompanion(
+          id: contact.id > 0 ? drift.Value(contact.id) : const drift.Value.absent(),
+          customerId: drift.Value(contact.customerId),
+          name: drift.Value(contact.name),
+          phone: drift.Value(contact.phone),
+          email: drift.Value(contact.email),
+          notes: drift.Value(contact.notes),
+          isMain: drift.Value(contact.isMain),
+          deactivate: drift.Value(contact.deactivate),
+          auditFlag: drift.Value(contact.auditFlag),
+          synced: drift.Value(contact.synced),
+        );
+
+        await contactDao.insertOrUpdateContact(companion);
+      }
+    }
+
     return true;
+  }
+
+  String formatPostalCode(String input) {
+    final cleaned = input.replaceAll(RegExp(r'\s+'), '').toUpperCase();
+    if (cleaned.length == 6) {
+      return '${cleaned.substring(0, 3)} ${cleaned.substring(3)}';
+    }
+    return input;
+  }
+
+  String cleanPostalCode(String input) {
+    return input.replaceAll(RegExp(r'\s+'), '').toUpperCase();
   }
 
   @override
   void dispose() {
+    gpsLocation.dispose();
+    customerNotes.dispose();
     siteAddress.dispose();
     siteCity.dispose();
     siteProvince.dispose();
-    sitePostalCode.dispose();
+    sitePostal.dispose();
     billingAddress.dispose();
     billingCity.dispose();
     billingProvince.dispose();
-    billingPostalCode.dispose();
-    gpsLocation.dispose();
-    customerNotes.dispose();
+    billingPostal.dispose();
     super.dispose();
   }
 }

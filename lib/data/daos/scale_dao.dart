@@ -1,4 +1,5 @@
 // File: lib/data/daos/scale_dao.dart
+
 import 'package:drift/drift.dart';
 import '../database.dart';
 import '../tables/scales.dart';
@@ -13,6 +14,10 @@ class ScaleDao extends DatabaseAccessor<AppDatabase> with _$ScaleDaoMixin {
     return into(scales).insert(entry);
   }
 
+  Future<Scale?> getScaleById(int id) {
+    return (select(scales)..where((s) => s.id.equals(id))).getSingleOrNull();
+  }
+  
   Future<List<Scale>> getAllScales() {
     return select(scales).get();
   }
@@ -22,9 +27,7 @@ class ScaleDao extends DatabaseAccessor<AppDatabase> with _$ScaleDaoMixin {
   }
 
   Future<List<Scale>> getScalesForCustomer(int customerId) {
-    return (select(scales)
-          ..where((tbl) => tbl.customerId.equals(customerId)))
-        .get();
+    return (select(scales)..where((tbl) => tbl.customerId.equals(customerId))).get();
   }
 
   Future<bool> updateScale(Scale updated) {

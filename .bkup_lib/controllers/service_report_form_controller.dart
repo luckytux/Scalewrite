@@ -1,13 +1,14 @@
 // File: lib/controllers/service_report_form_controller.dart
 
 import 'package:flutter/material.dart';
+import 'package:scalewrite_v2/pages/create_work_order_page.dart';
 import '../data/tables/scales.dart';
 import '../data/tables/work_orders.dart';
 
 class ServiceReportFormController extends ChangeNotifier {
   final formKey = GlobalKey<FormState>();
 
-  WorkOrder? selectedWorkOrder;
+  CreateWorkOrderPage? selectedWorkOrder;
   Scale? selectedScale;
 
   String? selectedMainType;

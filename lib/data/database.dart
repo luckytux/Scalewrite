@@ -36,6 +36,7 @@ LazyDatabase _openConnection() {
   return LazyDatabase(() async {
     final dir = await getApplicationDocumentsDirectory();
     final path = p.join(dir.path, 'scalewrite.sqlite');
+    print('📂 SQLite DB Path: $path'); // Add this line
     return NativeDatabase(File(path));
   });
 }

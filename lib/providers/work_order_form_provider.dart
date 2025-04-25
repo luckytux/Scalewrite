@@ -7,5 +7,6 @@ import 'drift_providers.dart';
 final workOrderFormProvider = ChangeNotifierProvider<WorkOrderFormController>((ref) {
   final workOrderDao = ref.read(workOrderDaoProvider);
   final customerDao = ref.read(customerDaoProvider);
-  return WorkOrderFormController(workOrderDao, customerDao);
+  final contactDao = ref.read(contactDaoProvider); // <-- Added this line
+  return WorkOrderFormController(workOrderDao, customerDao, contactDao); // <-- Updated constructor
 });

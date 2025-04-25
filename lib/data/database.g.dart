@@ -24,29 +24,54 @@ class $CustomersTable extends Customers
   late final GeneratedColumn<String> businessName = GeneratedColumn<String>(
       'business_name', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _addressMeta =
-      const VerificationMeta('address');
+  static const VerificationMeta _siteAddressMeta =
+      const VerificationMeta('siteAddress');
   @override
-  late final GeneratedColumn<String> address = GeneratedColumn<String>(
-      'address', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _cityMeta = const VerificationMeta('city');
+  late final GeneratedColumn<String> siteAddress = GeneratedColumn<String>(
+      'site_address', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _siteCityMeta =
+      const VerificationMeta('siteCity');
   @override
-  late final GeneratedColumn<String> city = GeneratedColumn<String>(
-      'city', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _provinceMeta =
-      const VerificationMeta('province');
+  late final GeneratedColumn<String> siteCity = GeneratedColumn<String>(
+      'site_city', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _siteProvinceMeta =
+      const VerificationMeta('siteProvince');
   @override
-  late final GeneratedColumn<String> province = GeneratedColumn<String>(
-      'province', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _postalCodeMeta =
-      const VerificationMeta('postalCode');
+  late final GeneratedColumn<String> siteProvince = GeneratedColumn<String>(
+      'site_province', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _sitePostalCodeMeta =
+      const VerificationMeta('sitePostalCode');
   @override
-  late final GeneratedColumn<String> postalCode = GeneratedColumn<String>(
-      'postal_code', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> sitePostalCode = GeneratedColumn<String>(
+      'site_postal_code', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _billingAddressMeta =
+      const VerificationMeta('billingAddress');
+  @override
+  late final GeneratedColumn<String> billingAddress = GeneratedColumn<String>(
+      'billing_address', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _billingCityMeta =
+      const VerificationMeta('billingCity');
+  @override
+  late final GeneratedColumn<String> billingCity = GeneratedColumn<String>(
+      'billing_city', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _billingProvinceMeta =
+      const VerificationMeta('billingProvince');
+  @override
+  late final GeneratedColumn<String> billingProvince = GeneratedColumn<String>(
+      'billing_province', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _billingPostalCodeMeta =
+      const VerificationMeta('billingPostalCode');
+  @override
+  late final GeneratedColumn<String> billingPostalCode =
+      GeneratedColumn<String>('billing_postal_code', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _gpsLocationMeta =
       const VerificationMeta('gpsLocation');
   @override
@@ -91,10 +116,14 @@ class $CustomersTable extends Customers
   List<GeneratedColumn> get $columns => [
         id,
         businessName,
-        address,
-        city,
-        province,
-        postalCode,
+        siteAddress,
+        siteCity,
+        siteProvince,
+        sitePostalCode,
+        billingAddress,
+        billingCity,
+        billingProvince,
+        billingPostalCode,
         gpsLocation,
         notes,
         deactivate,
@@ -122,31 +151,51 @@ class $CustomersTable extends Customers
     } else if (isInserting) {
       context.missing(_businessNameMeta);
     }
-    if (data.containsKey('address')) {
-      context.handle(_addressMeta,
-          address.isAcceptableOrUnknown(data['address']!, _addressMeta));
-    } else if (isInserting) {
-      context.missing(_addressMeta);
-    }
-    if (data.containsKey('city')) {
+    if (data.containsKey('site_address')) {
       context.handle(
-          _cityMeta, city.isAcceptableOrUnknown(data['city']!, _cityMeta));
-    } else if (isInserting) {
-      context.missing(_cityMeta);
+          _siteAddressMeta,
+          siteAddress.isAcceptableOrUnknown(
+              data['site_address']!, _siteAddressMeta));
     }
-    if (data.containsKey('province')) {
-      context.handle(_provinceMeta,
-          province.isAcceptableOrUnknown(data['province']!, _provinceMeta));
-    } else if (isInserting) {
-      context.missing(_provinceMeta);
+    if (data.containsKey('site_city')) {
+      context.handle(_siteCityMeta,
+          siteCity.isAcceptableOrUnknown(data['site_city']!, _siteCityMeta));
     }
-    if (data.containsKey('postal_code')) {
+    if (data.containsKey('site_province')) {
       context.handle(
-          _postalCodeMeta,
-          postalCode.isAcceptableOrUnknown(
-              data['postal_code']!, _postalCodeMeta));
-    } else if (isInserting) {
-      context.missing(_postalCodeMeta);
+          _siteProvinceMeta,
+          siteProvince.isAcceptableOrUnknown(
+              data['site_province']!, _siteProvinceMeta));
+    }
+    if (data.containsKey('site_postal_code')) {
+      context.handle(
+          _sitePostalCodeMeta,
+          sitePostalCode.isAcceptableOrUnknown(
+              data['site_postal_code']!, _sitePostalCodeMeta));
+    }
+    if (data.containsKey('billing_address')) {
+      context.handle(
+          _billingAddressMeta,
+          billingAddress.isAcceptableOrUnknown(
+              data['billing_address']!, _billingAddressMeta));
+    }
+    if (data.containsKey('billing_city')) {
+      context.handle(
+          _billingCityMeta,
+          billingCity.isAcceptableOrUnknown(
+              data['billing_city']!, _billingCityMeta));
+    }
+    if (data.containsKey('billing_province')) {
+      context.handle(
+          _billingProvinceMeta,
+          billingProvince.isAcceptableOrUnknown(
+              data['billing_province']!, _billingProvinceMeta));
+    }
+    if (data.containsKey('billing_postal_code')) {
+      context.handle(
+          _billingPostalCodeMeta,
+          billingPostalCode.isAcceptableOrUnknown(
+              data['billing_postal_code']!, _billingPostalCodeMeta));
     }
     if (data.containsKey('gps_location')) {
       context.handle(
@@ -185,14 +234,22 @@ class $CustomersTable extends Customers
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       businessName: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}business_name'])!,
-      address: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}address'])!,
-      city: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}city'])!,
-      province: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}province'])!,
-      postalCode: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}postal_code'])!,
+      siteAddress: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}site_address']),
+      siteCity: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}site_city']),
+      siteProvince: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}site_province']),
+      sitePostalCode: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}site_postal_code']),
+      billingAddress: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}billing_address']),
+      billingCity: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}billing_city']),
+      billingProvince: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}billing_province']),
+      billingPostalCode: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}billing_postal_code']),
       gpsLocation: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}gps_location']),
       notes: attachedDatabase.typeMapping
@@ -215,10 +272,14 @@ class $CustomersTable extends Customers
 class Customer extends DataClass implements Insertable<Customer> {
   final int id;
   final String businessName;
-  final String address;
-  final String city;
-  final String province;
-  final String postalCode;
+  final String? siteAddress;
+  final String? siteCity;
+  final String? siteProvince;
+  final String? sitePostalCode;
+  final String? billingAddress;
+  final String? billingCity;
+  final String? billingProvince;
+  final String? billingPostalCode;
   final String? gpsLocation;
   final String? notes;
   final bool deactivate;
@@ -227,10 +288,14 @@ class Customer extends DataClass implements Insertable<Customer> {
   const Customer(
       {required this.id,
       required this.businessName,
-      required this.address,
-      required this.city,
-      required this.province,
-      required this.postalCode,
+      this.siteAddress,
+      this.siteCity,
+      this.siteProvince,
+      this.sitePostalCode,
+      this.billingAddress,
+      this.billingCity,
+      this.billingProvince,
+      this.billingPostalCode,
       this.gpsLocation,
       this.notes,
       required this.deactivate,
@@ -241,10 +306,30 @@ class Customer extends DataClass implements Insertable<Customer> {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['business_name'] = Variable<String>(businessName);
-    map['address'] = Variable<String>(address);
-    map['city'] = Variable<String>(city);
-    map['province'] = Variable<String>(province);
-    map['postal_code'] = Variable<String>(postalCode);
+    if (!nullToAbsent || siteAddress != null) {
+      map['site_address'] = Variable<String>(siteAddress);
+    }
+    if (!nullToAbsent || siteCity != null) {
+      map['site_city'] = Variable<String>(siteCity);
+    }
+    if (!nullToAbsent || siteProvince != null) {
+      map['site_province'] = Variable<String>(siteProvince);
+    }
+    if (!nullToAbsent || sitePostalCode != null) {
+      map['site_postal_code'] = Variable<String>(sitePostalCode);
+    }
+    if (!nullToAbsent || billingAddress != null) {
+      map['billing_address'] = Variable<String>(billingAddress);
+    }
+    if (!nullToAbsent || billingCity != null) {
+      map['billing_city'] = Variable<String>(billingCity);
+    }
+    if (!nullToAbsent || billingProvince != null) {
+      map['billing_province'] = Variable<String>(billingProvince);
+    }
+    if (!nullToAbsent || billingPostalCode != null) {
+      map['billing_postal_code'] = Variable<String>(billingPostalCode);
+    }
     if (!nullToAbsent || gpsLocation != null) {
       map['gps_location'] = Variable<String>(gpsLocation);
     }
@@ -261,10 +346,30 @@ class Customer extends DataClass implements Insertable<Customer> {
     return CustomersCompanion(
       id: Value(id),
       businessName: Value(businessName),
-      address: Value(address),
-      city: Value(city),
-      province: Value(province),
-      postalCode: Value(postalCode),
+      siteAddress: siteAddress == null && nullToAbsent
+          ? const Value.absent()
+          : Value(siteAddress),
+      siteCity: siteCity == null && nullToAbsent
+          ? const Value.absent()
+          : Value(siteCity),
+      siteProvince: siteProvince == null && nullToAbsent
+          ? const Value.absent()
+          : Value(siteProvince),
+      sitePostalCode: sitePostalCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sitePostalCode),
+      billingAddress: billingAddress == null && nullToAbsent
+          ? const Value.absent()
+          : Value(billingAddress),
+      billingCity: billingCity == null && nullToAbsent
+          ? const Value.absent()
+          : Value(billingCity),
+      billingProvince: billingProvince == null && nullToAbsent
+          ? const Value.absent()
+          : Value(billingProvince),
+      billingPostalCode: billingPostalCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(billingPostalCode),
       gpsLocation: gpsLocation == null && nullToAbsent
           ? const Value.absent()
           : Value(gpsLocation),
@@ -282,10 +387,15 @@ class Customer extends DataClass implements Insertable<Customer> {
     return Customer(
       id: serializer.fromJson<int>(json['id']),
       businessName: serializer.fromJson<String>(json['businessName']),
-      address: serializer.fromJson<String>(json['address']),
-      city: serializer.fromJson<String>(json['city']),
-      province: serializer.fromJson<String>(json['province']),
-      postalCode: serializer.fromJson<String>(json['postalCode']),
+      siteAddress: serializer.fromJson<String?>(json['siteAddress']),
+      siteCity: serializer.fromJson<String?>(json['siteCity']),
+      siteProvince: serializer.fromJson<String?>(json['siteProvince']),
+      sitePostalCode: serializer.fromJson<String?>(json['sitePostalCode']),
+      billingAddress: serializer.fromJson<String?>(json['billingAddress']),
+      billingCity: serializer.fromJson<String?>(json['billingCity']),
+      billingProvince: serializer.fromJson<String?>(json['billingProvince']),
+      billingPostalCode:
+          serializer.fromJson<String?>(json['billingPostalCode']),
       gpsLocation: serializer.fromJson<String?>(json['gpsLocation']),
       notes: serializer.fromJson<String?>(json['notes']),
       deactivate: serializer.fromJson<bool>(json['deactivate']),
@@ -299,10 +409,14 @@ class Customer extends DataClass implements Insertable<Customer> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'businessName': serializer.toJson<String>(businessName),
-      'address': serializer.toJson<String>(address),
-      'city': serializer.toJson<String>(city),
-      'province': serializer.toJson<String>(province),
-      'postalCode': serializer.toJson<String>(postalCode),
+      'siteAddress': serializer.toJson<String?>(siteAddress),
+      'siteCity': serializer.toJson<String?>(siteCity),
+      'siteProvince': serializer.toJson<String?>(siteProvince),
+      'sitePostalCode': serializer.toJson<String?>(sitePostalCode),
+      'billingAddress': serializer.toJson<String?>(billingAddress),
+      'billingCity': serializer.toJson<String?>(billingCity),
+      'billingProvince': serializer.toJson<String?>(billingProvince),
+      'billingPostalCode': serializer.toJson<String?>(billingPostalCode),
       'gpsLocation': serializer.toJson<String?>(gpsLocation),
       'notes': serializer.toJson<String?>(notes),
       'deactivate': serializer.toJson<bool>(deactivate),
@@ -314,10 +428,14 @@ class Customer extends DataClass implements Insertable<Customer> {
   Customer copyWith(
           {int? id,
           String? businessName,
-          String? address,
-          String? city,
-          String? province,
-          String? postalCode,
+          Value<String?> siteAddress = const Value.absent(),
+          Value<String?> siteCity = const Value.absent(),
+          Value<String?> siteProvince = const Value.absent(),
+          Value<String?> sitePostalCode = const Value.absent(),
+          Value<String?> billingAddress = const Value.absent(),
+          Value<String?> billingCity = const Value.absent(),
+          Value<String?> billingProvince = const Value.absent(),
+          Value<String?> billingPostalCode = const Value.absent(),
           Value<String?> gpsLocation = const Value.absent(),
           Value<String?> notes = const Value.absent(),
           bool? deactivate,
@@ -326,10 +444,21 @@ class Customer extends DataClass implements Insertable<Customer> {
       Customer(
         id: id ?? this.id,
         businessName: businessName ?? this.businessName,
-        address: address ?? this.address,
-        city: city ?? this.city,
-        province: province ?? this.province,
-        postalCode: postalCode ?? this.postalCode,
+        siteAddress: siteAddress.present ? siteAddress.value : this.siteAddress,
+        siteCity: siteCity.present ? siteCity.value : this.siteCity,
+        siteProvince:
+            siteProvince.present ? siteProvince.value : this.siteProvince,
+        sitePostalCode:
+            sitePostalCode.present ? sitePostalCode.value : this.sitePostalCode,
+        billingAddress:
+            billingAddress.present ? billingAddress.value : this.billingAddress,
+        billingCity: billingCity.present ? billingCity.value : this.billingCity,
+        billingProvince: billingProvince.present
+            ? billingProvince.value
+            : this.billingProvince,
+        billingPostalCode: billingPostalCode.present
+            ? billingPostalCode.value
+            : this.billingPostalCode,
         gpsLocation: gpsLocation.present ? gpsLocation.value : this.gpsLocation,
         notes: notes.present ? notes.value : this.notes,
         deactivate: deactivate ?? this.deactivate,
@@ -342,11 +471,26 @@ class Customer extends DataClass implements Insertable<Customer> {
       businessName: data.businessName.present
           ? data.businessName.value
           : this.businessName,
-      address: data.address.present ? data.address.value : this.address,
-      city: data.city.present ? data.city.value : this.city,
-      province: data.province.present ? data.province.value : this.province,
-      postalCode:
-          data.postalCode.present ? data.postalCode.value : this.postalCode,
+      siteAddress:
+          data.siteAddress.present ? data.siteAddress.value : this.siteAddress,
+      siteCity: data.siteCity.present ? data.siteCity.value : this.siteCity,
+      siteProvince: data.siteProvince.present
+          ? data.siteProvince.value
+          : this.siteProvince,
+      sitePostalCode: data.sitePostalCode.present
+          ? data.sitePostalCode.value
+          : this.sitePostalCode,
+      billingAddress: data.billingAddress.present
+          ? data.billingAddress.value
+          : this.billingAddress,
+      billingCity:
+          data.billingCity.present ? data.billingCity.value : this.billingCity,
+      billingProvince: data.billingProvince.present
+          ? data.billingProvince.value
+          : this.billingProvince,
+      billingPostalCode: data.billingPostalCode.present
+          ? data.billingPostalCode.value
+          : this.billingPostalCode,
       gpsLocation:
           data.gpsLocation.present ? data.gpsLocation.value : this.gpsLocation,
       notes: data.notes.present ? data.notes.value : this.notes,
@@ -362,10 +506,14 @@ class Customer extends DataClass implements Insertable<Customer> {
     return (StringBuffer('Customer(')
           ..write('id: $id, ')
           ..write('businessName: $businessName, ')
-          ..write('address: $address, ')
-          ..write('city: $city, ')
-          ..write('province: $province, ')
-          ..write('postalCode: $postalCode, ')
+          ..write('siteAddress: $siteAddress, ')
+          ..write('siteCity: $siteCity, ')
+          ..write('siteProvince: $siteProvince, ')
+          ..write('sitePostalCode: $sitePostalCode, ')
+          ..write('billingAddress: $billingAddress, ')
+          ..write('billingCity: $billingCity, ')
+          ..write('billingProvince: $billingProvince, ')
+          ..write('billingPostalCode: $billingPostalCode, ')
           ..write('gpsLocation: $gpsLocation, ')
           ..write('notes: $notes, ')
           ..write('deactivate: $deactivate, ')
@@ -376,18 +524,36 @@ class Customer extends DataClass implements Insertable<Customer> {
   }
 
   @override
-  int get hashCode => Object.hash(id, businessName, address, city, province,
-      postalCode, gpsLocation, notes, deactivate, synced, auditFlag);
+  int get hashCode => Object.hash(
+      id,
+      businessName,
+      siteAddress,
+      siteCity,
+      siteProvince,
+      sitePostalCode,
+      billingAddress,
+      billingCity,
+      billingProvince,
+      billingPostalCode,
+      gpsLocation,
+      notes,
+      deactivate,
+      synced,
+      auditFlag);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Customer &&
           other.id == this.id &&
           other.businessName == this.businessName &&
-          other.address == this.address &&
-          other.city == this.city &&
-          other.province == this.province &&
-          other.postalCode == this.postalCode &&
+          other.siteAddress == this.siteAddress &&
+          other.siteCity == this.siteCity &&
+          other.siteProvince == this.siteProvince &&
+          other.sitePostalCode == this.sitePostalCode &&
+          other.billingAddress == this.billingAddress &&
+          other.billingCity == this.billingCity &&
+          other.billingProvince == this.billingProvince &&
+          other.billingPostalCode == this.billingPostalCode &&
           other.gpsLocation == this.gpsLocation &&
           other.notes == this.notes &&
           other.deactivate == this.deactivate &&
@@ -398,10 +564,14 @@ class Customer extends DataClass implements Insertable<Customer> {
 class CustomersCompanion extends UpdateCompanion<Customer> {
   final Value<int> id;
   final Value<String> businessName;
-  final Value<String> address;
-  final Value<String> city;
-  final Value<String> province;
-  final Value<String> postalCode;
+  final Value<String?> siteAddress;
+  final Value<String?> siteCity;
+  final Value<String?> siteProvince;
+  final Value<String?> sitePostalCode;
+  final Value<String?> billingAddress;
+  final Value<String?> billingCity;
+  final Value<String?> billingProvince;
+  final Value<String?> billingPostalCode;
   final Value<String?> gpsLocation;
   final Value<String?> notes;
   final Value<bool> deactivate;
@@ -410,10 +580,14 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
   const CustomersCompanion({
     this.id = const Value.absent(),
     this.businessName = const Value.absent(),
-    this.address = const Value.absent(),
-    this.city = const Value.absent(),
-    this.province = const Value.absent(),
-    this.postalCode = const Value.absent(),
+    this.siteAddress = const Value.absent(),
+    this.siteCity = const Value.absent(),
+    this.siteProvince = const Value.absent(),
+    this.sitePostalCode = const Value.absent(),
+    this.billingAddress = const Value.absent(),
+    this.billingCity = const Value.absent(),
+    this.billingProvince = const Value.absent(),
+    this.billingPostalCode = const Value.absent(),
     this.gpsLocation = const Value.absent(),
     this.notes = const Value.absent(),
     this.deactivate = const Value.absent(),
@@ -423,27 +597,31 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
   CustomersCompanion.insert({
     this.id = const Value.absent(),
     required String businessName,
-    required String address,
-    required String city,
-    required String province,
-    required String postalCode,
+    this.siteAddress = const Value.absent(),
+    this.siteCity = const Value.absent(),
+    this.siteProvince = const Value.absent(),
+    this.sitePostalCode = const Value.absent(),
+    this.billingAddress = const Value.absent(),
+    this.billingCity = const Value.absent(),
+    this.billingProvince = const Value.absent(),
+    this.billingPostalCode = const Value.absent(),
     this.gpsLocation = const Value.absent(),
     this.notes = const Value.absent(),
     this.deactivate = const Value.absent(),
     this.synced = const Value.absent(),
     this.auditFlag = const Value.absent(),
-  })  : businessName = Value(businessName),
-        address = Value(address),
-        city = Value(city),
-        province = Value(province),
-        postalCode = Value(postalCode);
+  }) : businessName = Value(businessName);
   static Insertable<Customer> custom({
     Expression<int>? id,
     Expression<String>? businessName,
-    Expression<String>? address,
-    Expression<String>? city,
-    Expression<String>? province,
-    Expression<String>? postalCode,
+    Expression<String>? siteAddress,
+    Expression<String>? siteCity,
+    Expression<String>? siteProvince,
+    Expression<String>? sitePostalCode,
+    Expression<String>? billingAddress,
+    Expression<String>? billingCity,
+    Expression<String>? billingProvince,
+    Expression<String>? billingPostalCode,
     Expression<String>? gpsLocation,
     Expression<String>? notes,
     Expression<bool>? deactivate,
@@ -453,10 +631,14 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (businessName != null) 'business_name': businessName,
-      if (address != null) 'address': address,
-      if (city != null) 'city': city,
-      if (province != null) 'province': province,
-      if (postalCode != null) 'postal_code': postalCode,
+      if (siteAddress != null) 'site_address': siteAddress,
+      if (siteCity != null) 'site_city': siteCity,
+      if (siteProvince != null) 'site_province': siteProvince,
+      if (sitePostalCode != null) 'site_postal_code': sitePostalCode,
+      if (billingAddress != null) 'billing_address': billingAddress,
+      if (billingCity != null) 'billing_city': billingCity,
+      if (billingProvince != null) 'billing_province': billingProvince,
+      if (billingPostalCode != null) 'billing_postal_code': billingPostalCode,
       if (gpsLocation != null) 'gps_location': gpsLocation,
       if (notes != null) 'notes': notes,
       if (deactivate != null) 'deactivate': deactivate,
@@ -468,10 +650,14 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
   CustomersCompanion copyWith(
       {Value<int>? id,
       Value<String>? businessName,
-      Value<String>? address,
-      Value<String>? city,
-      Value<String>? province,
-      Value<String>? postalCode,
+      Value<String?>? siteAddress,
+      Value<String?>? siteCity,
+      Value<String?>? siteProvince,
+      Value<String?>? sitePostalCode,
+      Value<String?>? billingAddress,
+      Value<String?>? billingCity,
+      Value<String?>? billingProvince,
+      Value<String?>? billingPostalCode,
       Value<String?>? gpsLocation,
       Value<String?>? notes,
       Value<bool>? deactivate,
@@ -480,10 +666,14 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
     return CustomersCompanion(
       id: id ?? this.id,
       businessName: businessName ?? this.businessName,
-      address: address ?? this.address,
-      city: city ?? this.city,
-      province: province ?? this.province,
-      postalCode: postalCode ?? this.postalCode,
+      siteAddress: siteAddress ?? this.siteAddress,
+      siteCity: siteCity ?? this.siteCity,
+      siteProvince: siteProvince ?? this.siteProvince,
+      sitePostalCode: sitePostalCode ?? this.sitePostalCode,
+      billingAddress: billingAddress ?? this.billingAddress,
+      billingCity: billingCity ?? this.billingCity,
+      billingProvince: billingProvince ?? this.billingProvince,
+      billingPostalCode: billingPostalCode ?? this.billingPostalCode,
       gpsLocation: gpsLocation ?? this.gpsLocation,
       notes: notes ?? this.notes,
       deactivate: deactivate ?? this.deactivate,
@@ -501,17 +691,29 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
     if (businessName.present) {
       map['business_name'] = Variable<String>(businessName.value);
     }
-    if (address.present) {
-      map['address'] = Variable<String>(address.value);
+    if (siteAddress.present) {
+      map['site_address'] = Variable<String>(siteAddress.value);
     }
-    if (city.present) {
-      map['city'] = Variable<String>(city.value);
+    if (siteCity.present) {
+      map['site_city'] = Variable<String>(siteCity.value);
     }
-    if (province.present) {
-      map['province'] = Variable<String>(province.value);
+    if (siteProvince.present) {
+      map['site_province'] = Variable<String>(siteProvince.value);
     }
-    if (postalCode.present) {
-      map['postal_code'] = Variable<String>(postalCode.value);
+    if (sitePostalCode.present) {
+      map['site_postal_code'] = Variable<String>(sitePostalCode.value);
+    }
+    if (billingAddress.present) {
+      map['billing_address'] = Variable<String>(billingAddress.value);
+    }
+    if (billingCity.present) {
+      map['billing_city'] = Variable<String>(billingCity.value);
+    }
+    if (billingProvince.present) {
+      map['billing_province'] = Variable<String>(billingProvince.value);
+    }
+    if (billingPostalCode.present) {
+      map['billing_postal_code'] = Variable<String>(billingPostalCode.value);
     }
     if (gpsLocation.present) {
       map['gps_location'] = Variable<String>(gpsLocation.value);
@@ -536,10 +738,14 @@ class CustomersCompanion extends UpdateCompanion<Customer> {
     return (StringBuffer('CustomersCompanion(')
           ..write('id: $id, ')
           ..write('businessName: $businessName, ')
-          ..write('address: $address, ')
-          ..write('city: $city, ')
-          ..write('province: $province, ')
-          ..write('postalCode: $postalCode, ')
+          ..write('siteAddress: $siteAddress, ')
+          ..write('siteCity: $siteCity, ')
+          ..write('siteProvince: $siteProvince, ')
+          ..write('sitePostalCode: $sitePostalCode, ')
+          ..write('billingAddress: $billingAddress, ')
+          ..write('billingCity: $billingCity, ')
+          ..write('billingProvince: $billingProvince, ')
+          ..write('billingPostalCode: $billingPostalCode, ')
           ..write('gpsLocation: $gpsLocation, ')
           ..write('notes: $notes, ')
           ..write('deactivate: $deactivate, ')
@@ -1072,12 +1278,15 @@ class $WorkOrdersTable extends WorkOrders
   late final GeneratedColumn<int> customerId = GeneratedColumn<int>(
       'customer_id', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _businessNameMeta =
-      const VerificationMeta('businessName');
+  static const VerificationMeta _workOrderNumberMeta =
+      const VerificationMeta('workOrderNumber');
   @override
-  late final GeneratedColumn<String> businessName = GeneratedColumn<String>(
-      'business_name', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+  late final GeneratedColumn<String> workOrderNumber = GeneratedColumn<String>(
+      'work_order_number', aliasedName, false,
+      additionalChecks:
+          GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 50),
+      type: DriftSqlType.string,
+      requiredDuringInsert: true);
   static const VerificationMeta _siteAddressMeta =
       const VerificationMeta('siteAddress');
   @override
@@ -1130,39 +1339,16 @@ class $WorkOrdersTable extends WorkOrders
       const VerificationMeta('gpsLocation');
   @override
   late final GeneratedColumn<String> gpsLocation = GeneratedColumn<String>(
-      'gps_location', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+      'gps_location', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _customerNotesMeta =
       const VerificationMeta('customerNotes');
   @override
   late final GeneratedColumn<String> customerNotes = GeneratedColumn<String>(
-      'customer_notes', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _workOrderNumberMeta =
-      const VerificationMeta('workOrderNumber');
-  @override
-  late final GeneratedColumn<String> workOrderNumber = GeneratedColumn<String>(
-      'work_order_number', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _deactivateMeta =
-      const VerificationMeta('deactivate');
-  @override
-  late final GeneratedColumn<bool> deactivate = GeneratedColumn<bool>(
-      'deactivate', aliasedName, false,
-      type: DriftSqlType.bool,
+      'customer_notes', aliasedName, false,
+      type: DriftSqlType.string,
       requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('CHECK ("deactivate" IN (0, 1))'),
-      defaultValue: const Constant(false));
-  static const VerificationMeta _syncedMeta = const VerificationMeta('synced');
-  @override
-  late final GeneratedColumn<bool> synced = GeneratedColumn<bool>(
-      'synced', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('CHECK ("synced" IN (0, 1))'),
-      defaultValue: const Constant(false));
+      defaultValue: const Constant(''));
   static const VerificationMeta _auditFlagMeta =
       const VerificationMeta('auditFlag');
   @override
@@ -1172,12 +1358,29 @@ class $WorkOrdersTable extends WorkOrders
       requiredDuringInsert: false,
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('CHECK ("audit_flag" IN (0, 1))'),
+      defaultValue: const Constant(true));
+  static const VerificationMeta _syncedMeta = const VerificationMeta('synced');
+  @override
+  late final GeneratedColumn<bool> synced = GeneratedColumn<bool>(
+      'synced', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("synced" IN (0, 1))'),
       defaultValue: const Constant(false));
+  static const VerificationMeta _lastModifiedMeta =
+      const VerificationMeta('lastModified');
+  @override
+  late final GeneratedColumn<DateTime> lastModified = GeneratedColumn<DateTime>(
+      'last_modified', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
   @override
   List<GeneratedColumn> get $columns => [
         id,
         customerId,
-        businessName,
+        workOrderNumber,
         siteAddress,
         siteCity,
         siteProvince,
@@ -1188,10 +1391,9 @@ class $WorkOrdersTable extends WorkOrders
         billingPostalCode,
         gpsLocation,
         customerNotes,
-        workOrderNumber,
-        deactivate,
+        auditFlag,
         synced,
-        auditFlag
+        lastModified
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1214,13 +1416,13 @@ class $WorkOrdersTable extends WorkOrders
     } else if (isInserting) {
       context.missing(_customerIdMeta);
     }
-    if (data.containsKey('business_name')) {
+    if (data.containsKey('work_order_number')) {
       context.handle(
-          _businessNameMeta,
-          businessName.isAcceptableOrUnknown(
-              data['business_name']!, _businessNameMeta));
+          _workOrderNumberMeta,
+          workOrderNumber.isAcceptableOrUnknown(
+              data['work_order_number']!, _workOrderNumberMeta));
     } else if (isInserting) {
-      context.missing(_businessNameMeta);
+      context.missing(_workOrderNumberMeta);
     }
     if (data.containsKey('site_address')) {
       context.handle(
@@ -1281,6 +1483,8 @@ class $WorkOrdersTable extends WorkOrders
           _gpsLocationMeta,
           gpsLocation.isAcceptableOrUnknown(
               data['gps_location']!, _gpsLocationMeta));
+    } else if (isInserting) {
+      context.missing(_gpsLocationMeta);
     }
     if (data.containsKey('customer_notes')) {
       context.handle(
@@ -1288,25 +1492,19 @@ class $WorkOrdersTable extends WorkOrders
           customerNotes.isAcceptableOrUnknown(
               data['customer_notes']!, _customerNotesMeta));
     }
-    if (data.containsKey('work_order_number')) {
-      context.handle(
-          _workOrderNumberMeta,
-          workOrderNumber.isAcceptableOrUnknown(
-              data['work_order_number']!, _workOrderNumberMeta));
-    }
-    if (data.containsKey('deactivate')) {
-      context.handle(
-          _deactivateMeta,
-          deactivate.isAcceptableOrUnknown(
-              data['deactivate']!, _deactivateMeta));
+    if (data.containsKey('audit_flag')) {
+      context.handle(_auditFlagMeta,
+          auditFlag.isAcceptableOrUnknown(data['audit_flag']!, _auditFlagMeta));
     }
     if (data.containsKey('synced')) {
       context.handle(_syncedMeta,
           synced.isAcceptableOrUnknown(data['synced']!, _syncedMeta));
     }
-    if (data.containsKey('audit_flag')) {
-      context.handle(_auditFlagMeta,
-          auditFlag.isAcceptableOrUnknown(data['audit_flag']!, _auditFlagMeta));
+    if (data.containsKey('last_modified')) {
+      context.handle(
+          _lastModifiedMeta,
+          lastModified.isAcceptableOrUnknown(
+              data['last_modified']!, _lastModifiedMeta));
     }
     return context;
   }
@@ -1321,8 +1519,8 @@ class $WorkOrdersTable extends WorkOrders
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       customerId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}customer_id'])!,
-      businessName: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}business_name'])!,
+      workOrderNumber: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}work_order_number'])!,
       siteAddress: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}site_address'])!,
       siteCity: attachedDatabase.typeMapping
@@ -1340,17 +1538,15 @@ class $WorkOrdersTable extends WorkOrders
       billingPostalCode: attachedDatabase.typeMapping.read(
           DriftSqlType.string, data['${effectivePrefix}billing_postal_code']),
       gpsLocation: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}gps_location']),
+          .read(DriftSqlType.string, data['${effectivePrefix}gps_location'])!,
       customerNotes: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}customer_notes']),
-      workOrderNumber: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}work_order_number']),
-      deactivate: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}deactivate'])!,
-      synced: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}synced'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}customer_notes'])!,
       auditFlag: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}audit_flag'])!,
+      synced: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}synced'])!,
+      lastModified: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}last_modified'])!,
     );
   }
 
@@ -1363,7 +1559,7 @@ class $WorkOrdersTable extends WorkOrders
 class WorkOrder extends DataClass implements Insertable<WorkOrder> {
   final int id;
   final int customerId;
-  final String businessName;
+  final String workOrderNumber;
   final String siteAddress;
   final String siteCity;
   final String siteProvince;
@@ -1372,16 +1568,15 @@ class WorkOrder extends DataClass implements Insertable<WorkOrder> {
   final String? billingCity;
   final String? billingProvince;
   final String? billingPostalCode;
-  final String? gpsLocation;
-  final String? customerNotes;
-  final String? workOrderNumber;
-  final bool deactivate;
-  final bool synced;
+  final String gpsLocation;
+  final String customerNotes;
   final bool auditFlag;
+  final bool synced;
+  final DateTime lastModified;
   const WorkOrder(
       {required this.id,
       required this.customerId,
-      required this.businessName,
+      required this.workOrderNumber,
       required this.siteAddress,
       required this.siteCity,
       required this.siteProvince,
@@ -1390,18 +1585,17 @@ class WorkOrder extends DataClass implements Insertable<WorkOrder> {
       this.billingCity,
       this.billingProvince,
       this.billingPostalCode,
-      this.gpsLocation,
-      this.customerNotes,
-      this.workOrderNumber,
-      required this.deactivate,
+      required this.gpsLocation,
+      required this.customerNotes,
+      required this.auditFlag,
       required this.synced,
-      required this.auditFlag});
+      required this.lastModified});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['customer_id'] = Variable<int>(customerId);
-    map['business_name'] = Variable<String>(businessName);
+    map['work_order_number'] = Variable<String>(workOrderNumber);
     map['site_address'] = Variable<String>(siteAddress);
     map['site_city'] = Variable<String>(siteCity);
     map['site_province'] = Variable<String>(siteProvince);
@@ -1418,18 +1612,11 @@ class WorkOrder extends DataClass implements Insertable<WorkOrder> {
     if (!nullToAbsent || billingPostalCode != null) {
       map['billing_postal_code'] = Variable<String>(billingPostalCode);
     }
-    if (!nullToAbsent || gpsLocation != null) {
-      map['gps_location'] = Variable<String>(gpsLocation);
-    }
-    if (!nullToAbsent || customerNotes != null) {
-      map['customer_notes'] = Variable<String>(customerNotes);
-    }
-    if (!nullToAbsent || workOrderNumber != null) {
-      map['work_order_number'] = Variable<String>(workOrderNumber);
-    }
-    map['deactivate'] = Variable<bool>(deactivate);
-    map['synced'] = Variable<bool>(synced);
+    map['gps_location'] = Variable<String>(gpsLocation);
+    map['customer_notes'] = Variable<String>(customerNotes);
     map['audit_flag'] = Variable<bool>(auditFlag);
+    map['synced'] = Variable<bool>(synced);
+    map['last_modified'] = Variable<DateTime>(lastModified);
     return map;
   }
 
@@ -1437,7 +1624,7 @@ class WorkOrder extends DataClass implements Insertable<WorkOrder> {
     return WorkOrdersCompanion(
       id: Value(id),
       customerId: Value(customerId),
-      businessName: Value(businessName),
+      workOrderNumber: Value(workOrderNumber),
       siteAddress: Value(siteAddress),
       siteCity: Value(siteCity),
       siteProvince: Value(siteProvince),
@@ -1454,18 +1641,11 @@ class WorkOrder extends DataClass implements Insertable<WorkOrder> {
       billingPostalCode: billingPostalCode == null && nullToAbsent
           ? const Value.absent()
           : Value(billingPostalCode),
-      gpsLocation: gpsLocation == null && nullToAbsent
-          ? const Value.absent()
-          : Value(gpsLocation),
-      customerNotes: customerNotes == null && nullToAbsent
-          ? const Value.absent()
-          : Value(customerNotes),
-      workOrderNumber: workOrderNumber == null && nullToAbsent
-          ? const Value.absent()
-          : Value(workOrderNumber),
-      deactivate: Value(deactivate),
-      synced: Value(synced),
+      gpsLocation: Value(gpsLocation),
+      customerNotes: Value(customerNotes),
       auditFlag: Value(auditFlag),
+      synced: Value(synced),
+      lastModified: Value(lastModified),
     );
   }
 
@@ -1475,7 +1655,7 @@ class WorkOrder extends DataClass implements Insertable<WorkOrder> {
     return WorkOrder(
       id: serializer.fromJson<int>(json['id']),
       customerId: serializer.fromJson<int>(json['customerId']),
-      businessName: serializer.fromJson<String>(json['businessName']),
+      workOrderNumber: serializer.fromJson<String>(json['workOrderNumber']),
       siteAddress: serializer.fromJson<String>(json['siteAddress']),
       siteCity: serializer.fromJson<String>(json['siteCity']),
       siteProvince: serializer.fromJson<String>(json['siteProvince']),
@@ -1485,12 +1665,11 @@ class WorkOrder extends DataClass implements Insertable<WorkOrder> {
       billingProvince: serializer.fromJson<String?>(json['billingProvince']),
       billingPostalCode:
           serializer.fromJson<String?>(json['billingPostalCode']),
-      gpsLocation: serializer.fromJson<String?>(json['gpsLocation']),
-      customerNotes: serializer.fromJson<String?>(json['customerNotes']),
-      workOrderNumber: serializer.fromJson<String?>(json['workOrderNumber']),
-      deactivate: serializer.fromJson<bool>(json['deactivate']),
-      synced: serializer.fromJson<bool>(json['synced']),
+      gpsLocation: serializer.fromJson<String>(json['gpsLocation']),
+      customerNotes: serializer.fromJson<String>(json['customerNotes']),
       auditFlag: serializer.fromJson<bool>(json['auditFlag']),
+      synced: serializer.fromJson<bool>(json['synced']),
+      lastModified: serializer.fromJson<DateTime>(json['lastModified']),
     );
   }
   @override
@@ -1499,7 +1678,7 @@ class WorkOrder extends DataClass implements Insertable<WorkOrder> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'customerId': serializer.toJson<int>(customerId),
-      'businessName': serializer.toJson<String>(businessName),
+      'workOrderNumber': serializer.toJson<String>(workOrderNumber),
       'siteAddress': serializer.toJson<String>(siteAddress),
       'siteCity': serializer.toJson<String>(siteCity),
       'siteProvince': serializer.toJson<String>(siteProvince),
@@ -1508,19 +1687,18 @@ class WorkOrder extends DataClass implements Insertable<WorkOrder> {
       'billingCity': serializer.toJson<String?>(billingCity),
       'billingProvince': serializer.toJson<String?>(billingProvince),
       'billingPostalCode': serializer.toJson<String?>(billingPostalCode),
-      'gpsLocation': serializer.toJson<String?>(gpsLocation),
-      'customerNotes': serializer.toJson<String?>(customerNotes),
-      'workOrderNumber': serializer.toJson<String?>(workOrderNumber),
-      'deactivate': serializer.toJson<bool>(deactivate),
-      'synced': serializer.toJson<bool>(synced),
+      'gpsLocation': serializer.toJson<String>(gpsLocation),
+      'customerNotes': serializer.toJson<String>(customerNotes),
       'auditFlag': serializer.toJson<bool>(auditFlag),
+      'synced': serializer.toJson<bool>(synced),
+      'lastModified': serializer.toJson<DateTime>(lastModified),
     };
   }
 
   WorkOrder copyWith(
           {int? id,
           int? customerId,
-          String? businessName,
+          String? workOrderNumber,
           String? siteAddress,
           String? siteCity,
           String? siteProvince,
@@ -1529,16 +1707,15 @@ class WorkOrder extends DataClass implements Insertable<WorkOrder> {
           Value<String?> billingCity = const Value.absent(),
           Value<String?> billingProvince = const Value.absent(),
           Value<String?> billingPostalCode = const Value.absent(),
-          Value<String?> gpsLocation = const Value.absent(),
-          Value<String?> customerNotes = const Value.absent(),
-          Value<String?> workOrderNumber = const Value.absent(),
-          bool? deactivate,
+          String? gpsLocation,
+          String? customerNotes,
+          bool? auditFlag,
           bool? synced,
-          bool? auditFlag}) =>
+          DateTime? lastModified}) =>
       WorkOrder(
         id: id ?? this.id,
         customerId: customerId ?? this.customerId,
-        businessName: businessName ?? this.businessName,
+        workOrderNumber: workOrderNumber ?? this.workOrderNumber,
         siteAddress: siteAddress ?? this.siteAddress,
         siteCity: siteCity ?? this.siteCity,
         siteProvince: siteProvince ?? this.siteProvince,
@@ -1552,24 +1729,20 @@ class WorkOrder extends DataClass implements Insertable<WorkOrder> {
         billingPostalCode: billingPostalCode.present
             ? billingPostalCode.value
             : this.billingPostalCode,
-        gpsLocation: gpsLocation.present ? gpsLocation.value : this.gpsLocation,
-        customerNotes:
-            customerNotes.present ? customerNotes.value : this.customerNotes,
-        workOrderNumber: workOrderNumber.present
-            ? workOrderNumber.value
-            : this.workOrderNumber,
-        deactivate: deactivate ?? this.deactivate,
-        synced: synced ?? this.synced,
+        gpsLocation: gpsLocation ?? this.gpsLocation,
+        customerNotes: customerNotes ?? this.customerNotes,
         auditFlag: auditFlag ?? this.auditFlag,
+        synced: synced ?? this.synced,
+        lastModified: lastModified ?? this.lastModified,
       );
   WorkOrder copyWithCompanion(WorkOrdersCompanion data) {
     return WorkOrder(
       id: data.id.present ? data.id.value : this.id,
       customerId:
           data.customerId.present ? data.customerId.value : this.customerId,
-      businessName: data.businessName.present
-          ? data.businessName.value
-          : this.businessName,
+      workOrderNumber: data.workOrderNumber.present
+          ? data.workOrderNumber.value
+          : this.workOrderNumber,
       siteAddress:
           data.siteAddress.present ? data.siteAddress.value : this.siteAddress,
       siteCity: data.siteCity.present ? data.siteCity.value : this.siteCity,
@@ -1595,13 +1768,11 @@ class WorkOrder extends DataClass implements Insertable<WorkOrder> {
       customerNotes: data.customerNotes.present
           ? data.customerNotes.value
           : this.customerNotes,
-      workOrderNumber: data.workOrderNumber.present
-          ? data.workOrderNumber.value
-          : this.workOrderNumber,
-      deactivate:
-          data.deactivate.present ? data.deactivate.value : this.deactivate,
-      synced: data.synced.present ? data.synced.value : this.synced,
       auditFlag: data.auditFlag.present ? data.auditFlag.value : this.auditFlag,
+      synced: data.synced.present ? data.synced.value : this.synced,
+      lastModified: data.lastModified.present
+          ? data.lastModified.value
+          : this.lastModified,
     );
   }
 
@@ -1610,7 +1781,7 @@ class WorkOrder extends DataClass implements Insertable<WorkOrder> {
     return (StringBuffer('WorkOrder(')
           ..write('id: $id, ')
           ..write('customerId: $customerId, ')
-          ..write('businessName: $businessName, ')
+          ..write('workOrderNumber: $workOrderNumber, ')
           ..write('siteAddress: $siteAddress, ')
           ..write('siteCity: $siteCity, ')
           ..write('siteProvince: $siteProvince, ')
@@ -1621,10 +1792,9 @@ class WorkOrder extends DataClass implements Insertable<WorkOrder> {
           ..write('billingPostalCode: $billingPostalCode, ')
           ..write('gpsLocation: $gpsLocation, ')
           ..write('customerNotes: $customerNotes, ')
-          ..write('workOrderNumber: $workOrderNumber, ')
-          ..write('deactivate: $deactivate, ')
+          ..write('auditFlag: $auditFlag, ')
           ..write('synced: $synced, ')
-          ..write('auditFlag: $auditFlag')
+          ..write('lastModified: $lastModified')
           ..write(')'))
         .toString();
   }
@@ -1633,7 +1803,7 @@ class WorkOrder extends DataClass implements Insertable<WorkOrder> {
   int get hashCode => Object.hash(
       id,
       customerId,
-      businessName,
+      workOrderNumber,
       siteAddress,
       siteCity,
       siteProvince,
@@ -1644,17 +1814,16 @@ class WorkOrder extends DataClass implements Insertable<WorkOrder> {
       billingPostalCode,
       gpsLocation,
       customerNotes,
-      workOrderNumber,
-      deactivate,
+      auditFlag,
       synced,
-      auditFlag);
+      lastModified);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is WorkOrder &&
           other.id == this.id &&
           other.customerId == this.customerId &&
-          other.businessName == this.businessName &&
+          other.workOrderNumber == this.workOrderNumber &&
           other.siteAddress == this.siteAddress &&
           other.siteCity == this.siteCity &&
           other.siteProvince == this.siteProvince &&
@@ -1665,16 +1834,15 @@ class WorkOrder extends DataClass implements Insertable<WorkOrder> {
           other.billingPostalCode == this.billingPostalCode &&
           other.gpsLocation == this.gpsLocation &&
           other.customerNotes == this.customerNotes &&
-          other.workOrderNumber == this.workOrderNumber &&
-          other.deactivate == this.deactivate &&
+          other.auditFlag == this.auditFlag &&
           other.synced == this.synced &&
-          other.auditFlag == this.auditFlag);
+          other.lastModified == this.lastModified);
 }
 
 class WorkOrdersCompanion extends UpdateCompanion<WorkOrder> {
   final Value<int> id;
   final Value<int> customerId;
-  final Value<String> businessName;
+  final Value<String> workOrderNumber;
   final Value<String> siteAddress;
   final Value<String> siteCity;
   final Value<String> siteProvince;
@@ -1683,16 +1851,15 @@ class WorkOrdersCompanion extends UpdateCompanion<WorkOrder> {
   final Value<String?> billingCity;
   final Value<String?> billingProvince;
   final Value<String?> billingPostalCode;
-  final Value<String?> gpsLocation;
-  final Value<String?> customerNotes;
-  final Value<String?> workOrderNumber;
-  final Value<bool> deactivate;
-  final Value<bool> synced;
+  final Value<String> gpsLocation;
+  final Value<String> customerNotes;
   final Value<bool> auditFlag;
+  final Value<bool> synced;
+  final Value<DateTime> lastModified;
   const WorkOrdersCompanion({
     this.id = const Value.absent(),
     this.customerId = const Value.absent(),
-    this.businessName = const Value.absent(),
+    this.workOrderNumber = const Value.absent(),
     this.siteAddress = const Value.absent(),
     this.siteCity = const Value.absent(),
     this.siteProvince = const Value.absent(),
@@ -1703,15 +1870,14 @@ class WorkOrdersCompanion extends UpdateCompanion<WorkOrder> {
     this.billingPostalCode = const Value.absent(),
     this.gpsLocation = const Value.absent(),
     this.customerNotes = const Value.absent(),
-    this.workOrderNumber = const Value.absent(),
-    this.deactivate = const Value.absent(),
-    this.synced = const Value.absent(),
     this.auditFlag = const Value.absent(),
+    this.synced = const Value.absent(),
+    this.lastModified = const Value.absent(),
   });
   WorkOrdersCompanion.insert({
     this.id = const Value.absent(),
     required int customerId,
-    required String businessName,
+    required String workOrderNumber,
     required String siteAddress,
     required String siteCity,
     required String siteProvince,
@@ -1720,22 +1886,22 @@ class WorkOrdersCompanion extends UpdateCompanion<WorkOrder> {
     this.billingCity = const Value.absent(),
     this.billingProvince = const Value.absent(),
     this.billingPostalCode = const Value.absent(),
-    this.gpsLocation = const Value.absent(),
+    required String gpsLocation,
     this.customerNotes = const Value.absent(),
-    this.workOrderNumber = const Value.absent(),
-    this.deactivate = const Value.absent(),
-    this.synced = const Value.absent(),
     this.auditFlag = const Value.absent(),
+    this.synced = const Value.absent(),
+    this.lastModified = const Value.absent(),
   })  : customerId = Value(customerId),
-        businessName = Value(businessName),
+        workOrderNumber = Value(workOrderNumber),
         siteAddress = Value(siteAddress),
         siteCity = Value(siteCity),
         siteProvince = Value(siteProvince),
-        sitePostalCode = Value(sitePostalCode);
+        sitePostalCode = Value(sitePostalCode),
+        gpsLocation = Value(gpsLocation);
   static Insertable<WorkOrder> custom({
     Expression<int>? id,
     Expression<int>? customerId,
-    Expression<String>? businessName,
+    Expression<String>? workOrderNumber,
     Expression<String>? siteAddress,
     Expression<String>? siteCity,
     Expression<String>? siteProvince,
@@ -1746,15 +1912,14 @@ class WorkOrdersCompanion extends UpdateCompanion<WorkOrder> {
     Expression<String>? billingPostalCode,
     Expression<String>? gpsLocation,
     Expression<String>? customerNotes,
-    Expression<String>? workOrderNumber,
-    Expression<bool>? deactivate,
-    Expression<bool>? synced,
     Expression<bool>? auditFlag,
+    Expression<bool>? synced,
+    Expression<DateTime>? lastModified,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (customerId != null) 'customer_id': customerId,
-      if (businessName != null) 'business_name': businessName,
+      if (workOrderNumber != null) 'work_order_number': workOrderNumber,
       if (siteAddress != null) 'site_address': siteAddress,
       if (siteCity != null) 'site_city': siteCity,
       if (siteProvince != null) 'site_province': siteProvince,
@@ -1765,17 +1930,16 @@ class WorkOrdersCompanion extends UpdateCompanion<WorkOrder> {
       if (billingPostalCode != null) 'billing_postal_code': billingPostalCode,
       if (gpsLocation != null) 'gps_location': gpsLocation,
       if (customerNotes != null) 'customer_notes': customerNotes,
-      if (workOrderNumber != null) 'work_order_number': workOrderNumber,
-      if (deactivate != null) 'deactivate': deactivate,
-      if (synced != null) 'synced': synced,
       if (auditFlag != null) 'audit_flag': auditFlag,
+      if (synced != null) 'synced': synced,
+      if (lastModified != null) 'last_modified': lastModified,
     });
   }
 
   WorkOrdersCompanion copyWith(
       {Value<int>? id,
       Value<int>? customerId,
-      Value<String>? businessName,
+      Value<String>? workOrderNumber,
       Value<String>? siteAddress,
       Value<String>? siteCity,
       Value<String>? siteProvince,
@@ -1784,16 +1948,15 @@ class WorkOrdersCompanion extends UpdateCompanion<WorkOrder> {
       Value<String?>? billingCity,
       Value<String?>? billingProvince,
       Value<String?>? billingPostalCode,
-      Value<String?>? gpsLocation,
-      Value<String?>? customerNotes,
-      Value<String?>? workOrderNumber,
-      Value<bool>? deactivate,
+      Value<String>? gpsLocation,
+      Value<String>? customerNotes,
+      Value<bool>? auditFlag,
       Value<bool>? synced,
-      Value<bool>? auditFlag}) {
+      Value<DateTime>? lastModified}) {
     return WorkOrdersCompanion(
       id: id ?? this.id,
       customerId: customerId ?? this.customerId,
-      businessName: businessName ?? this.businessName,
+      workOrderNumber: workOrderNumber ?? this.workOrderNumber,
       siteAddress: siteAddress ?? this.siteAddress,
       siteCity: siteCity ?? this.siteCity,
       siteProvince: siteProvince ?? this.siteProvince,
@@ -1804,10 +1967,9 @@ class WorkOrdersCompanion extends UpdateCompanion<WorkOrder> {
       billingPostalCode: billingPostalCode ?? this.billingPostalCode,
       gpsLocation: gpsLocation ?? this.gpsLocation,
       customerNotes: customerNotes ?? this.customerNotes,
-      workOrderNumber: workOrderNumber ?? this.workOrderNumber,
-      deactivate: deactivate ?? this.deactivate,
-      synced: synced ?? this.synced,
       auditFlag: auditFlag ?? this.auditFlag,
+      synced: synced ?? this.synced,
+      lastModified: lastModified ?? this.lastModified,
     );
   }
 
@@ -1820,8 +1982,8 @@ class WorkOrdersCompanion extends UpdateCompanion<WorkOrder> {
     if (customerId.present) {
       map['customer_id'] = Variable<int>(customerId.value);
     }
-    if (businessName.present) {
-      map['business_name'] = Variable<String>(businessName.value);
+    if (workOrderNumber.present) {
+      map['work_order_number'] = Variable<String>(workOrderNumber.value);
     }
     if (siteAddress.present) {
       map['site_address'] = Variable<String>(siteAddress.value);
@@ -1853,17 +2015,14 @@ class WorkOrdersCompanion extends UpdateCompanion<WorkOrder> {
     if (customerNotes.present) {
       map['customer_notes'] = Variable<String>(customerNotes.value);
     }
-    if (workOrderNumber.present) {
-      map['work_order_number'] = Variable<String>(workOrderNumber.value);
-    }
-    if (deactivate.present) {
-      map['deactivate'] = Variable<bool>(deactivate.value);
+    if (auditFlag.present) {
+      map['audit_flag'] = Variable<bool>(auditFlag.value);
     }
     if (synced.present) {
       map['synced'] = Variable<bool>(synced.value);
     }
-    if (auditFlag.present) {
-      map['audit_flag'] = Variable<bool>(auditFlag.value);
+    if (lastModified.present) {
+      map['last_modified'] = Variable<DateTime>(lastModified.value);
     }
     return map;
   }
@@ -1873,7 +2032,7 @@ class WorkOrdersCompanion extends UpdateCompanion<WorkOrder> {
     return (StringBuffer('WorkOrdersCompanion(')
           ..write('id: $id, ')
           ..write('customerId: $customerId, ')
-          ..write('businessName: $businessName, ')
+          ..write('workOrderNumber: $workOrderNumber, ')
           ..write('siteAddress: $siteAddress, ')
           ..write('siteCity: $siteCity, ')
           ..write('siteProvince: $siteProvince, ')
@@ -1884,10 +2043,9 @@ class WorkOrdersCompanion extends UpdateCompanion<WorkOrder> {
           ..write('billingPostalCode: $billingPostalCode, ')
           ..write('gpsLocation: $gpsLocation, ')
           ..write('customerNotes: $customerNotes, ')
-          ..write('workOrderNumber: $workOrderNumber, ')
-          ..write('deactivate: $deactivate, ')
+          ..write('auditFlag: $auditFlag, ')
           ..write('synced: $synced, ')
-          ..write('auditFlag: $auditFlag')
+          ..write('lastModified: $lastModified')
           ..write(')'))
         .toString();
   }
@@ -3565,10 +3723,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
 typedef $$CustomersTableCreateCompanionBuilder = CustomersCompanion Function({
   Value<int> id,
   required String businessName,
-  required String address,
-  required String city,
-  required String province,
-  required String postalCode,
+  Value<String?> siteAddress,
+  Value<String?> siteCity,
+  Value<String?> siteProvince,
+  Value<String?> sitePostalCode,
+  Value<String?> billingAddress,
+  Value<String?> billingCity,
+  Value<String?> billingProvince,
+  Value<String?> billingPostalCode,
   Value<String?> gpsLocation,
   Value<String?> notes,
   Value<bool> deactivate,
@@ -3578,10 +3740,14 @@ typedef $$CustomersTableCreateCompanionBuilder = CustomersCompanion Function({
 typedef $$CustomersTableUpdateCompanionBuilder = CustomersCompanion Function({
   Value<int> id,
   Value<String> businessName,
-  Value<String> address,
-  Value<String> city,
-  Value<String> province,
-  Value<String> postalCode,
+  Value<String?> siteAddress,
+  Value<String?> siteCity,
+  Value<String?> siteProvince,
+  Value<String?> sitePostalCode,
+  Value<String?> billingAddress,
+  Value<String?> billingCity,
+  Value<String?> billingProvince,
+  Value<String?> billingPostalCode,
   Value<String?> gpsLocation,
   Value<String?> notes,
   Value<bool> deactivate,
@@ -3639,17 +3805,33 @@ class $$CustomersTableFilterComposer
   ColumnFilters<String> get businessName => $composableBuilder(
       column: $table.businessName, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get address => $composableBuilder(
-      column: $table.address, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get siteAddress => $composableBuilder(
+      column: $table.siteAddress, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get city => $composableBuilder(
-      column: $table.city, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get siteCity => $composableBuilder(
+      column: $table.siteCity, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get province => $composableBuilder(
-      column: $table.province, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get siteProvince => $composableBuilder(
+      column: $table.siteProvince, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get postalCode => $composableBuilder(
-      column: $table.postalCode, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get sitePostalCode => $composableBuilder(
+      column: $table.sitePostalCode,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get billingAddress => $composableBuilder(
+      column: $table.billingAddress,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get billingCity => $composableBuilder(
+      column: $table.billingCity, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get billingProvince => $composableBuilder(
+      column: $table.billingProvince,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get billingPostalCode => $composableBuilder(
+      column: $table.billingPostalCode,
+      builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get gpsLocation => $composableBuilder(
       column: $table.gpsLocation, builder: (column) => ColumnFilters(column));
@@ -3725,17 +3907,34 @@ class $$CustomersTableOrderingComposer
       column: $table.businessName,
       builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get address => $composableBuilder(
-      column: $table.address, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get siteAddress => $composableBuilder(
+      column: $table.siteAddress, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get city => $composableBuilder(
-      column: $table.city, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get siteCity => $composableBuilder(
+      column: $table.siteCity, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get province => $composableBuilder(
-      column: $table.province, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get siteProvince => $composableBuilder(
+      column: $table.siteProvince,
+      builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get postalCode => $composableBuilder(
-      column: $table.postalCode, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get sitePostalCode => $composableBuilder(
+      column: $table.sitePostalCode,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get billingAddress => $composableBuilder(
+      column: $table.billingAddress,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get billingCity => $composableBuilder(
+      column: $table.billingCity, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get billingProvince => $composableBuilder(
+      column: $table.billingProvince,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get billingPostalCode => $composableBuilder(
+      column: $table.billingPostalCode,
+      builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get gpsLocation => $composableBuilder(
       column: $table.gpsLocation, builder: (column) => ColumnOrderings(column));
@@ -3768,17 +3967,29 @@ class $$CustomersTableAnnotationComposer
   GeneratedColumn<String> get businessName => $composableBuilder(
       column: $table.businessName, builder: (column) => column);
 
-  GeneratedColumn<String> get address =>
-      $composableBuilder(column: $table.address, builder: (column) => column);
+  GeneratedColumn<String> get siteAddress => $composableBuilder(
+      column: $table.siteAddress, builder: (column) => column);
 
-  GeneratedColumn<String> get city =>
-      $composableBuilder(column: $table.city, builder: (column) => column);
+  GeneratedColumn<String> get siteCity =>
+      $composableBuilder(column: $table.siteCity, builder: (column) => column);
 
-  GeneratedColumn<String> get province =>
-      $composableBuilder(column: $table.province, builder: (column) => column);
+  GeneratedColumn<String> get siteProvince => $composableBuilder(
+      column: $table.siteProvince, builder: (column) => column);
 
-  GeneratedColumn<String> get postalCode => $composableBuilder(
-      column: $table.postalCode, builder: (column) => column);
+  GeneratedColumn<String> get sitePostalCode => $composableBuilder(
+      column: $table.sitePostalCode, builder: (column) => column);
+
+  GeneratedColumn<String> get billingAddress => $composableBuilder(
+      column: $table.billingAddress, builder: (column) => column);
+
+  GeneratedColumn<String> get billingCity => $composableBuilder(
+      column: $table.billingCity, builder: (column) => column);
+
+  GeneratedColumn<String> get billingProvince => $composableBuilder(
+      column: $table.billingProvince, builder: (column) => column);
+
+  GeneratedColumn<String> get billingPostalCode => $composableBuilder(
+      column: $table.billingPostalCode, builder: (column) => column);
 
   GeneratedColumn<String> get gpsLocation => $composableBuilder(
       column: $table.gpsLocation, builder: (column) => column);
@@ -3863,10 +4074,14 @@ class $$CustomersTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<String> businessName = const Value.absent(),
-            Value<String> address = const Value.absent(),
-            Value<String> city = const Value.absent(),
-            Value<String> province = const Value.absent(),
-            Value<String> postalCode = const Value.absent(),
+            Value<String?> siteAddress = const Value.absent(),
+            Value<String?> siteCity = const Value.absent(),
+            Value<String?> siteProvince = const Value.absent(),
+            Value<String?> sitePostalCode = const Value.absent(),
+            Value<String?> billingAddress = const Value.absent(),
+            Value<String?> billingCity = const Value.absent(),
+            Value<String?> billingProvince = const Value.absent(),
+            Value<String?> billingPostalCode = const Value.absent(),
             Value<String?> gpsLocation = const Value.absent(),
             Value<String?> notes = const Value.absent(),
             Value<bool> deactivate = const Value.absent(),
@@ -3876,10 +4091,14 @@ class $$CustomersTableTableManager extends RootTableManager<
               CustomersCompanion(
             id: id,
             businessName: businessName,
-            address: address,
-            city: city,
-            province: province,
-            postalCode: postalCode,
+            siteAddress: siteAddress,
+            siteCity: siteCity,
+            siteProvince: siteProvince,
+            sitePostalCode: sitePostalCode,
+            billingAddress: billingAddress,
+            billingCity: billingCity,
+            billingProvince: billingProvince,
+            billingPostalCode: billingPostalCode,
             gpsLocation: gpsLocation,
             notes: notes,
             deactivate: deactivate,
@@ -3889,10 +4108,14 @@ class $$CustomersTableTableManager extends RootTableManager<
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             required String businessName,
-            required String address,
-            required String city,
-            required String province,
-            required String postalCode,
+            Value<String?> siteAddress = const Value.absent(),
+            Value<String?> siteCity = const Value.absent(),
+            Value<String?> siteProvince = const Value.absent(),
+            Value<String?> sitePostalCode = const Value.absent(),
+            Value<String?> billingAddress = const Value.absent(),
+            Value<String?> billingCity = const Value.absent(),
+            Value<String?> billingProvince = const Value.absent(),
+            Value<String?> billingPostalCode = const Value.absent(),
             Value<String?> gpsLocation = const Value.absent(),
             Value<String?> notes = const Value.absent(),
             Value<bool> deactivate = const Value.absent(),
@@ -3902,10 +4125,14 @@ class $$CustomersTableTableManager extends RootTableManager<
               CustomersCompanion.insert(
             id: id,
             businessName: businessName,
-            address: address,
-            city: city,
-            province: province,
-            postalCode: postalCode,
+            siteAddress: siteAddress,
+            siteCity: siteCity,
+            siteProvince: siteProvince,
+            sitePostalCode: sitePostalCode,
+            billingAddress: billingAddress,
+            billingCity: billingCity,
+            billingProvince: billingProvince,
+            billingPostalCode: billingPostalCode,
             gpsLocation: gpsLocation,
             notes: notes,
             deactivate: deactivate,
@@ -4315,7 +4542,7 @@ typedef $$ContactsTableProcessedTableManager = ProcessedTableManager<
 typedef $$WorkOrdersTableCreateCompanionBuilder = WorkOrdersCompanion Function({
   Value<int> id,
   required int customerId,
-  required String businessName,
+  required String workOrderNumber,
   required String siteAddress,
   required String siteCity,
   required String siteProvince,
@@ -4324,17 +4551,16 @@ typedef $$WorkOrdersTableCreateCompanionBuilder = WorkOrdersCompanion Function({
   Value<String?> billingCity,
   Value<String?> billingProvince,
   Value<String?> billingPostalCode,
-  Value<String?> gpsLocation,
-  Value<String?> customerNotes,
-  Value<String?> workOrderNumber,
-  Value<bool> deactivate,
-  Value<bool> synced,
+  required String gpsLocation,
+  Value<String> customerNotes,
   Value<bool> auditFlag,
+  Value<bool> synced,
+  Value<DateTime> lastModified,
 });
 typedef $$WorkOrdersTableUpdateCompanionBuilder = WorkOrdersCompanion Function({
   Value<int> id,
   Value<int> customerId,
-  Value<String> businessName,
+  Value<String> workOrderNumber,
   Value<String> siteAddress,
   Value<String> siteCity,
   Value<String> siteProvince,
@@ -4343,12 +4569,11 @@ typedef $$WorkOrdersTableUpdateCompanionBuilder = WorkOrdersCompanion Function({
   Value<String?> billingCity,
   Value<String?> billingProvince,
   Value<String?> billingPostalCode,
-  Value<String?> gpsLocation,
-  Value<String?> customerNotes,
-  Value<String?> workOrderNumber,
-  Value<bool> deactivate,
-  Value<bool> synced,
+  Value<String> gpsLocation,
+  Value<String> customerNotes,
   Value<bool> auditFlag,
+  Value<bool> synced,
+  Value<DateTime> lastModified,
 });
 
 final class $$WorkOrdersTableReferences
@@ -4386,8 +4611,9 @@ class $$WorkOrdersTableFilterComposer
   ColumnFilters<int> get customerId => $composableBuilder(
       column: $table.customerId, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get businessName => $composableBuilder(
-      column: $table.businessName, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get workOrderNumber => $composableBuilder(
+      column: $table.workOrderNumber,
+      builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get siteAddress => $composableBuilder(
       column: $table.siteAddress, builder: (column) => ColumnFilters(column));
@@ -4423,18 +4649,14 @@ class $$WorkOrdersTableFilterComposer
   ColumnFilters<String> get customerNotes => $composableBuilder(
       column: $table.customerNotes, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get workOrderNumber => $composableBuilder(
-      column: $table.workOrderNumber,
-      builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<bool> get deactivate => $composableBuilder(
-      column: $table.deactivate, builder: (column) => ColumnFilters(column));
+  ColumnFilters<bool> get auditFlag => $composableBuilder(
+      column: $table.auditFlag, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<bool> get synced => $composableBuilder(
       column: $table.synced, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<bool> get auditFlag => $composableBuilder(
-      column: $table.auditFlag, builder: (column) => ColumnFilters(column));
+  ColumnFilters<DateTime> get lastModified => $composableBuilder(
+      column: $table.lastModified, builder: (column) => ColumnFilters(column));
 
   Expression<bool> serviceReportsRefs(
       Expression<bool> Function($$ServiceReportsTableFilterComposer f) f) {
@@ -4473,8 +4695,8 @@ class $$WorkOrdersTableOrderingComposer
   ColumnOrderings<int> get customerId => $composableBuilder(
       column: $table.customerId, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get businessName => $composableBuilder(
-      column: $table.businessName,
+  ColumnOrderings<String> get workOrderNumber => $composableBuilder(
+      column: $table.workOrderNumber,
       builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<String> get siteAddress => $composableBuilder(
@@ -4513,18 +4735,15 @@ class $$WorkOrdersTableOrderingComposer
       column: $table.customerNotes,
       builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get workOrderNumber => $composableBuilder(
-      column: $table.workOrderNumber,
-      builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<bool> get deactivate => $composableBuilder(
-      column: $table.deactivate, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<bool> get auditFlag => $composableBuilder(
+      column: $table.auditFlag, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<bool> get synced => $composableBuilder(
       column: $table.synced, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<bool> get auditFlag => $composableBuilder(
-      column: $table.auditFlag, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<DateTime> get lastModified => $composableBuilder(
+      column: $table.lastModified,
+      builder: (column) => ColumnOrderings(column));
 }
 
 class $$WorkOrdersTableAnnotationComposer
@@ -4542,8 +4761,8 @@ class $$WorkOrdersTableAnnotationComposer
   GeneratedColumn<int> get customerId => $composableBuilder(
       column: $table.customerId, builder: (column) => column);
 
-  GeneratedColumn<String> get businessName => $composableBuilder(
-      column: $table.businessName, builder: (column) => column);
+  GeneratedColumn<String> get workOrderNumber => $composableBuilder(
+      column: $table.workOrderNumber, builder: (column) => column);
 
   GeneratedColumn<String> get siteAddress => $composableBuilder(
       column: $table.siteAddress, builder: (column) => column);
@@ -4575,17 +4794,14 @@ class $$WorkOrdersTableAnnotationComposer
   GeneratedColumn<String> get customerNotes => $composableBuilder(
       column: $table.customerNotes, builder: (column) => column);
 
-  GeneratedColumn<String> get workOrderNumber => $composableBuilder(
-      column: $table.workOrderNumber, builder: (column) => column);
-
-  GeneratedColumn<bool> get deactivate => $composableBuilder(
-      column: $table.deactivate, builder: (column) => column);
+  GeneratedColumn<bool> get auditFlag =>
+      $composableBuilder(column: $table.auditFlag, builder: (column) => column);
 
   GeneratedColumn<bool> get synced =>
       $composableBuilder(column: $table.synced, builder: (column) => column);
 
-  GeneratedColumn<bool> get auditFlag =>
-      $composableBuilder(column: $table.auditFlag, builder: (column) => column);
+  GeneratedColumn<DateTime> get lastModified => $composableBuilder(
+      column: $table.lastModified, builder: (column) => column);
 
   Expression<T> serviceReportsRefs<T extends Object>(
       Expression<T> Function($$ServiceReportsTableAnnotationComposer a) f) {
@@ -4634,7 +4850,7 @@ class $$WorkOrdersTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<int> customerId = const Value.absent(),
-            Value<String> businessName = const Value.absent(),
+            Value<String> workOrderNumber = const Value.absent(),
             Value<String> siteAddress = const Value.absent(),
             Value<String> siteCity = const Value.absent(),
             Value<String> siteProvince = const Value.absent(),
@@ -4643,17 +4859,16 @@ class $$WorkOrdersTableTableManager extends RootTableManager<
             Value<String?> billingCity = const Value.absent(),
             Value<String?> billingProvince = const Value.absent(),
             Value<String?> billingPostalCode = const Value.absent(),
-            Value<String?> gpsLocation = const Value.absent(),
-            Value<String?> customerNotes = const Value.absent(),
-            Value<String?> workOrderNumber = const Value.absent(),
-            Value<bool> deactivate = const Value.absent(),
-            Value<bool> synced = const Value.absent(),
+            Value<String> gpsLocation = const Value.absent(),
+            Value<String> customerNotes = const Value.absent(),
             Value<bool> auditFlag = const Value.absent(),
+            Value<bool> synced = const Value.absent(),
+            Value<DateTime> lastModified = const Value.absent(),
           }) =>
               WorkOrdersCompanion(
             id: id,
             customerId: customerId,
-            businessName: businessName,
+            workOrderNumber: workOrderNumber,
             siteAddress: siteAddress,
             siteCity: siteCity,
             siteProvince: siteProvince,
@@ -4664,15 +4879,14 @@ class $$WorkOrdersTableTableManager extends RootTableManager<
             billingPostalCode: billingPostalCode,
             gpsLocation: gpsLocation,
             customerNotes: customerNotes,
-            workOrderNumber: workOrderNumber,
-            deactivate: deactivate,
-            synced: synced,
             auditFlag: auditFlag,
+            synced: synced,
+            lastModified: lastModified,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             required int customerId,
-            required String businessName,
+            required String workOrderNumber,
             required String siteAddress,
             required String siteCity,
             required String siteProvince,
@@ -4681,17 +4895,16 @@ class $$WorkOrdersTableTableManager extends RootTableManager<
             Value<String?> billingCity = const Value.absent(),
             Value<String?> billingProvince = const Value.absent(),
             Value<String?> billingPostalCode = const Value.absent(),
-            Value<String?> gpsLocation = const Value.absent(),
-            Value<String?> customerNotes = const Value.absent(),
-            Value<String?> workOrderNumber = const Value.absent(),
-            Value<bool> deactivate = const Value.absent(),
-            Value<bool> synced = const Value.absent(),
+            required String gpsLocation,
+            Value<String> customerNotes = const Value.absent(),
             Value<bool> auditFlag = const Value.absent(),
+            Value<bool> synced = const Value.absent(),
+            Value<DateTime> lastModified = const Value.absent(),
           }) =>
               WorkOrdersCompanion.insert(
             id: id,
             customerId: customerId,
-            businessName: businessName,
+            workOrderNumber: workOrderNumber,
             siteAddress: siteAddress,
             siteCity: siteCity,
             siteProvince: siteProvince,
@@ -4702,10 +4915,9 @@ class $$WorkOrdersTableTableManager extends RootTableManager<
             billingPostalCode: billingPostalCode,
             gpsLocation: gpsLocation,
             customerNotes: customerNotes,
-            workOrderNumber: workOrderNumber,
-            deactivate: deactivate,
-            synced: synced,
             auditFlag: auditFlag,
+            synced: synced,
+            lastModified: lastModified,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (

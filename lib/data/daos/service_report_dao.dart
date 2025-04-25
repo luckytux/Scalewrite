@@ -1,4 +1,5 @@
 // File: lib/data/daos/service_report_dao.dart
+
 import 'package:drift/drift.dart';
 import '../database.dart';
 import '../tables/service_reports.dart';
@@ -6,10 +7,11 @@ import '../tables/service_reports.dart';
 part 'service_report_dao.g.dart';
 
 @DriftAccessor(tables: [ServiceReports])
-class ServiceReportDao extends DatabaseAccessor<AppDatabase> with _$ServiceReportDaoMixin {
+class ServiceReportDao extends DatabaseAccessor<AppDatabase>
+    with _$ServiceReportDaoMixin {
   ServiceReportDao(AppDatabase db) : super(db);
 
-  Future<int> insertServiceReport(ServiceReportsCompanion entry) {
+  Future<int> insertReport(ServiceReportsCompanion entry) {
     return into(serviceReports).insert(entry);
   }
 
@@ -27,11 +29,12 @@ class ServiceReportDao extends DatabaseAccessor<AppDatabase> with _$ServiceRepor
         .get();
   }
 
-  Future<bool> updateServiceReport(ServiceReport updated) {
-    return update(serviceReports).replace(updated);
+  Future<void> markReportComplete(int id) {
+    return (update(serviceReports)..where((tbl) => tbl.id.equals(id)))
+        .write(const ServiceReportsCompanion(complete: Value(true)));
   }
 
-  Future<int> deleteServiceReport(int id) {
+  Future<void> deleteReport(int id) {
     return (delete(serviceReports)..where((tbl) => tbl.id.equals(id))).go();
   }
 }

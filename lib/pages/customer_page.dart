@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../controllers/customer_form_controller.dart';
 import '../providers/customer_form_provider.dart';
+import '../widgets/rounded_text_field.dart';
 
 class CustomerPage extends ConsumerWidget {
   const CustomerPage({super.key});
@@ -21,35 +22,69 @@ class CustomerPage extends ConsumerWidget {
           key: formKey,
           child: ListView(
             children: [
-              TextFormField(
+              RoundedTextField(
                 controller: controller.businessName,
-                decoration: const InputDecoration(labelText: 'Business Name'),
+                label: 'Business Name',
                 validator: (val) =>
                     val == null || val.isEmpty ? 'Required' : null,
               ),
-              TextFormField(
-                controller: controller.address,
-                decoration: const InputDecoration(labelText: 'Mailing Address'),
+              const SizedBox(height: 16),
+              const Text('Billing Address', style: TextStyle(fontWeight: FontWeight.bold)),
+              RoundedTextField(
+                controller: controller.billingAddress,
+                label: 'Billing Address',
               ),
-              TextFormField(
-                controller: controller.city,
-                decoration: const InputDecoration(labelText: 'City'),
+              RoundedTextField(
+                controller: controller.billingCity,
+                label: 'City',
               ),
-              TextFormField(
-                controller: controller.province,
-                decoration: const InputDecoration(labelText: 'Province'),
+              RoundedTextField(
+                controller: controller.billingProvince,
+                label: 'Province',
               ),
-              TextFormField(
-                controller: controller.postalCode,
-                decoration: const InputDecoration(labelText: 'Postal Code'),
+              RoundedTextField(
+                controller: controller.billingPostalCode,
+                label: 'Postal Code',
+                validator: (val) {
+                  final cleaned = val?.replaceAll(' ', '');
+                  final regex = RegExp(r'^[A-Za-z]\d[A-Za-z]\d[A-Za-z]\d$');
+                  return cleaned == null || !regex.hasMatch(cleaned)
+                      ? 'Format: A1A 1A1'
+                      : null;
+                },
               ),
-              TextFormField(
+              const SizedBox(height: 16),
+              const Text('Site Address', style: TextStyle(fontWeight: FontWeight.bold)),
+              RoundedTextField(
+                controller: controller.siteAddress,
+                label: 'Site Address',
+              ),
+              RoundedTextField(
+                controller: controller.siteCity,
+                label: 'City',
+              ),
+              RoundedTextField(
+                controller: controller.siteProvince,
+                label: 'Province',
+              ),
+              RoundedTextField(
+                controller: controller.sitePostalCode,
+                label: 'Postal Code',
+                validator: (val) {
+                  final cleaned = val?.replaceAll(' ', '');
+                  final regex = RegExp(r'^[A-Za-z]\d[A-Za-z]\d[A-Za-z]\d$');
+                  return cleaned == null || !regex.hasMatch(cleaned)
+                      ? 'Format: A1A 1A1'
+                      : null;
+                },
+              ),
+              RoundedTextField(
                 controller: controller.gpsLocation,
-                decoration: const InputDecoration(labelText: 'GPS Location'),
+                label: 'GPS Location',
               ),
-              TextFormField(
+              RoundedTextField(
                 controller: controller.notes,
-                decoration: const InputDecoration(labelText: 'Customer Notes'),
+                label: 'Customer Notes',
                 maxLines: 3,
               ),
               const SizedBox(height: 20),

@@ -9,38 +9,25 @@ part 'contact_dao.g.dart';
 class ContactDao extends DatabaseAccessor<AppDatabase> with _$ContactDaoMixin {
   ContactDao(AppDatabase db) : super(db);
 
-  Future<int> insertContact(ContactsCompanion contact) =>
-      into(contacts).insert(contact);
+  Future<int> insertContact(ContactsCompanion entry) => into(contacts).insert(entry);
 
   Future<List<Contact>> getContactsForCustomer(int customerId) {
     return (select(contacts)
-          ..where((tbl) =>
-              tbl.customerId.equals(customerId) &
-              tbl.deactivate.equals(false)))
+          ..where((c) => c.customerId.equals(customerId) & c.deactivate.equals(false)))
         .get();
   }
 
-  Stream<List<Contact>> watchContactsForCustomer(int customerId) {
-    return (select(contacts)
-          ..where((tbl) =>
-              tbl.customerId.equals(customerId) &
-              tbl.deactivate.equals(false)))
-        .watch();
+  Future<void> updateContact(Contact contact) async {
+    await update(contacts).replace(contact);
   }
 
-  Future<bool> updateContact(Contact contact) =>
-      update(contacts).replace(contact);
+  Future<void> markAsDeactivated(int id) async {
+    await (update(contacts)..where((c) => c.id.equals(id))).write(const ContactsCompanion(
+      deactivate: Value(true),
+    ));
+  }
 
-  Future<int> deleteContact(int id) =>
-      (delete(contacts)..where((tbl) => tbl.id.equals(id))).go();
-
-  Future<void> setMainContact(int customerId, int contactId) async {
-    final allContacts = await getContactsForCustomer(customerId);
-    for (final c in allContacts) {
-      final isMain = c.id == contactId;
-      await update(contacts).replace(
-        c.copyWith(isMain: isMain),
-      );
-    }
+  Future<void> insertOrUpdateContact(ContactsCompanion entry) async {
+    await into(contacts).insertOnConflictUpdate(entry);
   }
 }

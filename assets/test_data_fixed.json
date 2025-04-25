@@ -2,22 +2,18 @@
   "customers": [
     {
       "email": "contact1@company.com",
-      "phone": "123-456-78{i:02d}",
-      "address": "100 Business Rd",
-      "city": "City1",
-      "province": "Province1",
-      "postal": "P1234",
+      "phone": "403-555-7800",
       "additionalContacts": [
         {
           "name": "Contact A1",
-          "phone": "555-1111",
-          "email": "a1@company.com",
+          "phone": "403-222-1100",
+          "email": "contacta1@company.com",
           "notes": "Manager"
         },
         {
           "name": "Contact B1",
-          "phone": "555-2122",
-          "email": "b1@company.com",
+          "phone": "403-222-1101",
+          "email": "contactb1@company.com",
           "notes": "Technician"
         }
       ],
@@ -222,30 +218,34 @@
       "details": "",
       "mainContact": {
         "name": "Main Contact",
-        "phone": "",
-        "email": "",
+        "phone": "403-111-1000",
+        "email": "main0@company.com",
         "notes": ""
       },
-      "businessName": "Company 1"
+      "businessName": "Company 1",
+      "siteAddress": "100 Main St",
+      "siteCity": "Calgary",
+      "siteProvince": "Alberta",
+      "sitePostalCode": "A0A 0A0",
+      "billingAddress": "",
+      "billingCity": "",
+      "billingProvince": "",
+      "billingPostalCode": ""
     },
     {
       "email": "contact2@company.com",
-      "phone": "123-456-78{i:02d}",
-      "address": "200 Business Rd",
-      "city": "City2",
-      "province": "Province2",
-      "postal": "P2234",
+      "phone": "403-555-7801",
       "additionalContacts": [
         {
           "name": "Contact A2",
-          "phone": "555-1211",
-          "email": "a2@company.com",
+          "phone": "403-222-1101",
+          "email": "contacta2@company.com",
           "notes": "Manager"
         },
         {
           "name": "Contact B2",
-          "phone": "555-2222",
-          "email": "b2@company.com",
+          "phone": "403-222-1102",
+          "email": "contactb2@company.com",
           "notes": "Technician"
         }
       ],
@@ -450,30 +450,34 @@
       "details": "",
       "mainContact": {
         "name": "Main Contact",
-        "phone": "",
-        "email": "",
+        "phone": "403-111-1001",
+        "email": "main1@company.com",
         "notes": ""
       },
-      "businessName": "Company 2"
+      "businessName": "Company 2",
+      "siteAddress": "101 2nd Ave",
+      "siteCity": "Vancouver",
+      "siteProvince": "British Columbia",
+      "sitePostalCode": "B1B 1B1",
+      "billingAddress": "",
+      "billingCity": "",
+      "billingProvince": "",
+      "billingPostalCode": ""
     },
     {
       "email": "contact3@company.com",
-      "phone": "123-456-78{i:02d}",
-      "address": "300 Business Rd",
-      "city": "City3",
-      "province": "Province3",
-      "postal": "P3234",
+      "phone": "403-555-7802",
       "additionalContacts": [
         {
           "name": "Contact A3",
-          "phone": "555-1311",
-          "email": "a3@company.com",
+          "phone": "403-222-1102",
+          "email": "contacta3@company.com",
           "notes": "Manager"
         },
         {
           "name": "Contact B3",
-          "phone": "555-2322",
-          "email": "b3@company.com",
+          "phone": "403-222-1103",
+          "email": "contactb3@company.com",
           "notes": "Technician"
         }
       ],
@@ -678,30 +682,34 @@
       "details": "",
       "mainContact": {
         "name": "Main Contact",
-        "phone": "",
-        "email": "",
+        "phone": "403-111-1002",
+        "email": "main2@company.com",
         "notes": ""
       },
-      "businessName": "Company 3"
+      "businessName": "Company 3",
+      "siteAddress": "102 Broadway",
+      "siteCity": "Regina",
+      "siteProvince": "Saskatchewan",
+      "sitePostalCode": "C2C 2C2",
+      "billingAddress": "",
+      "billingCity": "",
+      "billingProvince": "",
+      "billingPostalCode": ""
     },
     {
       "email": "contact4@company.com",
-      "phone": "123-456-78{i:02d}",
-      "address": "400 Business Rd",
-      "city": "City4",
-      "province": "Province4",
-      "postal": "P4234",
+      "phone": "403-555-7803",
       "additionalContacts": [
         {
           "name": "Contact A4",
-          "phone": "555-1411",
-          "email": "a4@company.com",
+          "phone": "403-222-1103",
+          "email": "contacta4@company.com",
           "notes": "Manager"
         },
         {
           "name": "Contact B4",
-          "phone": "555-2422",
-          "email": "b4@company.com",
+          "phone": "403-222-1104",
+          "email": "contactb4@company.com",
           "notes": "Technician"
         }
       ],
@@ -906,30 +914,34 @@
       "details": "",
       "mainContact": {
         "name": "Main Contact",
-        "phone": "",
-        "email": "",
+        "phone": "403-111-1003",
+        "email": "main3@company.com",
         "notes": ""
       },
-      "businessName": "Company 4"
+      "businessName": "Company 4",
+      "siteAddress": "103 Elm St",
+      "siteCity": "Winnipeg",
+      "siteProvince": "Manitoba",
+      "sitePostalCode": "D3D 3D3",
+      "billingAddress": "",
+      "billingCity": "",
+      "billingProvince": "",
+      "billingPostalCode": ""
     },
     {
       "email": "contact5@company.com",
-      "phone": "123-456-78{i:02d}",
-      "address": "500 Business Rd",
-      "city": "City5",
-      "province": "Province5",
-      "postal": "P5234",
+      "phone": "403-555-7804",
       "additionalContacts": [
         {
           "name": "Contact A5",
-          "phone": "555-1511",
-          "email": "a5@company.com",
+          "phone": "403-222-1104",
+          "email": "contacta5@company.com",
           "notes": "Manager"
         },
         {
           "name": "Contact B5",
-          "phone": "555-2522",
-          "email": "b5@company.com",
+          "phone": "403-222-1105",
+          "email": "contactb5@company.com",
           "notes": "Technician"
         }
       ],
@@ -1134,11 +1146,19 @@
       "details": "",
       "mainContact": {
         "name": "Main Contact",
-        "phone": "",
-        "email": "",
+        "phone": "403-111-1004",
+        "email": "main4@company.com",
         "notes": ""
       },
-      "businessName": "Company 5"
+      "businessName": "Company 5",
+      "siteAddress": "104 Maple Rd",
+      "siteCity": "Toronto",
+      "siteProvince": "Ontario",
+      "sitePostalCode": "E4E 4E4",
+      "billingAddress": "",
+      "billingCity": "",
+      "billingProvince": "",
+      "billingPostalCode": ""
     }
   ]
 }

@@ -30,100 +30,120 @@ class TestDataLoader extends ChangeNotifier {
       final Map<String, dynamic> data = jsonDecode(jsonString);
       final db = ref.read(databaseProvider);
 
-      // Customers
+      await db.delete(db.serviceReports).go();
+      await db.delete(db.scales).go();
+      await db.delete(db.workOrders).go();
+      await db.delete(db.contacts).go();
+      await db.delete(db.customers).go();
+
       final List customers = data['customers'] ?? [];
       for (final c in customers) {
-        await db.customerDao.insertCustomer(CustomersCompanion(
+        final customerId = await db.customerDao.insertCustomer(CustomersCompanion(
           businessName: Value(c['businessName'] ?? c['name'] ?? ''),
-          address: Value(c['address'] ?? ''),
-          city: Value(c['city'] ?? ''),
-          province: Value(c['province'] ?? ''),
-          postalCode: Value(c['postal'] ?? ''),
-          notes: Value(c['notes'] ?? ''),
+          siteAddress: Value(c['siteAddress'] ?? ''),
+          siteCity: Value(c['siteCity'] ?? ''),
+          siteProvince: Value(c['siteProvince'] ?? ''),
+          sitePostalCode: Value(c['sitePostalCode'] ?? ''),
+          billingAddress: Value(c['billingAddress'] ?? c['siteAddress'] ?? ''),
+          billingCity: Value(c['billingCity'] ?? c['siteCity'] ?? ''),
+          billingProvince: Value(c['billingProvince'] ?? c['siteProvince'] ?? ''),
+          billingPostalCode: Value(c['billingPostalCode'] ?? c['sitePostalCode'] ?? ''),
+          gpsLocation: Value(c['gpsLocation'] ?? ''),
+          notes: Value(c['details'] ?? ''),
           deactivate: const Value(false),
           auditFlag: const Value(false),
           synced: const Value(false),
         ));
-      }
 
-      // Contacts
-      final List contacts = data['contacts'] ?? [];
-      for (final ct in contacts) {
-        await db.contactDao.insertContact(ContactsCompanion(
-          customerId: Value(ct['customerId']),
-          name: Value(ct['name']),
-          phone: Value(ct['phone'] ?? ''),
-          email: Value(ct['email'] ?? ''),
-          notes: Value(ct['notes'] ?? ''),
-          isMain: Value(ct['isMain'] ?? false),
-          deactivate: const Value(false),
-          auditFlag: const Value(false),
-          synced: const Value(false),
-        ));
-      }
+        final main = c['mainContact'];
+        if (main != null && (main['name'] ?? '').isNotEmpty) {
+          await db.contactDao.insertContact(ContactsCompanion(
+            customerId: Value(customerId),
+            name: Value(main['name']),
+            phone: Value(main['phone'] ?? ''),
+            email: Value(main['email'] ?? ''),
+            notes: Value(main['notes'] ?? ''),
+            isMain: const Value(true),
+            deactivate: const Value(false),
+            auditFlag: const Value(false),
+            synced: const Value(false),
+          ));
+        }
 
-      // Work Orders
-      final List workOrders = data['workOrders'] ?? [];
-      for (final wo in workOrders) {
-        await db.workOrderDao.insertWorkOrder(WorkOrdersCompanion(
-          customerId: Value(wo['customerId']),
-          businessName: Value(wo['businessName']),
-          billingAddress: Value(wo['billingAddress'] ?? ''),
-          city: Value(wo['city'] ?? ''),
-          province: Value(wo['province'] ?? ''),
-          postalCode: Value(wo['postal'] ?? ''),
-          workOrderNumber: Value(wo['workOrderNumber']),
-          gpsLocation: Value(wo['gpsLocation'] ?? ''),
-          customerNotes: Value(wo['customerNotes'] ?? ''),
-          deactivate: const Value(false),
-          synced: const Value(false),
-        ));
-      }
+        final List additionalContacts = c['additionalContacts'] ?? [];
+        for (final ct in additionalContacts) {
+          await db.contactDao.insertContact(ContactsCompanion(
+            customerId: Value(customerId),
+            name: Value(ct['name']),
+            phone: Value(ct['phone'] ?? ''),
+            email: Value(ct['email'] ?? ''),
+            notes: Value(ct['notes'] ?? ''),
+            isMain: const Value(false),
+            deactivate: const Value(false),
+            auditFlag: const Value(false),
+            synced: const Value(false),
+          ));
+        }
 
-      // Scales
-      final List scales = data['scales'] ?? [];
-      for (final s in scales) {
-        await db.scaleDao.insertScale(ScalesCompanion(
-          customerId: Value(s['customerId']),
-          configuration: Value(s['configuration'] ?? true),
-          scaleType: Value(s['scaleType'] ?? ''),
-          indicatorMake: Value(s['indicatorMake'] ?? ''),
-          indicatorModel: Value(s['indicatorModel'] ?? ''),
-          indicatorSerial: Value(s['indicatorSerial'] ?? ''),
-          approvalPrefix: Value(s['approvalPrefix'] ?? ''),
-          approvalNumber: Value(s['approvalNumber'] ?? ''),
-          baseMake: Value(s['baseMake']),
-          baseModel: Value(s['baseModel']),
-          baseSerial: Value(s['baseSerial']),
-          baseApprovalPrefix: Value(s['baseApprovalPrefix']),
-          baseApprovalNumber: Value(s['baseApprovalNumber']),
-          capacity: Value((s['capacity'] ?? 0).toDouble()),
-          capacityUnit: Value(s['capacityUnit'] ?? ''),
-          division: Value((s['division'] ?? 0).toDouble()),
-          numberOfLoadCells: Value(s['numberOfLoadCells'] ?? 0),
-          numberOfSections: Value(s['numberOfSections'] ?? 0),
-          loadCellModel: Value(s['loadCellModel'] ?? ''),
-          loadCellCapacity: Value((s['loadCellCapacity'] ?? 0).toDouble()),
-          loadCellCapacityUnit: Value(s['loadCellCapacityUnit'] ?? ''),
-          notes: Value(s['notes']),
-          deactivate: const Value(false),
-          auditFlag: const Value(false),
-          synced: const Value(false),
-        ));
-      }
+        final List workOrders = c['workOrders'] ?? [];
+        for (final wo in workOrders) {
+          final workOrderId = await db.workOrderDao.insertWorkOrder(WorkOrdersCompanion(
+            customerId: Value(customerId),
+            workOrderNumber: Value(wo['number']),
+            siteAddress: Value(wo['siteAddress'] ?? 'Test Address'),
+            siteCity: Value(wo['siteCity'] ?? 'Test City'),
+            siteProvince: Value(wo['siteProvince'] ?? 'AB'),
+            sitePostalCode: Value(wo['sitePostalCode'] ?? 'T1T1T1'),
+            gpsLocation: Value(wo['gpsLocation'] ?? '51.0000,-114.0000'),
+            customerNotes: Value(wo['notes'] ?? ''),
+            billingAddress: Value(wo['billingAddress'] ?? 'Test Address'),
+            billingCity: Value(wo['billingCity'] ?? 'Test City'),
+            billingProvince: Value(wo['billingProvince'] ?? 'AB'),
+            billingPostalCode: Value(wo['billingPostalCode'] ?? 'T1T1T1'),
+            auditFlag: const Value(false),
+          ));
 
-      // Service Reports
-      final List reports = data['serviceReports'] ?? [];
-      for (final r in reports) {
-        await db.serviceReportDao.insertServiceReport(ServiceReportsCompanion(
-          workOrderId: Value(r['workOrderId']),
-          scaleId: Value(r['scaleId']),
-          reportType: Value(r['reportType']),
-          notes: Value(r['notes']),
-          createdAt: Value(DateTime.tryParse(r['createdAt'] ?? '') ?? DateTime.now()),
-          complete: Value(r['complete'] ?? false),
-          synced: Value(r['synced'] ?? false),
-        ));
+          final List serviceReports = wo['serviceReports'] ?? [];
+          for (final sr in serviceReports) {
+            final scaleId = await db.scaleDao.insertScale(ScalesCompanion(
+              customerId: Value(customerId),
+              configuration: Value(sr['configuration'] == 'C'),
+              scaleType: Value(sr['scaleType']),
+              indicatorMake: Value(sr['indicatorMake']),
+              indicatorModel: Value(sr['indicatorModel']),
+              indicatorSerial: Value(sr['indicatorSerial']),
+              approvalPrefix: Value(sr['approvalPrefix']),
+              approvalNumber: Value(sr['approvalCode']),
+              baseMake: Value(sr['baseMake']),
+              baseModel: Value(sr['baseModel']),
+              baseSerial: Value(sr['baseSerial']),
+              baseApprovalPrefix: Value(sr['baseApprovalPrefix']),
+              baseApprovalNumber: Value(sr['baseApprovalCode']),
+              capacity: Value((sr['capacityValue'] ?? 0).toDouble()),
+              capacityUnit: Value(sr['capacityUnit']),
+              division: Value((sr['division'] ?? 0).toDouble()),
+              numberOfLoadCells: Value(sr['numberOfLoadCells']),
+              numberOfSections: Value(sr['numberOfSections']),
+              loadCellModel: Value(sr['loadCellModel']),
+              loadCellCapacity: Value((sr['loadCellCapacity'] ?? 0).toDouble()),
+              loadCellCapacityUnit: Value(sr['loadCellCapacityUnit']),
+              notes: const Value(null),
+              auditFlag: const Value(false),
+              deactivate: const Value(false),
+              synced: const Value(false),
+            ));
+
+            await db.serviceReportDao.insertReport(ServiceReportsCompanion(
+              workOrderId: Value(workOrderId),
+              scaleId: Value(scaleId),
+              reportType: Value('Standard'),
+              notes: const Value(''),
+              createdAt: Value(DateTime.tryParse(wo['createdAt']) ?? DateTime.now()),
+              complete: const Value(true),
+              synced: const Value(false),
+            ));
+          }
+        }
       }
 
       debugPrint('✅ Test data loaded successfully');

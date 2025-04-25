@@ -1,13 +1,22 @@
 // File: lib/data/tables/customers.dart
+
 import 'package:drift/drift.dart';
 
 class Customers extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get businessName => text()();
-  TextColumn get address => text()();
-  TextColumn get city => text()();
-  TextColumn get province => text()();
-  TextColumn get postalCode => text()();
+
+  // Site Address
+  TextColumn get siteAddress => text().nullable()();
+  TextColumn get siteCity => text().nullable()();
+  TextColumn get siteProvince => text().nullable()();
+  TextColumn get sitePostalCode => text().nullable()();
+
+  // Billing Address
+  TextColumn get billingAddress => text().nullable()();
+  TextColumn get billingCity => text().nullable()();
+  TextColumn get billingProvince => text().nullable()();
+  TextColumn get billingPostalCode => text().nullable()();
 
   TextColumn get gpsLocation => text().nullable()();
   TextColumn get notes => text().nullable()();

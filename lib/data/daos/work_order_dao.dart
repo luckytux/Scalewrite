@@ -1,31 +1,80 @@
 // File: lib/data/daos/work_order_dao.dart
+
 import 'package:drift/drift.dart';
 import '../database.dart';
 import '../tables/work_orders.dart';
+import '../tables/customers.dart';
 
 part 'work_order_dao.g.dart';
 
-@DriftAccessor(tables: [WorkOrders])
+@DriftAccessor(tables: [WorkOrders, Customers])
 class WorkOrderDao extends DatabaseAccessor<AppDatabase> with _$WorkOrderDaoMixin {
   WorkOrderDao(AppDatabase db) : super(db);
 
-  Future<int> insertWorkOrder(WorkOrdersCompanion entry) {
-    return into(workOrders).insert(entry);
+  Future<int> insertWorkOrder(WorkOrdersCompanion entry) =>
+      into(workOrders).insert(entry);
+
+  Future<List<WorkOrder>> getAllWorkOrders() =>
+      (select(workOrders)..orderBy([(w) => OrderingTerm.desc(w.id)])).get();
+
+  Future<void> deleteWorkOrder(int id) async {
+    await (delete(workOrders)..where((tbl) => tbl.id.equals(id))).go();
   }
 
-  Future<List<WorkOrder>> getAllWorkOrders() {
-    return select(workOrders).get();
+  Future<WorkOrder?> getWorkOrderById(int id) {
+    return (select(workOrders)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
   }
 
-  Stream<List<WorkOrder>> watchAllWorkOrders() {
-    return select(workOrders).watch();
+  Future<void> updateWorkOrder(WorkOrder updated) async {
+    await (update(workOrders)..where((w) => w.id.equals(updated.id))).write(
+      WorkOrdersCompanion(
+        id: Value(updated.id),
+        customerId: Value(updated.customerId),
+        workOrderNumber: Value(updated.workOrderNumber),
+        siteAddress: Value(updated.siteAddress),
+        siteCity: Value(updated.siteCity),
+        siteProvince: Value(updated.siteProvince),
+        sitePostalCode: Value(updated.sitePostalCode),
+        billingAddress: Value(updated.billingAddress),
+        billingCity: Value(updated.billingCity),
+        billingProvince: Value(updated.billingProvince),
+        billingPostalCode: Value(updated.billingPostalCode),
+        gpsLocation: Value(updated.gpsLocation),
+        customerNotes: Value(updated.customerNotes),
+        auditFlag: const Value(true),
+        synced: Value(updated.synced),
+        lastModified: Value(DateTime.now()),
+      ),
+    );
   }
 
-  Future<bool> updateWorkOrder(WorkOrder updated) {
-    return update(workOrders).replace(updated);
+  Future<WorkOrder?> getMostRecentForCustomer(int customerId) {
+    return (select(workOrders)
+          ..where((w) => w.customerId.equals(customerId))
+          ..orderBy([(w) => OrderingTerm.desc(w.id)])
+          ..limit(1))
+        .getSingleOrNull();
   }
 
-  Future<int> deleteWorkOrder(int id) {
-    return (delete(workOrders)..where((tbl) => tbl.id.equals(id))).go();
+  Future<List<WorkOrder>> getUnsyncedWorkOrders({int limit = 50}) {
+    return (select(workOrders)
+          ..where((w) => w.synced.equals(false))
+          ..orderBy([(w) => OrderingTerm.desc(w.id)])
+          ..limit(limit))
+        .get();
+  }
+
+  // ✅ THIS is the missing method used in the Service Report page
+  Future<List<(WorkOrder, Customer)>> getAllWorkOrdersWithCustomers() {
+    final query = select(workOrders).join([
+      innerJoin(customers, customers.id.equalsExp(workOrders.customerId)),
+    ])
+      ..orderBy([
+        OrderingTerm.desc(workOrders.id),
+      ]);
+
+    return query.map((row) {
+      return (row.readTable(workOrders), row.readTable(customers));
+    }).get();
   }
 }
