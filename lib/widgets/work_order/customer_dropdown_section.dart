@@ -37,11 +37,7 @@ class CustomerDropdownSection extends ConsumerWidget {
           value: controller.selectedCustomerId,
           items: dropdownItems,
           onChanged: (value) {
-            controller.selectCustomer(value);
-            if (value != null) {
-              final selected = customers.firstWhere((c) => c.id == value);
-              controller.populateCustomerFields(selected);
-            }
+            controller.selectCustomer(value, customers);
           },
           validator: (val) => val == null ? 'Please select a customer' : null,
         ),

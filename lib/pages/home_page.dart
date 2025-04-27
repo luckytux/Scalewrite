@@ -1,15 +1,26 @@
 // File: lib/pages/home_page.dart
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:scalewrite_v2/pages/create_work_order_page.dart';
+import 'package:scalewrite_v2/pages/create_service_report_page.dart';
+import 'package:scalewrite_v2/pages/view_work_orders_page.dart';
+import 'package:scalewrite_v2/pages/view_service_reports_page.dart';
+import 'package:scalewrite_v2/pages/view_weight_tests_page.dart';
 import 'package:scalewrite_v2/providers/test_data_loader_provider.dart';
+import 'package:scalewrite_v2/providers/customer_list_provider.dart'; // 🔵 Add this!
 
-class HomePage extends ConsumerWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends ConsumerState<HomePage> {
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('ScaleWrite Home')),
       body: Center(
@@ -26,8 +37,13 @@ class HomePage extends ConsumerWidget {
                   onPressed: () async {
                     final loader = ref.read(testDataLoaderProvider);
                     final result = await loader.loadTestData();
+                    if (!context.mounted) return;
+
+                    // 🔵 Invalidate customer list after loading test data
+                    ref.invalidate(customerListProvider);
+
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(result ? '✅ Data Loaded' : '❌ Failed')),
+                      SnackBar(content: Text(result ? '✅ Test Data Loaded' : '❌ Failed to Load')),
                     );
                   },
                   icon: const Icon(Icons.refresh),
@@ -72,11 +88,10 @@ class HomePage extends ConsumerWidget {
                     context,
                     icon: Icons.receipt_long,
                     label: 'Service Report',
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Create Service Report - Coming soon')),
-                      );
-                    },
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const CreateServiceReportPage()),
+                    ),
                   ),
                 ],
               ),
@@ -95,31 +110,28 @@ class HomePage extends ConsumerWidget {
                     context,
                     icon: Icons.assignment,
                     label: 'Work Orders',
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Work Orders - Coming soon')),
-                      );
-                    },
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ViewWorkOrdersPage()),
+                    ),
                   ),
                   _buildTileButton(
                     context,
                     icon: Icons.article,
                     label: 'Service Reports',
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Service Reports - Coming soon')),
-                      );
-                    },
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ViewServiceReportsPage()),
+                    ),
                   ),
                   _buildTileButton(
                     context,
                     icon: Icons.scale,
                     label: 'Weight Tests',
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Weight Tests - Coming soon')),
-                      );
-                    },
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ViewWeightTestsPage()),
+                    ),
                   ),
                 ],
               ),

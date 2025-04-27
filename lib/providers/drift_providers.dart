@@ -1,4 +1,5 @@
 // File: lib/providers/drift_providers.dart
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/database.dart';
 
@@ -8,6 +9,7 @@ import '../data/daos/contact_dao.dart';
 import '../data/daos/work_order_dao.dart';
 import '../data/daos/scale_dao.dart';
 import '../data/daos/service_report_dao.dart';
+import '../data/daos/weight_test_dao.dart'; // ✅ Add this line
 
 /// Provides the singleton Drift database
 final databaseProvider = Provider<AppDatabase>((ref) {
@@ -33,4 +35,8 @@ final scaleDaoProvider = Provider<ScaleDao>((ref) {
 
 final serviceReportDaoProvider = Provider<ServiceReportDao>((ref) {
   return ref.read(databaseProvider).serviceReportDao;
+});
+
+final weightTestDaoProvider = Provider<WeightTestDao>((ref) { // ✅ New
+  return ref.read(databaseProvider).weightTestDao;
 });

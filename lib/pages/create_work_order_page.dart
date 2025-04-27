@@ -34,14 +34,18 @@ class CreateWorkOrderPage extends ConsumerWidget {
                 SwitchListTile(
                   title: const Text('Edit Customer Fields'),
                   value: controller.customerFieldsEnabled,
-                  onChanged: (_) => controller.enableCustomerEditing(),
+                  onChanged: controller.selectedCustomerId != null
+                      ? (_) => controller.enableCustomerEditing()
+                      : null,
                 ),
                 const SiteAddressSection(),
                 const SizedBox(height: 24),
                 SwitchListTile(
                   title: const Text('Use Separate Billing Address'),
                   value: controller.showBilling,
-                  onChanged: controller.customerFieldsEnabled ? controller.toggleBillingVisibility : null,
+                  onChanged: controller.customerFieldsEnabled
+                      ? controller.toggleBillingVisibility
+                      : null,
                 ),
                 const BillingAddressSection(),
                 const SizedBox(height: 24),

@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../controllers/service_report_form_controller.dart';
 import '../data/database.dart';
 import '../providers/service_report_form_provider.dart';
 import '../providers/drift_providers.dart';
@@ -13,6 +12,7 @@ import '../widgets/service_report/indicator_section.dart';
 import '../widgets/service_report/base_section.dart';
 import '../widgets/service_report/load_cell_section.dart';
 import '../widgets/service_report/scale_capacity_section.dart';
+import 'create_weight_test_page.dart';
 
 class CreateServiceReportPage extends ConsumerStatefulWidget {
   final int? customerId;
@@ -26,8 +26,8 @@ class CreateServiceReportPage extends ConsumerStatefulWidget {
 
 class _CreateServiceReportPageState extends ConsumerState<CreateServiceReportPage> {
   late final ServiceReportFormController controller;
-  final _formKey = GlobalKey<FormState>();
-
+  late final GlobalKey<FormState> _formKey;
+  
   final indicatorMakeController = TextEditingController();
   final indicatorModelController = TextEditingController();
   final indicatorSerialController = TextEditingController();
@@ -52,20 +52,24 @@ class _CreateServiceReportPageState extends ConsumerState<CreateServiceReportPag
   final sectionsController = TextEditingController();
 
   bool configuration = false;
-  WorkOrder? selectedWorkOrder;
+  int? selectedWorkOrderId;
   int? customerId;
 
   @override
   void initState() {
     super.initState();
     controller = ref.read(serviceReportFormProvider.notifier);
+    _formKey = controller.formKey;
 
-    if (widget.workOrderId != null) {
-      _loadWorkOrder(widget.workOrderId!);
-    } else {
-      controller.setWorkOrder(null);
-      controller.toggleEditMode(controller.isCreatingNewScale);
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.workOrderId != null) {
+        selectedWorkOrderId = widget.workOrderId;
+        _loadWorkOrder(widget.workOrderId!);
+      } else {
+        controller.setWorkOrder(null);
+        controller.toggleEditMode(controller.isCreatingNewScale);
+      }
+    });
   }
 
   Future<void> _loadWorkOrder(int id) async {
@@ -73,10 +77,8 @@ class _CreateServiceReportPageState extends ConsumerState<CreateServiceReportPag
     final workOrder = await db.workOrderDao.getWorkOrderById(id);
     if (workOrder != null) {
       setState(() {
-        selectedWorkOrder = workOrder;
         customerId = workOrder.customerId;
         controller.setWorkOrder(workOrder);
-        controller.toggleEditMode(controller.isCreatingNewScale);
       });
     }
   }
@@ -84,7 +86,7 @@ class _CreateServiceReportPageState extends ConsumerState<CreateServiceReportPag
   void _handleWorkOrderSelected(WorkOrder? workOrder) {
     if (workOrder == null) return;
     setState(() {
-      selectedWorkOrder = workOrder;
+      selectedWorkOrderId = workOrder.id;
       customerId = workOrder.customerId;
       controller.setWorkOrder(workOrder);
     });
@@ -122,9 +124,9 @@ class _CreateServiceReportPageState extends ConsumerState<CreateServiceReportPag
 
   Future<void> _saveServiceReport() async {
     if (!_formKey.currentState!.validate()) return;
+    if (customerId == null || selectedWorkOrderId == null) return;
 
     final isCreating = controller.isCreatingNewScale;
-    if (customerId == null || selectedWorkOrder == null) return;
 
     if (isCreating) {
       final newScaleId = await controller.createNewScale(
@@ -175,6 +177,55 @@ class _CreateServiceReportPageState extends ConsumerState<CreateServiceReportPag
     }
   }
 
+  Future<void> _showAddFormDialog() async {
+    final success = await controller.save();
+    if (!success || controller.selectedServiceReportId == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please complete and save the Service Report first.')),
+        );
+      }
+      return;
+    }
+
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add Form'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.scale),
+              title: const Text('Weight Test'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CreateWeightTestPage(serviceReportId: controller.selectedServiceReportId!),
+                  ),
+                );
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.visibility),
+              title: const Text('Visual Inspection (Coming Soon)'),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.build),
+              title: const Text('Mechanical Inspection (Coming Soon)'),
+              onTap: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   bool get fieldsEditable => controller.isCreatingNewScale || controller.editMode;
 
   @override
@@ -190,7 +241,7 @@ class _CreateServiceReportPageState extends ConsumerState<CreateServiceReportPag
           child: ListView(
             children: [
               WorkOrderDropdown(
-                selected: selectedWorkOrder,
+                selected: state.selectedWorkOrder,
                 onSelected: _handleWorkOrderSelected,
               ),
               const SizedBox(height: 16),
@@ -205,7 +256,9 @@ class _CreateServiceReportPageState extends ConsumerState<CreateServiceReportPag
                 children: [
                   Switch(
                     value: controller.editMode,
-                    onChanged: (val) => setState(() => controller.toggleEditMode(val)),
+                    onChanged: selectedWorkOrderId != null
+                        ? (val) => setState(() => controller.toggleEditMode(val))
+                        : null,
                   ),
                   const SizedBox(width: 8),
                   const Text('Edit Mode'),
@@ -294,10 +347,20 @@ class _CreateServiceReportPageState extends ConsumerState<CreateServiceReportPag
                 ),
               ),
               const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: _saveServiceReport,
-                icon: const Icon(Icons.save),
-                label: const Text('Save Report'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: _saveServiceReport,
+                    icon: const Icon(Icons.save),
+                    label: const Text('Save and Exit'),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: _showAddFormDialog,
+                    icon: const Icon(Icons.add_circle_outline),
+                    label: const Text('Add Forms'),
+                  ),
+                ],
               ),
             ],
           ),

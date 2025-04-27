@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart';
-
 import '../data/database.dart';
 import '../providers/drift_providers.dart';
 
@@ -21,10 +20,14 @@ class ServiceReportFormController extends ChangeNotifier {
   String reportType = 'Standard';
   String? notes;
   bool editMode = false;
-
   bool isCreatingNewScale = false;
 
+  int? selectedServiceReportId; 
+
   ServiceReportFormController(this.ref);
+
+  // ------------------------------
+  // Setters
 
   void setWorkOrder(WorkOrder? wo) {
     selectedWorkOrder = wo;
@@ -58,6 +61,8 @@ class ServiceReportFormController extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ------------------------------
+  // Create New Scale
   Future<int?> createNewScale({
     required int customerId,
     required bool configuration,
@@ -115,19 +120,48 @@ class ServiceReportFormController extends ChangeNotifier {
     return newId;
   }
 
+  // ------------------------------
+  // Save Service Report
   Future<bool> save() async {
-    if (!formKey.currentState!.validate() || selectedWorkOrder == null || selectedScale == null) {
+    if (!formKey.currentState!.validate()) {
+      debugPrint('❌ Form validation failed');
+      return false;
+    }
+
+    if (selectedWorkOrder == null) {
+      debugPrint('❌ selectedWorkOrder is null');
+      return false;
+    }
+
+    if (selectedScale == null) {
+      debugPrint('❌ selectedScale is null');
       return false;
     }
 
     final dao = ref.read(serviceReportDaoProvider);
-    await dao.insertReport(ServiceReportsCompanion(
+    selectedServiceReportId = await dao.insertReport(ServiceReportsCompanion(
       workOrderId: Value(selectedWorkOrder!.id),
       scaleId: Value(selectedScale!.id),
       reportType: Value(reportType),
       notes: Value(notes ?? ''),
     ));
 
+    debugPrint('✅ Service Report saved with ID: $selectedServiceReportId');
+
+    notifyListeners();
     return true;
+  }
+
+  // ------------------------------
+  // Optional Reset (future idea)
+  void clear() {
+    selectedWorkOrder = null;
+    selectedScale = null;
+    reportType = 'Standard';
+    notes = null;
+    editMode = false;
+    isCreatingNewScale = false;
+    selectedServiceReportId = null;
+    notifyListeners();
   }
 }

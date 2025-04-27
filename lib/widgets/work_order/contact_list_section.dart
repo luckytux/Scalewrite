@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:scalewrite_v2/providers/work_order_form_provider.dart';
-import 'package:scalewrite_v2/widgets/contact_input_tile.dart';
+import 'package:scalewrite_v2/widgets/work_order/contact_input_tile.dart';
 
 class ContactListSection extends ConsumerWidget {
   const ContactListSection({super.key});
@@ -15,20 +15,30 @@ class ContactListSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Contacts', style: TextStyle(fontSize: 18)),
-        for (final contact in controller.contacts)
-          ContactInputTile(
-            contact: contact,
-            isMain: contact.isMain,
-            readOnly: !controller.customerFieldsEnabled,
-            onMakeMain: () => controller.makeMainContact(contact),
-            onRemove: () => controller.removeContact(contact),
-            onUpdate: (updated) => controller.updateContact(updated),
+        const Text('Contacts', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        const SizedBox(height: 8),
+        ...controller.contacts.map((contact) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: ContactInputTile(
+                contact: contact,
+                isMain: contact.isMain,
+                readOnly: !controller.customerFieldsEnabled,
+                onMakeMain: () => controller.makeMainContact(contact),
+                onRemove: () => controller.removeContact(contact),
+                onUpdate: (updated) => controller.updateContact(updated),
+              ),
+            )),
+        const SizedBox(height: 8),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            onPressed: controller.customerFieldsEnabled ? controller.addNewContact : null,
+            icon: const Icon(Icons.add),
+            label: const Text('Add Contact'),
+            style: TextButton.styleFrom(
+              foregroundColor: controller.customerFieldsEnabled ? Colors.teal : Colors.grey,
+            ),
           ),
-        TextButton.icon(
-          onPressed: controller.customerFieldsEnabled ? controller.addNewContact : null,
-          icon: const Icon(Icons.add),
-          label: const Text('Add Contact'),
         ),
       ],
     );

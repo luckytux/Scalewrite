@@ -3698,6 +3698,2551 @@ class ServiceReportsCompanion extends UpdateCompanion<ServiceReport> {
   }
 }
 
+class $WeightTestsTable extends WeightTests
+    with TableInfo<$WeightTestsTable, WeightTest> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $WeightTestsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _serviceReportIdMeta =
+      const VerificationMeta('serviceReportId');
+  @override
+  late final GeneratedColumn<int> serviceReportId = GeneratedColumn<int>(
+      'service_report_id', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES service_reports (id)'));
+  static const VerificationMeta _eccentricityTypeMeta =
+      const VerificationMeta('eccentricityType');
+  @override
+  late final GeneratedColumn<String> eccentricityType = GeneratedColumn<String>(
+      'eccentricity_type', aliasedName, false,
+      additionalChecks:
+          GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 20),
+      type: DriftSqlType.string,
+      requiredDuringInsert: true);
+  static const VerificationMeta _eccentricityPointsMeta =
+      const VerificationMeta('eccentricityPoints');
+  @override
+  late final GeneratedColumn<int> eccentricityPoints = GeneratedColumn<int>(
+      'eccentricity_points', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(4));
+  static const VerificationMeta _eccentricityDirectionsMeta =
+      const VerificationMeta('eccentricityDirections');
+  @override
+  late final GeneratedColumn<String> eccentricityDirections =
+      GeneratedColumn<String>('eccentricity_directions', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _eccentricity1Meta =
+      const VerificationMeta('eccentricity1');
+  @override
+  late final GeneratedColumn<double> eccentricity1 = GeneratedColumn<double>(
+      'eccentricity1', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _eccentricity2Meta =
+      const VerificationMeta('eccentricity2');
+  @override
+  late final GeneratedColumn<double> eccentricity2 = GeneratedColumn<double>(
+      'eccentricity2', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _eccentricity3Meta =
+      const VerificationMeta('eccentricity3');
+  @override
+  late final GeneratedColumn<double> eccentricity3 = GeneratedColumn<double>(
+      'eccentricity3', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _eccentricity4Meta =
+      const VerificationMeta('eccentricity4');
+  @override
+  late final GeneratedColumn<double> eccentricity4 = GeneratedColumn<double>(
+      'eccentricity4', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _eccentricity5Meta =
+      const VerificationMeta('eccentricity5');
+  @override
+  late final GeneratedColumn<double> eccentricity5 = GeneratedColumn<double>(
+      'eccentricity5', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _eccentricity6Meta =
+      const VerificationMeta('eccentricity6');
+  @override
+  late final GeneratedColumn<double> eccentricity6 = GeneratedColumn<double>(
+      'eccentricity6', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _eccentricity7Meta =
+      const VerificationMeta('eccentricity7');
+  @override
+  late final GeneratedColumn<double> eccentricity7 = GeneratedColumn<double>(
+      'eccentricity7', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _eccentricity8Meta =
+      const VerificationMeta('eccentricity8');
+  @override
+  late final GeneratedColumn<double> eccentricity8 = GeneratedColumn<double>(
+      'eccentricity8', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _eccentricity9Meta =
+      const VerificationMeta('eccentricity9');
+  @override
+  late final GeneratedColumn<double> eccentricity9 = GeneratedColumn<double>(
+      'eccentricity9', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _eccentricity10Meta =
+      const VerificationMeta('eccentricity10');
+  @override
+  late final GeneratedColumn<double> eccentricity10 = GeneratedColumn<double>(
+      'eccentricity10', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _eccentricityErrorMeta =
+      const VerificationMeta('eccentricityError');
+  @override
+  late final GeneratedColumn<String> eccentricityError =
+      GeneratedColumn<String>('eccentricity_error', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _asFoundTest1Meta =
+      const VerificationMeta('asFoundTest1');
+  @override
+  late final GeneratedColumn<double> asFoundTest1 = GeneratedColumn<double>(
+      'as_found_test1', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asFoundRead1Meta =
+      const VerificationMeta('asFoundRead1');
+  @override
+  late final GeneratedColumn<double> asFoundRead1 = GeneratedColumn<double>(
+      'as_found_read1', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asFoundDiff1Meta =
+      const VerificationMeta('asFoundDiff1');
+  @override
+  late final GeneratedColumn<double> asFoundDiff1 = GeneratedColumn<double>(
+      'as_found_diff1', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asFoundTest2Meta =
+      const VerificationMeta('asFoundTest2');
+  @override
+  late final GeneratedColumn<double> asFoundTest2 = GeneratedColumn<double>(
+      'as_found_test2', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asFoundRead2Meta =
+      const VerificationMeta('asFoundRead2');
+  @override
+  late final GeneratedColumn<double> asFoundRead2 = GeneratedColumn<double>(
+      'as_found_read2', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asFoundDiff2Meta =
+      const VerificationMeta('asFoundDiff2');
+  @override
+  late final GeneratedColumn<double> asFoundDiff2 = GeneratedColumn<double>(
+      'as_found_diff2', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asFoundTest3Meta =
+      const VerificationMeta('asFoundTest3');
+  @override
+  late final GeneratedColumn<double> asFoundTest3 = GeneratedColumn<double>(
+      'as_found_test3', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asFoundRead3Meta =
+      const VerificationMeta('asFoundRead3');
+  @override
+  late final GeneratedColumn<double> asFoundRead3 = GeneratedColumn<double>(
+      'as_found_read3', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asFoundDiff3Meta =
+      const VerificationMeta('asFoundDiff3');
+  @override
+  late final GeneratedColumn<double> asFoundDiff3 = GeneratedColumn<double>(
+      'as_found_diff3', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asFoundTest4Meta =
+      const VerificationMeta('asFoundTest4');
+  @override
+  late final GeneratedColumn<double> asFoundTest4 = GeneratedColumn<double>(
+      'as_found_test4', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asFoundRead4Meta =
+      const VerificationMeta('asFoundRead4');
+  @override
+  late final GeneratedColumn<double> asFoundRead4 = GeneratedColumn<double>(
+      'as_found_read4', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asFoundDiff4Meta =
+      const VerificationMeta('asFoundDiff4');
+  @override
+  late final GeneratedColumn<double> asFoundDiff4 = GeneratedColumn<double>(
+      'as_found_diff4', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asFoundTest5Meta =
+      const VerificationMeta('asFoundTest5');
+  @override
+  late final GeneratedColumn<double> asFoundTest5 = GeneratedColumn<double>(
+      'as_found_test5', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asFoundRead5Meta =
+      const VerificationMeta('asFoundRead5');
+  @override
+  late final GeneratedColumn<double> asFoundRead5 = GeneratedColumn<double>(
+      'as_found_read5', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asFoundDiff5Meta =
+      const VerificationMeta('asFoundDiff5');
+  @override
+  late final GeneratedColumn<double> asFoundDiff5 = GeneratedColumn<double>(
+      'as_found_diff5', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asFoundTest6Meta =
+      const VerificationMeta('asFoundTest6');
+  @override
+  late final GeneratedColumn<double> asFoundTest6 = GeneratedColumn<double>(
+      'as_found_test6', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asFoundRead6Meta =
+      const VerificationMeta('asFoundRead6');
+  @override
+  late final GeneratedColumn<double> asFoundRead6 = GeneratedColumn<double>(
+      'as_found_read6', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asFoundDiff6Meta =
+      const VerificationMeta('asFoundDiff6');
+  @override
+  late final GeneratedColumn<double> asFoundDiff6 = GeneratedColumn<double>(
+      'as_found_diff6', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftTest1Meta =
+      const VerificationMeta('asLeftTest1');
+  @override
+  late final GeneratedColumn<double> asLeftTest1 = GeneratedColumn<double>(
+      'as_left_test1', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftRead1Meta =
+      const VerificationMeta('asLeftRead1');
+  @override
+  late final GeneratedColumn<double> asLeftRead1 = GeneratedColumn<double>(
+      'as_left_read1', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftDiff1Meta =
+      const VerificationMeta('asLeftDiff1');
+  @override
+  late final GeneratedColumn<double> asLeftDiff1 = GeneratedColumn<double>(
+      'as_left_diff1', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftTest2Meta =
+      const VerificationMeta('asLeftTest2');
+  @override
+  late final GeneratedColumn<double> asLeftTest2 = GeneratedColumn<double>(
+      'as_left_test2', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftRead2Meta =
+      const VerificationMeta('asLeftRead2');
+  @override
+  late final GeneratedColumn<double> asLeftRead2 = GeneratedColumn<double>(
+      'as_left_read2', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftDiff2Meta =
+      const VerificationMeta('asLeftDiff2');
+  @override
+  late final GeneratedColumn<double> asLeftDiff2 = GeneratedColumn<double>(
+      'as_left_diff2', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftTest3Meta =
+      const VerificationMeta('asLeftTest3');
+  @override
+  late final GeneratedColumn<double> asLeftTest3 = GeneratedColumn<double>(
+      'as_left_test3', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftRead3Meta =
+      const VerificationMeta('asLeftRead3');
+  @override
+  late final GeneratedColumn<double> asLeftRead3 = GeneratedColumn<double>(
+      'as_left_read3', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftDiff3Meta =
+      const VerificationMeta('asLeftDiff3');
+  @override
+  late final GeneratedColumn<double> asLeftDiff3 = GeneratedColumn<double>(
+      'as_left_diff3', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftTest4Meta =
+      const VerificationMeta('asLeftTest4');
+  @override
+  late final GeneratedColumn<double> asLeftTest4 = GeneratedColumn<double>(
+      'as_left_test4', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftRead4Meta =
+      const VerificationMeta('asLeftRead4');
+  @override
+  late final GeneratedColumn<double> asLeftRead4 = GeneratedColumn<double>(
+      'as_left_read4', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftDiff4Meta =
+      const VerificationMeta('asLeftDiff4');
+  @override
+  late final GeneratedColumn<double> asLeftDiff4 = GeneratedColumn<double>(
+      'as_left_diff4', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftTest5Meta =
+      const VerificationMeta('asLeftTest5');
+  @override
+  late final GeneratedColumn<double> asLeftTest5 = GeneratedColumn<double>(
+      'as_left_test5', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftRead5Meta =
+      const VerificationMeta('asLeftRead5');
+  @override
+  late final GeneratedColumn<double> asLeftRead5 = GeneratedColumn<double>(
+      'as_left_read5', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftDiff5Meta =
+      const VerificationMeta('asLeftDiff5');
+  @override
+  late final GeneratedColumn<double> asLeftDiff5 = GeneratedColumn<double>(
+      'as_left_diff5', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftTest6Meta =
+      const VerificationMeta('asLeftTest6');
+  @override
+  late final GeneratedColumn<double> asLeftTest6 = GeneratedColumn<double>(
+      'as_left_test6', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftRead6Meta =
+      const VerificationMeta('asLeftRead6');
+  @override
+  late final GeneratedColumn<double> asLeftRead6 = GeneratedColumn<double>(
+      'as_left_read6', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftDiff6Meta =
+      const VerificationMeta('asLeftDiff6');
+  @override
+  late final GeneratedColumn<double> asLeftDiff6 = GeneratedColumn<double>(
+      'as_left_diff6', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+      'notes', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _weightTestUnitMeta =
+      const VerificationMeta('weightTestUnit');
+  @override
+  late final GeneratedColumn<String> weightTestUnit = GeneratedColumn<String>(
+      'weight_test_unit', aliasedName, true,
+      additionalChecks:
+          GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 10),
+      type: DriftSqlType.string,
+      requiredDuringInsert: false);
+  static const VerificationMeta _timestampMeta =
+      const VerificationMeta('timestamp');
+  @override
+  late final GeneratedColumn<DateTime> timestamp = GeneratedColumn<DateTime>(
+      'timestamp', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        serviceReportId,
+        eccentricityType,
+        eccentricityPoints,
+        eccentricityDirections,
+        eccentricity1,
+        eccentricity2,
+        eccentricity3,
+        eccentricity4,
+        eccentricity5,
+        eccentricity6,
+        eccentricity7,
+        eccentricity8,
+        eccentricity9,
+        eccentricity10,
+        eccentricityError,
+        asFoundTest1,
+        asFoundRead1,
+        asFoundDiff1,
+        asFoundTest2,
+        asFoundRead2,
+        asFoundDiff2,
+        asFoundTest3,
+        asFoundRead3,
+        asFoundDiff3,
+        asFoundTest4,
+        asFoundRead4,
+        asFoundDiff4,
+        asFoundTest5,
+        asFoundRead5,
+        asFoundDiff5,
+        asFoundTest6,
+        asFoundRead6,
+        asFoundDiff6,
+        asLeftTest1,
+        asLeftRead1,
+        asLeftDiff1,
+        asLeftTest2,
+        asLeftRead2,
+        asLeftDiff2,
+        asLeftTest3,
+        asLeftRead3,
+        asLeftDiff3,
+        asLeftTest4,
+        asLeftRead4,
+        asLeftDiff4,
+        asLeftTest5,
+        asLeftRead5,
+        asLeftDiff5,
+        asLeftTest6,
+        asLeftRead6,
+        asLeftDiff6,
+        notes,
+        weightTestUnit,
+        timestamp
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'weight_tests';
+  @override
+  VerificationContext validateIntegrity(Insertable<WeightTest> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('service_report_id')) {
+      context.handle(
+          _serviceReportIdMeta,
+          serviceReportId.isAcceptableOrUnknown(
+              data['service_report_id']!, _serviceReportIdMeta));
+    } else if (isInserting) {
+      context.missing(_serviceReportIdMeta);
+    }
+    if (data.containsKey('eccentricity_type')) {
+      context.handle(
+          _eccentricityTypeMeta,
+          eccentricityType.isAcceptableOrUnknown(
+              data['eccentricity_type']!, _eccentricityTypeMeta));
+    } else if (isInserting) {
+      context.missing(_eccentricityTypeMeta);
+    }
+    if (data.containsKey('eccentricity_points')) {
+      context.handle(
+          _eccentricityPointsMeta,
+          eccentricityPoints.isAcceptableOrUnknown(
+              data['eccentricity_points']!, _eccentricityPointsMeta));
+    }
+    if (data.containsKey('eccentricity_directions')) {
+      context.handle(
+          _eccentricityDirectionsMeta,
+          eccentricityDirections.isAcceptableOrUnknown(
+              data['eccentricity_directions']!, _eccentricityDirectionsMeta));
+    }
+    if (data.containsKey('eccentricity1')) {
+      context.handle(
+          _eccentricity1Meta,
+          eccentricity1.isAcceptableOrUnknown(
+              data['eccentricity1']!, _eccentricity1Meta));
+    }
+    if (data.containsKey('eccentricity2')) {
+      context.handle(
+          _eccentricity2Meta,
+          eccentricity2.isAcceptableOrUnknown(
+              data['eccentricity2']!, _eccentricity2Meta));
+    }
+    if (data.containsKey('eccentricity3')) {
+      context.handle(
+          _eccentricity3Meta,
+          eccentricity3.isAcceptableOrUnknown(
+              data['eccentricity3']!, _eccentricity3Meta));
+    }
+    if (data.containsKey('eccentricity4')) {
+      context.handle(
+          _eccentricity4Meta,
+          eccentricity4.isAcceptableOrUnknown(
+              data['eccentricity4']!, _eccentricity4Meta));
+    }
+    if (data.containsKey('eccentricity5')) {
+      context.handle(
+          _eccentricity5Meta,
+          eccentricity5.isAcceptableOrUnknown(
+              data['eccentricity5']!, _eccentricity5Meta));
+    }
+    if (data.containsKey('eccentricity6')) {
+      context.handle(
+          _eccentricity6Meta,
+          eccentricity6.isAcceptableOrUnknown(
+              data['eccentricity6']!, _eccentricity6Meta));
+    }
+    if (data.containsKey('eccentricity7')) {
+      context.handle(
+          _eccentricity7Meta,
+          eccentricity7.isAcceptableOrUnknown(
+              data['eccentricity7']!, _eccentricity7Meta));
+    }
+    if (data.containsKey('eccentricity8')) {
+      context.handle(
+          _eccentricity8Meta,
+          eccentricity8.isAcceptableOrUnknown(
+              data['eccentricity8']!, _eccentricity8Meta));
+    }
+    if (data.containsKey('eccentricity9')) {
+      context.handle(
+          _eccentricity9Meta,
+          eccentricity9.isAcceptableOrUnknown(
+              data['eccentricity9']!, _eccentricity9Meta));
+    }
+    if (data.containsKey('eccentricity10')) {
+      context.handle(
+          _eccentricity10Meta,
+          eccentricity10.isAcceptableOrUnknown(
+              data['eccentricity10']!, _eccentricity10Meta));
+    }
+    if (data.containsKey('eccentricity_error')) {
+      context.handle(
+          _eccentricityErrorMeta,
+          eccentricityError.isAcceptableOrUnknown(
+              data['eccentricity_error']!, _eccentricityErrorMeta));
+    }
+    if (data.containsKey('as_found_test1')) {
+      context.handle(
+          _asFoundTest1Meta,
+          asFoundTest1.isAcceptableOrUnknown(
+              data['as_found_test1']!, _asFoundTest1Meta));
+    }
+    if (data.containsKey('as_found_read1')) {
+      context.handle(
+          _asFoundRead1Meta,
+          asFoundRead1.isAcceptableOrUnknown(
+              data['as_found_read1']!, _asFoundRead1Meta));
+    }
+    if (data.containsKey('as_found_diff1')) {
+      context.handle(
+          _asFoundDiff1Meta,
+          asFoundDiff1.isAcceptableOrUnknown(
+              data['as_found_diff1']!, _asFoundDiff1Meta));
+    }
+    if (data.containsKey('as_found_test2')) {
+      context.handle(
+          _asFoundTest2Meta,
+          asFoundTest2.isAcceptableOrUnknown(
+              data['as_found_test2']!, _asFoundTest2Meta));
+    }
+    if (data.containsKey('as_found_read2')) {
+      context.handle(
+          _asFoundRead2Meta,
+          asFoundRead2.isAcceptableOrUnknown(
+              data['as_found_read2']!, _asFoundRead2Meta));
+    }
+    if (data.containsKey('as_found_diff2')) {
+      context.handle(
+          _asFoundDiff2Meta,
+          asFoundDiff2.isAcceptableOrUnknown(
+              data['as_found_diff2']!, _asFoundDiff2Meta));
+    }
+    if (data.containsKey('as_found_test3')) {
+      context.handle(
+          _asFoundTest3Meta,
+          asFoundTest3.isAcceptableOrUnknown(
+              data['as_found_test3']!, _asFoundTest3Meta));
+    }
+    if (data.containsKey('as_found_read3')) {
+      context.handle(
+          _asFoundRead3Meta,
+          asFoundRead3.isAcceptableOrUnknown(
+              data['as_found_read3']!, _asFoundRead3Meta));
+    }
+    if (data.containsKey('as_found_diff3')) {
+      context.handle(
+          _asFoundDiff3Meta,
+          asFoundDiff3.isAcceptableOrUnknown(
+              data['as_found_diff3']!, _asFoundDiff3Meta));
+    }
+    if (data.containsKey('as_found_test4')) {
+      context.handle(
+          _asFoundTest4Meta,
+          asFoundTest4.isAcceptableOrUnknown(
+              data['as_found_test4']!, _asFoundTest4Meta));
+    }
+    if (data.containsKey('as_found_read4')) {
+      context.handle(
+          _asFoundRead4Meta,
+          asFoundRead4.isAcceptableOrUnknown(
+              data['as_found_read4']!, _asFoundRead4Meta));
+    }
+    if (data.containsKey('as_found_diff4')) {
+      context.handle(
+          _asFoundDiff4Meta,
+          asFoundDiff4.isAcceptableOrUnknown(
+              data['as_found_diff4']!, _asFoundDiff4Meta));
+    }
+    if (data.containsKey('as_found_test5')) {
+      context.handle(
+          _asFoundTest5Meta,
+          asFoundTest5.isAcceptableOrUnknown(
+              data['as_found_test5']!, _asFoundTest5Meta));
+    }
+    if (data.containsKey('as_found_read5')) {
+      context.handle(
+          _asFoundRead5Meta,
+          asFoundRead5.isAcceptableOrUnknown(
+              data['as_found_read5']!, _asFoundRead5Meta));
+    }
+    if (data.containsKey('as_found_diff5')) {
+      context.handle(
+          _asFoundDiff5Meta,
+          asFoundDiff5.isAcceptableOrUnknown(
+              data['as_found_diff5']!, _asFoundDiff5Meta));
+    }
+    if (data.containsKey('as_found_test6')) {
+      context.handle(
+          _asFoundTest6Meta,
+          asFoundTest6.isAcceptableOrUnknown(
+              data['as_found_test6']!, _asFoundTest6Meta));
+    }
+    if (data.containsKey('as_found_read6')) {
+      context.handle(
+          _asFoundRead6Meta,
+          asFoundRead6.isAcceptableOrUnknown(
+              data['as_found_read6']!, _asFoundRead6Meta));
+    }
+    if (data.containsKey('as_found_diff6')) {
+      context.handle(
+          _asFoundDiff6Meta,
+          asFoundDiff6.isAcceptableOrUnknown(
+              data['as_found_diff6']!, _asFoundDiff6Meta));
+    }
+    if (data.containsKey('as_left_test1')) {
+      context.handle(
+          _asLeftTest1Meta,
+          asLeftTest1.isAcceptableOrUnknown(
+              data['as_left_test1']!, _asLeftTest1Meta));
+    }
+    if (data.containsKey('as_left_read1')) {
+      context.handle(
+          _asLeftRead1Meta,
+          asLeftRead1.isAcceptableOrUnknown(
+              data['as_left_read1']!, _asLeftRead1Meta));
+    }
+    if (data.containsKey('as_left_diff1')) {
+      context.handle(
+          _asLeftDiff1Meta,
+          asLeftDiff1.isAcceptableOrUnknown(
+              data['as_left_diff1']!, _asLeftDiff1Meta));
+    }
+    if (data.containsKey('as_left_test2')) {
+      context.handle(
+          _asLeftTest2Meta,
+          asLeftTest2.isAcceptableOrUnknown(
+              data['as_left_test2']!, _asLeftTest2Meta));
+    }
+    if (data.containsKey('as_left_read2')) {
+      context.handle(
+          _asLeftRead2Meta,
+          asLeftRead2.isAcceptableOrUnknown(
+              data['as_left_read2']!, _asLeftRead2Meta));
+    }
+    if (data.containsKey('as_left_diff2')) {
+      context.handle(
+          _asLeftDiff2Meta,
+          asLeftDiff2.isAcceptableOrUnknown(
+              data['as_left_diff2']!, _asLeftDiff2Meta));
+    }
+    if (data.containsKey('as_left_test3')) {
+      context.handle(
+          _asLeftTest3Meta,
+          asLeftTest3.isAcceptableOrUnknown(
+              data['as_left_test3']!, _asLeftTest3Meta));
+    }
+    if (data.containsKey('as_left_read3')) {
+      context.handle(
+          _asLeftRead3Meta,
+          asLeftRead3.isAcceptableOrUnknown(
+              data['as_left_read3']!, _asLeftRead3Meta));
+    }
+    if (data.containsKey('as_left_diff3')) {
+      context.handle(
+          _asLeftDiff3Meta,
+          asLeftDiff3.isAcceptableOrUnknown(
+              data['as_left_diff3']!, _asLeftDiff3Meta));
+    }
+    if (data.containsKey('as_left_test4')) {
+      context.handle(
+          _asLeftTest4Meta,
+          asLeftTest4.isAcceptableOrUnknown(
+              data['as_left_test4']!, _asLeftTest4Meta));
+    }
+    if (data.containsKey('as_left_read4')) {
+      context.handle(
+          _asLeftRead4Meta,
+          asLeftRead4.isAcceptableOrUnknown(
+              data['as_left_read4']!, _asLeftRead4Meta));
+    }
+    if (data.containsKey('as_left_diff4')) {
+      context.handle(
+          _asLeftDiff4Meta,
+          asLeftDiff4.isAcceptableOrUnknown(
+              data['as_left_diff4']!, _asLeftDiff4Meta));
+    }
+    if (data.containsKey('as_left_test5')) {
+      context.handle(
+          _asLeftTest5Meta,
+          asLeftTest5.isAcceptableOrUnknown(
+              data['as_left_test5']!, _asLeftTest5Meta));
+    }
+    if (data.containsKey('as_left_read5')) {
+      context.handle(
+          _asLeftRead5Meta,
+          asLeftRead5.isAcceptableOrUnknown(
+              data['as_left_read5']!, _asLeftRead5Meta));
+    }
+    if (data.containsKey('as_left_diff5')) {
+      context.handle(
+          _asLeftDiff5Meta,
+          asLeftDiff5.isAcceptableOrUnknown(
+              data['as_left_diff5']!, _asLeftDiff5Meta));
+    }
+    if (data.containsKey('as_left_test6')) {
+      context.handle(
+          _asLeftTest6Meta,
+          asLeftTest6.isAcceptableOrUnknown(
+              data['as_left_test6']!, _asLeftTest6Meta));
+    }
+    if (data.containsKey('as_left_read6')) {
+      context.handle(
+          _asLeftRead6Meta,
+          asLeftRead6.isAcceptableOrUnknown(
+              data['as_left_read6']!, _asLeftRead6Meta));
+    }
+    if (data.containsKey('as_left_diff6')) {
+      context.handle(
+          _asLeftDiff6Meta,
+          asLeftDiff6.isAcceptableOrUnknown(
+              data['as_left_diff6']!, _asLeftDiff6Meta));
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+          _notesMeta, notes.isAcceptableOrUnknown(data['notes']!, _notesMeta));
+    }
+    if (data.containsKey('weight_test_unit')) {
+      context.handle(
+          _weightTestUnitMeta,
+          weightTestUnit.isAcceptableOrUnknown(
+              data['weight_test_unit']!, _weightTestUnitMeta));
+    }
+    if (data.containsKey('timestamp')) {
+      context.handle(_timestampMeta,
+          timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  WeightTest map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return WeightTest(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      serviceReportId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}service_report_id'])!,
+      eccentricityType: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}eccentricity_type'])!,
+      eccentricityPoints: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}eccentricity_points'])!,
+      eccentricityDirections: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}eccentricity_directions']),
+      eccentricity1: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}eccentricity1']),
+      eccentricity2: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}eccentricity2']),
+      eccentricity3: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}eccentricity3']),
+      eccentricity4: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}eccentricity4']),
+      eccentricity5: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}eccentricity5']),
+      eccentricity6: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}eccentricity6']),
+      eccentricity7: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}eccentricity7']),
+      eccentricity8: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}eccentricity8']),
+      eccentricity9: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}eccentricity9']),
+      eccentricity10: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}eccentricity10']),
+      eccentricityError: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}eccentricity_error']),
+      asFoundTest1: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_found_test1']),
+      asFoundRead1: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_found_read1']),
+      asFoundDiff1: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_found_diff1']),
+      asFoundTest2: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_found_test2']),
+      asFoundRead2: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_found_read2']),
+      asFoundDiff2: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_found_diff2']),
+      asFoundTest3: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_found_test3']),
+      asFoundRead3: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_found_read3']),
+      asFoundDiff3: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_found_diff3']),
+      asFoundTest4: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_found_test4']),
+      asFoundRead4: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_found_read4']),
+      asFoundDiff4: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_found_diff4']),
+      asFoundTest5: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_found_test5']),
+      asFoundRead5: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_found_read5']),
+      asFoundDiff5: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_found_diff5']),
+      asFoundTest6: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_found_test6']),
+      asFoundRead6: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_found_read6']),
+      asFoundDiff6: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_found_diff6']),
+      asLeftTest1: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_left_test1']),
+      asLeftRead1: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_left_read1']),
+      asLeftDiff1: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_left_diff1']),
+      asLeftTest2: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_left_test2']),
+      asLeftRead2: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_left_read2']),
+      asLeftDiff2: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_left_diff2']),
+      asLeftTest3: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_left_test3']),
+      asLeftRead3: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_left_read3']),
+      asLeftDiff3: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_left_diff3']),
+      asLeftTest4: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_left_test4']),
+      asLeftRead4: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_left_read4']),
+      asLeftDiff4: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_left_diff4']),
+      asLeftTest5: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_left_test5']),
+      asLeftRead5: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_left_read5']),
+      asLeftDiff5: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_left_diff5']),
+      asLeftTest6: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_left_test6']),
+      asLeftRead6: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_left_read6']),
+      asLeftDiff6: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}as_left_diff6']),
+      notes: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}notes']),
+      weightTestUnit: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}weight_test_unit']),
+      timestamp: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}timestamp'])!,
+    );
+  }
+
+  @override
+  $WeightTestsTable createAlias(String alias) {
+    return $WeightTestsTable(attachedDatabase, alias);
+  }
+}
+
+class WeightTest extends DataClass implements Insertable<WeightTest> {
+  final int id;
+  final int serviceReportId;
+  final String eccentricityType;
+  final int eccentricityPoints;
+  final String? eccentricityDirections;
+  final double? eccentricity1;
+  final double? eccentricity2;
+  final double? eccentricity3;
+  final double? eccentricity4;
+  final double? eccentricity5;
+  final double? eccentricity6;
+  final double? eccentricity7;
+  final double? eccentricity8;
+  final double? eccentricity9;
+  final double? eccentricity10;
+  final String? eccentricityError;
+  final double? asFoundTest1;
+  final double? asFoundRead1;
+  final double? asFoundDiff1;
+  final double? asFoundTest2;
+  final double? asFoundRead2;
+  final double? asFoundDiff2;
+  final double? asFoundTest3;
+  final double? asFoundRead3;
+  final double? asFoundDiff3;
+  final double? asFoundTest4;
+  final double? asFoundRead4;
+  final double? asFoundDiff4;
+  final double? asFoundTest5;
+  final double? asFoundRead5;
+  final double? asFoundDiff5;
+  final double? asFoundTest6;
+  final double? asFoundRead6;
+  final double? asFoundDiff6;
+  final double? asLeftTest1;
+  final double? asLeftRead1;
+  final double? asLeftDiff1;
+  final double? asLeftTest2;
+  final double? asLeftRead2;
+  final double? asLeftDiff2;
+  final double? asLeftTest3;
+  final double? asLeftRead3;
+  final double? asLeftDiff3;
+  final double? asLeftTest4;
+  final double? asLeftRead4;
+  final double? asLeftDiff4;
+  final double? asLeftTest5;
+  final double? asLeftRead5;
+  final double? asLeftDiff5;
+  final double? asLeftTest6;
+  final double? asLeftRead6;
+  final double? asLeftDiff6;
+  final String? notes;
+  final String? weightTestUnit;
+  final DateTime timestamp;
+  const WeightTest(
+      {required this.id,
+      required this.serviceReportId,
+      required this.eccentricityType,
+      required this.eccentricityPoints,
+      this.eccentricityDirections,
+      this.eccentricity1,
+      this.eccentricity2,
+      this.eccentricity3,
+      this.eccentricity4,
+      this.eccentricity5,
+      this.eccentricity6,
+      this.eccentricity7,
+      this.eccentricity8,
+      this.eccentricity9,
+      this.eccentricity10,
+      this.eccentricityError,
+      this.asFoundTest1,
+      this.asFoundRead1,
+      this.asFoundDiff1,
+      this.asFoundTest2,
+      this.asFoundRead2,
+      this.asFoundDiff2,
+      this.asFoundTest3,
+      this.asFoundRead3,
+      this.asFoundDiff3,
+      this.asFoundTest4,
+      this.asFoundRead4,
+      this.asFoundDiff4,
+      this.asFoundTest5,
+      this.asFoundRead5,
+      this.asFoundDiff5,
+      this.asFoundTest6,
+      this.asFoundRead6,
+      this.asFoundDiff6,
+      this.asLeftTest1,
+      this.asLeftRead1,
+      this.asLeftDiff1,
+      this.asLeftTest2,
+      this.asLeftRead2,
+      this.asLeftDiff2,
+      this.asLeftTest3,
+      this.asLeftRead3,
+      this.asLeftDiff3,
+      this.asLeftTest4,
+      this.asLeftRead4,
+      this.asLeftDiff4,
+      this.asLeftTest5,
+      this.asLeftRead5,
+      this.asLeftDiff5,
+      this.asLeftTest6,
+      this.asLeftRead6,
+      this.asLeftDiff6,
+      this.notes,
+      this.weightTestUnit,
+      required this.timestamp});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['service_report_id'] = Variable<int>(serviceReportId);
+    map['eccentricity_type'] = Variable<String>(eccentricityType);
+    map['eccentricity_points'] = Variable<int>(eccentricityPoints);
+    if (!nullToAbsent || eccentricityDirections != null) {
+      map['eccentricity_directions'] = Variable<String>(eccentricityDirections);
+    }
+    if (!nullToAbsent || eccentricity1 != null) {
+      map['eccentricity1'] = Variable<double>(eccentricity1);
+    }
+    if (!nullToAbsent || eccentricity2 != null) {
+      map['eccentricity2'] = Variable<double>(eccentricity2);
+    }
+    if (!nullToAbsent || eccentricity3 != null) {
+      map['eccentricity3'] = Variable<double>(eccentricity3);
+    }
+    if (!nullToAbsent || eccentricity4 != null) {
+      map['eccentricity4'] = Variable<double>(eccentricity4);
+    }
+    if (!nullToAbsent || eccentricity5 != null) {
+      map['eccentricity5'] = Variable<double>(eccentricity5);
+    }
+    if (!nullToAbsent || eccentricity6 != null) {
+      map['eccentricity6'] = Variable<double>(eccentricity6);
+    }
+    if (!nullToAbsent || eccentricity7 != null) {
+      map['eccentricity7'] = Variable<double>(eccentricity7);
+    }
+    if (!nullToAbsent || eccentricity8 != null) {
+      map['eccentricity8'] = Variable<double>(eccentricity8);
+    }
+    if (!nullToAbsent || eccentricity9 != null) {
+      map['eccentricity9'] = Variable<double>(eccentricity9);
+    }
+    if (!nullToAbsent || eccentricity10 != null) {
+      map['eccentricity10'] = Variable<double>(eccentricity10);
+    }
+    if (!nullToAbsent || eccentricityError != null) {
+      map['eccentricity_error'] = Variable<String>(eccentricityError);
+    }
+    if (!nullToAbsent || asFoundTest1 != null) {
+      map['as_found_test1'] = Variable<double>(asFoundTest1);
+    }
+    if (!nullToAbsent || asFoundRead1 != null) {
+      map['as_found_read1'] = Variable<double>(asFoundRead1);
+    }
+    if (!nullToAbsent || asFoundDiff1 != null) {
+      map['as_found_diff1'] = Variable<double>(asFoundDiff1);
+    }
+    if (!nullToAbsent || asFoundTest2 != null) {
+      map['as_found_test2'] = Variable<double>(asFoundTest2);
+    }
+    if (!nullToAbsent || asFoundRead2 != null) {
+      map['as_found_read2'] = Variable<double>(asFoundRead2);
+    }
+    if (!nullToAbsent || asFoundDiff2 != null) {
+      map['as_found_diff2'] = Variable<double>(asFoundDiff2);
+    }
+    if (!nullToAbsent || asFoundTest3 != null) {
+      map['as_found_test3'] = Variable<double>(asFoundTest3);
+    }
+    if (!nullToAbsent || asFoundRead3 != null) {
+      map['as_found_read3'] = Variable<double>(asFoundRead3);
+    }
+    if (!nullToAbsent || asFoundDiff3 != null) {
+      map['as_found_diff3'] = Variable<double>(asFoundDiff3);
+    }
+    if (!nullToAbsent || asFoundTest4 != null) {
+      map['as_found_test4'] = Variable<double>(asFoundTest4);
+    }
+    if (!nullToAbsent || asFoundRead4 != null) {
+      map['as_found_read4'] = Variable<double>(asFoundRead4);
+    }
+    if (!nullToAbsent || asFoundDiff4 != null) {
+      map['as_found_diff4'] = Variable<double>(asFoundDiff4);
+    }
+    if (!nullToAbsent || asFoundTest5 != null) {
+      map['as_found_test5'] = Variable<double>(asFoundTest5);
+    }
+    if (!nullToAbsent || asFoundRead5 != null) {
+      map['as_found_read5'] = Variable<double>(asFoundRead5);
+    }
+    if (!nullToAbsent || asFoundDiff5 != null) {
+      map['as_found_diff5'] = Variable<double>(asFoundDiff5);
+    }
+    if (!nullToAbsent || asFoundTest6 != null) {
+      map['as_found_test6'] = Variable<double>(asFoundTest6);
+    }
+    if (!nullToAbsent || asFoundRead6 != null) {
+      map['as_found_read6'] = Variable<double>(asFoundRead6);
+    }
+    if (!nullToAbsent || asFoundDiff6 != null) {
+      map['as_found_diff6'] = Variable<double>(asFoundDiff6);
+    }
+    if (!nullToAbsent || asLeftTest1 != null) {
+      map['as_left_test1'] = Variable<double>(asLeftTest1);
+    }
+    if (!nullToAbsent || asLeftRead1 != null) {
+      map['as_left_read1'] = Variable<double>(asLeftRead1);
+    }
+    if (!nullToAbsent || asLeftDiff1 != null) {
+      map['as_left_diff1'] = Variable<double>(asLeftDiff1);
+    }
+    if (!nullToAbsent || asLeftTest2 != null) {
+      map['as_left_test2'] = Variable<double>(asLeftTest2);
+    }
+    if (!nullToAbsent || asLeftRead2 != null) {
+      map['as_left_read2'] = Variable<double>(asLeftRead2);
+    }
+    if (!nullToAbsent || asLeftDiff2 != null) {
+      map['as_left_diff2'] = Variable<double>(asLeftDiff2);
+    }
+    if (!nullToAbsent || asLeftTest3 != null) {
+      map['as_left_test3'] = Variable<double>(asLeftTest3);
+    }
+    if (!nullToAbsent || asLeftRead3 != null) {
+      map['as_left_read3'] = Variable<double>(asLeftRead3);
+    }
+    if (!nullToAbsent || asLeftDiff3 != null) {
+      map['as_left_diff3'] = Variable<double>(asLeftDiff3);
+    }
+    if (!nullToAbsent || asLeftTest4 != null) {
+      map['as_left_test4'] = Variable<double>(asLeftTest4);
+    }
+    if (!nullToAbsent || asLeftRead4 != null) {
+      map['as_left_read4'] = Variable<double>(asLeftRead4);
+    }
+    if (!nullToAbsent || asLeftDiff4 != null) {
+      map['as_left_diff4'] = Variable<double>(asLeftDiff4);
+    }
+    if (!nullToAbsent || asLeftTest5 != null) {
+      map['as_left_test5'] = Variable<double>(asLeftTest5);
+    }
+    if (!nullToAbsent || asLeftRead5 != null) {
+      map['as_left_read5'] = Variable<double>(asLeftRead5);
+    }
+    if (!nullToAbsent || asLeftDiff5 != null) {
+      map['as_left_diff5'] = Variable<double>(asLeftDiff5);
+    }
+    if (!nullToAbsent || asLeftTest6 != null) {
+      map['as_left_test6'] = Variable<double>(asLeftTest6);
+    }
+    if (!nullToAbsent || asLeftRead6 != null) {
+      map['as_left_read6'] = Variable<double>(asLeftRead6);
+    }
+    if (!nullToAbsent || asLeftDiff6 != null) {
+      map['as_left_diff6'] = Variable<double>(asLeftDiff6);
+    }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    if (!nullToAbsent || weightTestUnit != null) {
+      map['weight_test_unit'] = Variable<String>(weightTestUnit);
+    }
+    map['timestamp'] = Variable<DateTime>(timestamp);
+    return map;
+  }
+
+  WeightTestsCompanion toCompanion(bool nullToAbsent) {
+    return WeightTestsCompanion(
+      id: Value(id),
+      serviceReportId: Value(serviceReportId),
+      eccentricityType: Value(eccentricityType),
+      eccentricityPoints: Value(eccentricityPoints),
+      eccentricityDirections: eccentricityDirections == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eccentricityDirections),
+      eccentricity1: eccentricity1 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eccentricity1),
+      eccentricity2: eccentricity2 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eccentricity2),
+      eccentricity3: eccentricity3 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eccentricity3),
+      eccentricity4: eccentricity4 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eccentricity4),
+      eccentricity5: eccentricity5 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eccentricity5),
+      eccentricity6: eccentricity6 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eccentricity6),
+      eccentricity7: eccentricity7 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eccentricity7),
+      eccentricity8: eccentricity8 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eccentricity8),
+      eccentricity9: eccentricity9 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eccentricity9),
+      eccentricity10: eccentricity10 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eccentricity10),
+      eccentricityError: eccentricityError == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eccentricityError),
+      asFoundTest1: asFoundTest1 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asFoundTest1),
+      asFoundRead1: asFoundRead1 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asFoundRead1),
+      asFoundDiff1: asFoundDiff1 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asFoundDiff1),
+      asFoundTest2: asFoundTest2 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asFoundTest2),
+      asFoundRead2: asFoundRead2 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asFoundRead2),
+      asFoundDiff2: asFoundDiff2 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asFoundDiff2),
+      asFoundTest3: asFoundTest3 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asFoundTest3),
+      asFoundRead3: asFoundRead3 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asFoundRead3),
+      asFoundDiff3: asFoundDiff3 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asFoundDiff3),
+      asFoundTest4: asFoundTest4 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asFoundTest4),
+      asFoundRead4: asFoundRead4 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asFoundRead4),
+      asFoundDiff4: asFoundDiff4 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asFoundDiff4),
+      asFoundTest5: asFoundTest5 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asFoundTest5),
+      asFoundRead5: asFoundRead5 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asFoundRead5),
+      asFoundDiff5: asFoundDiff5 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asFoundDiff5),
+      asFoundTest6: asFoundTest6 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asFoundTest6),
+      asFoundRead6: asFoundRead6 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asFoundRead6),
+      asFoundDiff6: asFoundDiff6 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asFoundDiff6),
+      asLeftTest1: asLeftTest1 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftTest1),
+      asLeftRead1: asLeftRead1 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftRead1),
+      asLeftDiff1: asLeftDiff1 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftDiff1),
+      asLeftTest2: asLeftTest2 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftTest2),
+      asLeftRead2: asLeftRead2 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftRead2),
+      asLeftDiff2: asLeftDiff2 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftDiff2),
+      asLeftTest3: asLeftTest3 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftTest3),
+      asLeftRead3: asLeftRead3 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftRead3),
+      asLeftDiff3: asLeftDiff3 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftDiff3),
+      asLeftTest4: asLeftTest4 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftTest4),
+      asLeftRead4: asLeftRead4 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftRead4),
+      asLeftDiff4: asLeftDiff4 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftDiff4),
+      asLeftTest5: asLeftTest5 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftTest5),
+      asLeftRead5: asLeftRead5 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftRead5),
+      asLeftDiff5: asLeftDiff5 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftDiff5),
+      asLeftTest6: asLeftTest6 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftTest6),
+      asLeftRead6: asLeftRead6 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftRead6),
+      asLeftDiff6: asLeftDiff6 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftDiff6),
+      notes:
+          notes == null && nullToAbsent ? const Value.absent() : Value(notes),
+      weightTestUnit: weightTestUnit == null && nullToAbsent
+          ? const Value.absent()
+          : Value(weightTestUnit),
+      timestamp: Value(timestamp),
+    );
+  }
+
+  factory WeightTest.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return WeightTest(
+      id: serializer.fromJson<int>(json['id']),
+      serviceReportId: serializer.fromJson<int>(json['serviceReportId']),
+      eccentricityType: serializer.fromJson<String>(json['eccentricityType']),
+      eccentricityPoints: serializer.fromJson<int>(json['eccentricityPoints']),
+      eccentricityDirections:
+          serializer.fromJson<String?>(json['eccentricityDirections']),
+      eccentricity1: serializer.fromJson<double?>(json['eccentricity1']),
+      eccentricity2: serializer.fromJson<double?>(json['eccentricity2']),
+      eccentricity3: serializer.fromJson<double?>(json['eccentricity3']),
+      eccentricity4: serializer.fromJson<double?>(json['eccentricity4']),
+      eccentricity5: serializer.fromJson<double?>(json['eccentricity5']),
+      eccentricity6: serializer.fromJson<double?>(json['eccentricity6']),
+      eccentricity7: serializer.fromJson<double?>(json['eccentricity7']),
+      eccentricity8: serializer.fromJson<double?>(json['eccentricity8']),
+      eccentricity9: serializer.fromJson<double?>(json['eccentricity9']),
+      eccentricity10: serializer.fromJson<double?>(json['eccentricity10']),
+      eccentricityError:
+          serializer.fromJson<String?>(json['eccentricityError']),
+      asFoundTest1: serializer.fromJson<double?>(json['asFoundTest1']),
+      asFoundRead1: serializer.fromJson<double?>(json['asFoundRead1']),
+      asFoundDiff1: serializer.fromJson<double?>(json['asFoundDiff1']),
+      asFoundTest2: serializer.fromJson<double?>(json['asFoundTest2']),
+      asFoundRead2: serializer.fromJson<double?>(json['asFoundRead2']),
+      asFoundDiff2: serializer.fromJson<double?>(json['asFoundDiff2']),
+      asFoundTest3: serializer.fromJson<double?>(json['asFoundTest3']),
+      asFoundRead3: serializer.fromJson<double?>(json['asFoundRead3']),
+      asFoundDiff3: serializer.fromJson<double?>(json['asFoundDiff3']),
+      asFoundTest4: serializer.fromJson<double?>(json['asFoundTest4']),
+      asFoundRead4: serializer.fromJson<double?>(json['asFoundRead4']),
+      asFoundDiff4: serializer.fromJson<double?>(json['asFoundDiff4']),
+      asFoundTest5: serializer.fromJson<double?>(json['asFoundTest5']),
+      asFoundRead5: serializer.fromJson<double?>(json['asFoundRead5']),
+      asFoundDiff5: serializer.fromJson<double?>(json['asFoundDiff5']),
+      asFoundTest6: serializer.fromJson<double?>(json['asFoundTest6']),
+      asFoundRead6: serializer.fromJson<double?>(json['asFoundRead6']),
+      asFoundDiff6: serializer.fromJson<double?>(json['asFoundDiff6']),
+      asLeftTest1: serializer.fromJson<double?>(json['asLeftTest1']),
+      asLeftRead1: serializer.fromJson<double?>(json['asLeftRead1']),
+      asLeftDiff1: serializer.fromJson<double?>(json['asLeftDiff1']),
+      asLeftTest2: serializer.fromJson<double?>(json['asLeftTest2']),
+      asLeftRead2: serializer.fromJson<double?>(json['asLeftRead2']),
+      asLeftDiff2: serializer.fromJson<double?>(json['asLeftDiff2']),
+      asLeftTest3: serializer.fromJson<double?>(json['asLeftTest3']),
+      asLeftRead3: serializer.fromJson<double?>(json['asLeftRead3']),
+      asLeftDiff3: serializer.fromJson<double?>(json['asLeftDiff3']),
+      asLeftTest4: serializer.fromJson<double?>(json['asLeftTest4']),
+      asLeftRead4: serializer.fromJson<double?>(json['asLeftRead4']),
+      asLeftDiff4: serializer.fromJson<double?>(json['asLeftDiff4']),
+      asLeftTest5: serializer.fromJson<double?>(json['asLeftTest5']),
+      asLeftRead5: serializer.fromJson<double?>(json['asLeftRead5']),
+      asLeftDiff5: serializer.fromJson<double?>(json['asLeftDiff5']),
+      asLeftTest6: serializer.fromJson<double?>(json['asLeftTest6']),
+      asLeftRead6: serializer.fromJson<double?>(json['asLeftRead6']),
+      asLeftDiff6: serializer.fromJson<double?>(json['asLeftDiff6']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      weightTestUnit: serializer.fromJson<String?>(json['weightTestUnit']),
+      timestamp: serializer.fromJson<DateTime>(json['timestamp']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'serviceReportId': serializer.toJson<int>(serviceReportId),
+      'eccentricityType': serializer.toJson<String>(eccentricityType),
+      'eccentricityPoints': serializer.toJson<int>(eccentricityPoints),
+      'eccentricityDirections':
+          serializer.toJson<String?>(eccentricityDirections),
+      'eccentricity1': serializer.toJson<double?>(eccentricity1),
+      'eccentricity2': serializer.toJson<double?>(eccentricity2),
+      'eccentricity3': serializer.toJson<double?>(eccentricity3),
+      'eccentricity4': serializer.toJson<double?>(eccentricity4),
+      'eccentricity5': serializer.toJson<double?>(eccentricity5),
+      'eccentricity6': serializer.toJson<double?>(eccentricity6),
+      'eccentricity7': serializer.toJson<double?>(eccentricity7),
+      'eccentricity8': serializer.toJson<double?>(eccentricity8),
+      'eccentricity9': serializer.toJson<double?>(eccentricity9),
+      'eccentricity10': serializer.toJson<double?>(eccentricity10),
+      'eccentricityError': serializer.toJson<String?>(eccentricityError),
+      'asFoundTest1': serializer.toJson<double?>(asFoundTest1),
+      'asFoundRead1': serializer.toJson<double?>(asFoundRead1),
+      'asFoundDiff1': serializer.toJson<double?>(asFoundDiff1),
+      'asFoundTest2': serializer.toJson<double?>(asFoundTest2),
+      'asFoundRead2': serializer.toJson<double?>(asFoundRead2),
+      'asFoundDiff2': serializer.toJson<double?>(asFoundDiff2),
+      'asFoundTest3': serializer.toJson<double?>(asFoundTest3),
+      'asFoundRead3': serializer.toJson<double?>(asFoundRead3),
+      'asFoundDiff3': serializer.toJson<double?>(asFoundDiff3),
+      'asFoundTest4': serializer.toJson<double?>(asFoundTest4),
+      'asFoundRead4': serializer.toJson<double?>(asFoundRead4),
+      'asFoundDiff4': serializer.toJson<double?>(asFoundDiff4),
+      'asFoundTest5': serializer.toJson<double?>(asFoundTest5),
+      'asFoundRead5': serializer.toJson<double?>(asFoundRead5),
+      'asFoundDiff5': serializer.toJson<double?>(asFoundDiff5),
+      'asFoundTest6': serializer.toJson<double?>(asFoundTest6),
+      'asFoundRead6': serializer.toJson<double?>(asFoundRead6),
+      'asFoundDiff6': serializer.toJson<double?>(asFoundDiff6),
+      'asLeftTest1': serializer.toJson<double?>(asLeftTest1),
+      'asLeftRead1': serializer.toJson<double?>(asLeftRead1),
+      'asLeftDiff1': serializer.toJson<double?>(asLeftDiff1),
+      'asLeftTest2': serializer.toJson<double?>(asLeftTest2),
+      'asLeftRead2': serializer.toJson<double?>(asLeftRead2),
+      'asLeftDiff2': serializer.toJson<double?>(asLeftDiff2),
+      'asLeftTest3': serializer.toJson<double?>(asLeftTest3),
+      'asLeftRead3': serializer.toJson<double?>(asLeftRead3),
+      'asLeftDiff3': serializer.toJson<double?>(asLeftDiff3),
+      'asLeftTest4': serializer.toJson<double?>(asLeftTest4),
+      'asLeftRead4': serializer.toJson<double?>(asLeftRead4),
+      'asLeftDiff4': serializer.toJson<double?>(asLeftDiff4),
+      'asLeftTest5': serializer.toJson<double?>(asLeftTest5),
+      'asLeftRead5': serializer.toJson<double?>(asLeftRead5),
+      'asLeftDiff5': serializer.toJson<double?>(asLeftDiff5),
+      'asLeftTest6': serializer.toJson<double?>(asLeftTest6),
+      'asLeftRead6': serializer.toJson<double?>(asLeftRead6),
+      'asLeftDiff6': serializer.toJson<double?>(asLeftDiff6),
+      'notes': serializer.toJson<String?>(notes),
+      'weightTestUnit': serializer.toJson<String?>(weightTestUnit),
+      'timestamp': serializer.toJson<DateTime>(timestamp),
+    };
+  }
+
+  WeightTest copyWith(
+          {int? id,
+          int? serviceReportId,
+          String? eccentricityType,
+          int? eccentricityPoints,
+          Value<String?> eccentricityDirections = const Value.absent(),
+          Value<double?> eccentricity1 = const Value.absent(),
+          Value<double?> eccentricity2 = const Value.absent(),
+          Value<double?> eccentricity3 = const Value.absent(),
+          Value<double?> eccentricity4 = const Value.absent(),
+          Value<double?> eccentricity5 = const Value.absent(),
+          Value<double?> eccentricity6 = const Value.absent(),
+          Value<double?> eccentricity7 = const Value.absent(),
+          Value<double?> eccentricity8 = const Value.absent(),
+          Value<double?> eccentricity9 = const Value.absent(),
+          Value<double?> eccentricity10 = const Value.absent(),
+          Value<String?> eccentricityError = const Value.absent(),
+          Value<double?> asFoundTest1 = const Value.absent(),
+          Value<double?> asFoundRead1 = const Value.absent(),
+          Value<double?> asFoundDiff1 = const Value.absent(),
+          Value<double?> asFoundTest2 = const Value.absent(),
+          Value<double?> asFoundRead2 = const Value.absent(),
+          Value<double?> asFoundDiff2 = const Value.absent(),
+          Value<double?> asFoundTest3 = const Value.absent(),
+          Value<double?> asFoundRead3 = const Value.absent(),
+          Value<double?> asFoundDiff3 = const Value.absent(),
+          Value<double?> asFoundTest4 = const Value.absent(),
+          Value<double?> asFoundRead4 = const Value.absent(),
+          Value<double?> asFoundDiff4 = const Value.absent(),
+          Value<double?> asFoundTest5 = const Value.absent(),
+          Value<double?> asFoundRead5 = const Value.absent(),
+          Value<double?> asFoundDiff5 = const Value.absent(),
+          Value<double?> asFoundTest6 = const Value.absent(),
+          Value<double?> asFoundRead6 = const Value.absent(),
+          Value<double?> asFoundDiff6 = const Value.absent(),
+          Value<double?> asLeftTest1 = const Value.absent(),
+          Value<double?> asLeftRead1 = const Value.absent(),
+          Value<double?> asLeftDiff1 = const Value.absent(),
+          Value<double?> asLeftTest2 = const Value.absent(),
+          Value<double?> asLeftRead2 = const Value.absent(),
+          Value<double?> asLeftDiff2 = const Value.absent(),
+          Value<double?> asLeftTest3 = const Value.absent(),
+          Value<double?> asLeftRead3 = const Value.absent(),
+          Value<double?> asLeftDiff3 = const Value.absent(),
+          Value<double?> asLeftTest4 = const Value.absent(),
+          Value<double?> asLeftRead4 = const Value.absent(),
+          Value<double?> asLeftDiff4 = const Value.absent(),
+          Value<double?> asLeftTest5 = const Value.absent(),
+          Value<double?> asLeftRead5 = const Value.absent(),
+          Value<double?> asLeftDiff5 = const Value.absent(),
+          Value<double?> asLeftTest6 = const Value.absent(),
+          Value<double?> asLeftRead6 = const Value.absent(),
+          Value<double?> asLeftDiff6 = const Value.absent(),
+          Value<String?> notes = const Value.absent(),
+          Value<String?> weightTestUnit = const Value.absent(),
+          DateTime? timestamp}) =>
+      WeightTest(
+        id: id ?? this.id,
+        serviceReportId: serviceReportId ?? this.serviceReportId,
+        eccentricityType: eccentricityType ?? this.eccentricityType,
+        eccentricityPoints: eccentricityPoints ?? this.eccentricityPoints,
+        eccentricityDirections: eccentricityDirections.present
+            ? eccentricityDirections.value
+            : this.eccentricityDirections,
+        eccentricity1:
+            eccentricity1.present ? eccentricity1.value : this.eccentricity1,
+        eccentricity2:
+            eccentricity2.present ? eccentricity2.value : this.eccentricity2,
+        eccentricity3:
+            eccentricity3.present ? eccentricity3.value : this.eccentricity3,
+        eccentricity4:
+            eccentricity4.present ? eccentricity4.value : this.eccentricity4,
+        eccentricity5:
+            eccentricity5.present ? eccentricity5.value : this.eccentricity5,
+        eccentricity6:
+            eccentricity6.present ? eccentricity6.value : this.eccentricity6,
+        eccentricity7:
+            eccentricity7.present ? eccentricity7.value : this.eccentricity7,
+        eccentricity8:
+            eccentricity8.present ? eccentricity8.value : this.eccentricity8,
+        eccentricity9:
+            eccentricity9.present ? eccentricity9.value : this.eccentricity9,
+        eccentricity10:
+            eccentricity10.present ? eccentricity10.value : this.eccentricity10,
+        eccentricityError: eccentricityError.present
+            ? eccentricityError.value
+            : this.eccentricityError,
+        asFoundTest1:
+            asFoundTest1.present ? asFoundTest1.value : this.asFoundTest1,
+        asFoundRead1:
+            asFoundRead1.present ? asFoundRead1.value : this.asFoundRead1,
+        asFoundDiff1:
+            asFoundDiff1.present ? asFoundDiff1.value : this.asFoundDiff1,
+        asFoundTest2:
+            asFoundTest2.present ? asFoundTest2.value : this.asFoundTest2,
+        asFoundRead2:
+            asFoundRead2.present ? asFoundRead2.value : this.asFoundRead2,
+        asFoundDiff2:
+            asFoundDiff2.present ? asFoundDiff2.value : this.asFoundDiff2,
+        asFoundTest3:
+            asFoundTest3.present ? asFoundTest3.value : this.asFoundTest3,
+        asFoundRead3:
+            asFoundRead3.present ? asFoundRead3.value : this.asFoundRead3,
+        asFoundDiff3:
+            asFoundDiff3.present ? asFoundDiff3.value : this.asFoundDiff3,
+        asFoundTest4:
+            asFoundTest4.present ? asFoundTest4.value : this.asFoundTest4,
+        asFoundRead4:
+            asFoundRead4.present ? asFoundRead4.value : this.asFoundRead4,
+        asFoundDiff4:
+            asFoundDiff4.present ? asFoundDiff4.value : this.asFoundDiff4,
+        asFoundTest5:
+            asFoundTest5.present ? asFoundTest5.value : this.asFoundTest5,
+        asFoundRead5:
+            asFoundRead5.present ? asFoundRead5.value : this.asFoundRead5,
+        asFoundDiff5:
+            asFoundDiff5.present ? asFoundDiff5.value : this.asFoundDiff5,
+        asFoundTest6:
+            asFoundTest6.present ? asFoundTest6.value : this.asFoundTest6,
+        asFoundRead6:
+            asFoundRead6.present ? asFoundRead6.value : this.asFoundRead6,
+        asFoundDiff6:
+            asFoundDiff6.present ? asFoundDiff6.value : this.asFoundDiff6,
+        asLeftTest1: asLeftTest1.present ? asLeftTest1.value : this.asLeftTest1,
+        asLeftRead1: asLeftRead1.present ? asLeftRead1.value : this.asLeftRead1,
+        asLeftDiff1: asLeftDiff1.present ? asLeftDiff1.value : this.asLeftDiff1,
+        asLeftTest2: asLeftTest2.present ? asLeftTest2.value : this.asLeftTest2,
+        asLeftRead2: asLeftRead2.present ? asLeftRead2.value : this.asLeftRead2,
+        asLeftDiff2: asLeftDiff2.present ? asLeftDiff2.value : this.asLeftDiff2,
+        asLeftTest3: asLeftTest3.present ? asLeftTest3.value : this.asLeftTest3,
+        asLeftRead3: asLeftRead3.present ? asLeftRead3.value : this.asLeftRead3,
+        asLeftDiff3: asLeftDiff3.present ? asLeftDiff3.value : this.asLeftDiff3,
+        asLeftTest4: asLeftTest4.present ? asLeftTest4.value : this.asLeftTest4,
+        asLeftRead4: asLeftRead4.present ? asLeftRead4.value : this.asLeftRead4,
+        asLeftDiff4: asLeftDiff4.present ? asLeftDiff4.value : this.asLeftDiff4,
+        asLeftTest5: asLeftTest5.present ? asLeftTest5.value : this.asLeftTest5,
+        asLeftRead5: asLeftRead5.present ? asLeftRead5.value : this.asLeftRead5,
+        asLeftDiff5: asLeftDiff5.present ? asLeftDiff5.value : this.asLeftDiff5,
+        asLeftTest6: asLeftTest6.present ? asLeftTest6.value : this.asLeftTest6,
+        asLeftRead6: asLeftRead6.present ? asLeftRead6.value : this.asLeftRead6,
+        asLeftDiff6: asLeftDiff6.present ? asLeftDiff6.value : this.asLeftDiff6,
+        notes: notes.present ? notes.value : this.notes,
+        weightTestUnit:
+            weightTestUnit.present ? weightTestUnit.value : this.weightTestUnit,
+        timestamp: timestamp ?? this.timestamp,
+      );
+  WeightTest copyWithCompanion(WeightTestsCompanion data) {
+    return WeightTest(
+      id: data.id.present ? data.id.value : this.id,
+      serviceReportId: data.serviceReportId.present
+          ? data.serviceReportId.value
+          : this.serviceReportId,
+      eccentricityType: data.eccentricityType.present
+          ? data.eccentricityType.value
+          : this.eccentricityType,
+      eccentricityPoints: data.eccentricityPoints.present
+          ? data.eccentricityPoints.value
+          : this.eccentricityPoints,
+      eccentricityDirections: data.eccentricityDirections.present
+          ? data.eccentricityDirections.value
+          : this.eccentricityDirections,
+      eccentricity1: data.eccentricity1.present
+          ? data.eccentricity1.value
+          : this.eccentricity1,
+      eccentricity2: data.eccentricity2.present
+          ? data.eccentricity2.value
+          : this.eccentricity2,
+      eccentricity3: data.eccentricity3.present
+          ? data.eccentricity3.value
+          : this.eccentricity3,
+      eccentricity4: data.eccentricity4.present
+          ? data.eccentricity4.value
+          : this.eccentricity4,
+      eccentricity5: data.eccentricity5.present
+          ? data.eccentricity5.value
+          : this.eccentricity5,
+      eccentricity6: data.eccentricity6.present
+          ? data.eccentricity6.value
+          : this.eccentricity6,
+      eccentricity7: data.eccentricity7.present
+          ? data.eccentricity7.value
+          : this.eccentricity7,
+      eccentricity8: data.eccentricity8.present
+          ? data.eccentricity8.value
+          : this.eccentricity8,
+      eccentricity9: data.eccentricity9.present
+          ? data.eccentricity9.value
+          : this.eccentricity9,
+      eccentricity10: data.eccentricity10.present
+          ? data.eccentricity10.value
+          : this.eccentricity10,
+      eccentricityError: data.eccentricityError.present
+          ? data.eccentricityError.value
+          : this.eccentricityError,
+      asFoundTest1: data.asFoundTest1.present
+          ? data.asFoundTest1.value
+          : this.asFoundTest1,
+      asFoundRead1: data.asFoundRead1.present
+          ? data.asFoundRead1.value
+          : this.asFoundRead1,
+      asFoundDiff1: data.asFoundDiff1.present
+          ? data.asFoundDiff1.value
+          : this.asFoundDiff1,
+      asFoundTest2: data.asFoundTest2.present
+          ? data.asFoundTest2.value
+          : this.asFoundTest2,
+      asFoundRead2: data.asFoundRead2.present
+          ? data.asFoundRead2.value
+          : this.asFoundRead2,
+      asFoundDiff2: data.asFoundDiff2.present
+          ? data.asFoundDiff2.value
+          : this.asFoundDiff2,
+      asFoundTest3: data.asFoundTest3.present
+          ? data.asFoundTest3.value
+          : this.asFoundTest3,
+      asFoundRead3: data.asFoundRead3.present
+          ? data.asFoundRead3.value
+          : this.asFoundRead3,
+      asFoundDiff3: data.asFoundDiff3.present
+          ? data.asFoundDiff3.value
+          : this.asFoundDiff3,
+      asFoundTest4: data.asFoundTest4.present
+          ? data.asFoundTest4.value
+          : this.asFoundTest4,
+      asFoundRead4: data.asFoundRead4.present
+          ? data.asFoundRead4.value
+          : this.asFoundRead4,
+      asFoundDiff4: data.asFoundDiff4.present
+          ? data.asFoundDiff4.value
+          : this.asFoundDiff4,
+      asFoundTest5: data.asFoundTest5.present
+          ? data.asFoundTest5.value
+          : this.asFoundTest5,
+      asFoundRead5: data.asFoundRead5.present
+          ? data.asFoundRead5.value
+          : this.asFoundRead5,
+      asFoundDiff5: data.asFoundDiff5.present
+          ? data.asFoundDiff5.value
+          : this.asFoundDiff5,
+      asFoundTest6: data.asFoundTest6.present
+          ? data.asFoundTest6.value
+          : this.asFoundTest6,
+      asFoundRead6: data.asFoundRead6.present
+          ? data.asFoundRead6.value
+          : this.asFoundRead6,
+      asFoundDiff6: data.asFoundDiff6.present
+          ? data.asFoundDiff6.value
+          : this.asFoundDiff6,
+      asLeftTest1:
+          data.asLeftTest1.present ? data.asLeftTest1.value : this.asLeftTest1,
+      asLeftRead1:
+          data.asLeftRead1.present ? data.asLeftRead1.value : this.asLeftRead1,
+      asLeftDiff1:
+          data.asLeftDiff1.present ? data.asLeftDiff1.value : this.asLeftDiff1,
+      asLeftTest2:
+          data.asLeftTest2.present ? data.asLeftTest2.value : this.asLeftTest2,
+      asLeftRead2:
+          data.asLeftRead2.present ? data.asLeftRead2.value : this.asLeftRead2,
+      asLeftDiff2:
+          data.asLeftDiff2.present ? data.asLeftDiff2.value : this.asLeftDiff2,
+      asLeftTest3:
+          data.asLeftTest3.present ? data.asLeftTest3.value : this.asLeftTest3,
+      asLeftRead3:
+          data.asLeftRead3.present ? data.asLeftRead3.value : this.asLeftRead3,
+      asLeftDiff3:
+          data.asLeftDiff3.present ? data.asLeftDiff3.value : this.asLeftDiff3,
+      asLeftTest4:
+          data.asLeftTest4.present ? data.asLeftTest4.value : this.asLeftTest4,
+      asLeftRead4:
+          data.asLeftRead4.present ? data.asLeftRead4.value : this.asLeftRead4,
+      asLeftDiff4:
+          data.asLeftDiff4.present ? data.asLeftDiff4.value : this.asLeftDiff4,
+      asLeftTest5:
+          data.asLeftTest5.present ? data.asLeftTest5.value : this.asLeftTest5,
+      asLeftRead5:
+          data.asLeftRead5.present ? data.asLeftRead5.value : this.asLeftRead5,
+      asLeftDiff5:
+          data.asLeftDiff5.present ? data.asLeftDiff5.value : this.asLeftDiff5,
+      asLeftTest6:
+          data.asLeftTest6.present ? data.asLeftTest6.value : this.asLeftTest6,
+      asLeftRead6:
+          data.asLeftRead6.present ? data.asLeftRead6.value : this.asLeftRead6,
+      asLeftDiff6:
+          data.asLeftDiff6.present ? data.asLeftDiff6.value : this.asLeftDiff6,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      weightTestUnit: data.weightTestUnit.present
+          ? data.weightTestUnit.value
+          : this.weightTestUnit,
+      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('WeightTest(')
+          ..write('id: $id, ')
+          ..write('serviceReportId: $serviceReportId, ')
+          ..write('eccentricityType: $eccentricityType, ')
+          ..write('eccentricityPoints: $eccentricityPoints, ')
+          ..write('eccentricityDirections: $eccentricityDirections, ')
+          ..write('eccentricity1: $eccentricity1, ')
+          ..write('eccentricity2: $eccentricity2, ')
+          ..write('eccentricity3: $eccentricity3, ')
+          ..write('eccentricity4: $eccentricity4, ')
+          ..write('eccentricity5: $eccentricity5, ')
+          ..write('eccentricity6: $eccentricity6, ')
+          ..write('eccentricity7: $eccentricity7, ')
+          ..write('eccentricity8: $eccentricity8, ')
+          ..write('eccentricity9: $eccentricity9, ')
+          ..write('eccentricity10: $eccentricity10, ')
+          ..write('eccentricityError: $eccentricityError, ')
+          ..write('asFoundTest1: $asFoundTest1, ')
+          ..write('asFoundRead1: $asFoundRead1, ')
+          ..write('asFoundDiff1: $asFoundDiff1, ')
+          ..write('asFoundTest2: $asFoundTest2, ')
+          ..write('asFoundRead2: $asFoundRead2, ')
+          ..write('asFoundDiff2: $asFoundDiff2, ')
+          ..write('asFoundTest3: $asFoundTest3, ')
+          ..write('asFoundRead3: $asFoundRead3, ')
+          ..write('asFoundDiff3: $asFoundDiff3, ')
+          ..write('asFoundTest4: $asFoundTest4, ')
+          ..write('asFoundRead4: $asFoundRead4, ')
+          ..write('asFoundDiff4: $asFoundDiff4, ')
+          ..write('asFoundTest5: $asFoundTest5, ')
+          ..write('asFoundRead5: $asFoundRead5, ')
+          ..write('asFoundDiff5: $asFoundDiff5, ')
+          ..write('asFoundTest6: $asFoundTest6, ')
+          ..write('asFoundRead6: $asFoundRead6, ')
+          ..write('asFoundDiff6: $asFoundDiff6, ')
+          ..write('asLeftTest1: $asLeftTest1, ')
+          ..write('asLeftRead1: $asLeftRead1, ')
+          ..write('asLeftDiff1: $asLeftDiff1, ')
+          ..write('asLeftTest2: $asLeftTest2, ')
+          ..write('asLeftRead2: $asLeftRead2, ')
+          ..write('asLeftDiff2: $asLeftDiff2, ')
+          ..write('asLeftTest3: $asLeftTest3, ')
+          ..write('asLeftRead3: $asLeftRead3, ')
+          ..write('asLeftDiff3: $asLeftDiff3, ')
+          ..write('asLeftTest4: $asLeftTest4, ')
+          ..write('asLeftRead4: $asLeftRead4, ')
+          ..write('asLeftDiff4: $asLeftDiff4, ')
+          ..write('asLeftTest5: $asLeftTest5, ')
+          ..write('asLeftRead5: $asLeftRead5, ')
+          ..write('asLeftDiff5: $asLeftDiff5, ')
+          ..write('asLeftTest6: $asLeftTest6, ')
+          ..write('asLeftRead6: $asLeftRead6, ')
+          ..write('asLeftDiff6: $asLeftDiff6, ')
+          ..write('notes: $notes, ')
+          ..write('weightTestUnit: $weightTestUnit, ')
+          ..write('timestamp: $timestamp')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hashAll([
+        id,
+        serviceReportId,
+        eccentricityType,
+        eccentricityPoints,
+        eccentricityDirections,
+        eccentricity1,
+        eccentricity2,
+        eccentricity3,
+        eccentricity4,
+        eccentricity5,
+        eccentricity6,
+        eccentricity7,
+        eccentricity8,
+        eccentricity9,
+        eccentricity10,
+        eccentricityError,
+        asFoundTest1,
+        asFoundRead1,
+        asFoundDiff1,
+        asFoundTest2,
+        asFoundRead2,
+        asFoundDiff2,
+        asFoundTest3,
+        asFoundRead3,
+        asFoundDiff3,
+        asFoundTest4,
+        asFoundRead4,
+        asFoundDiff4,
+        asFoundTest5,
+        asFoundRead5,
+        asFoundDiff5,
+        asFoundTest6,
+        asFoundRead6,
+        asFoundDiff6,
+        asLeftTest1,
+        asLeftRead1,
+        asLeftDiff1,
+        asLeftTest2,
+        asLeftRead2,
+        asLeftDiff2,
+        asLeftTest3,
+        asLeftRead3,
+        asLeftDiff3,
+        asLeftTest4,
+        asLeftRead4,
+        asLeftDiff4,
+        asLeftTest5,
+        asLeftRead5,
+        asLeftDiff5,
+        asLeftTest6,
+        asLeftRead6,
+        asLeftDiff6,
+        notes,
+        weightTestUnit,
+        timestamp
+      ]);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is WeightTest &&
+          other.id == this.id &&
+          other.serviceReportId == this.serviceReportId &&
+          other.eccentricityType == this.eccentricityType &&
+          other.eccentricityPoints == this.eccentricityPoints &&
+          other.eccentricityDirections == this.eccentricityDirections &&
+          other.eccentricity1 == this.eccentricity1 &&
+          other.eccentricity2 == this.eccentricity2 &&
+          other.eccentricity3 == this.eccentricity3 &&
+          other.eccentricity4 == this.eccentricity4 &&
+          other.eccentricity5 == this.eccentricity5 &&
+          other.eccentricity6 == this.eccentricity6 &&
+          other.eccentricity7 == this.eccentricity7 &&
+          other.eccentricity8 == this.eccentricity8 &&
+          other.eccentricity9 == this.eccentricity9 &&
+          other.eccentricity10 == this.eccentricity10 &&
+          other.eccentricityError == this.eccentricityError &&
+          other.asFoundTest1 == this.asFoundTest1 &&
+          other.asFoundRead1 == this.asFoundRead1 &&
+          other.asFoundDiff1 == this.asFoundDiff1 &&
+          other.asFoundTest2 == this.asFoundTest2 &&
+          other.asFoundRead2 == this.asFoundRead2 &&
+          other.asFoundDiff2 == this.asFoundDiff2 &&
+          other.asFoundTest3 == this.asFoundTest3 &&
+          other.asFoundRead3 == this.asFoundRead3 &&
+          other.asFoundDiff3 == this.asFoundDiff3 &&
+          other.asFoundTest4 == this.asFoundTest4 &&
+          other.asFoundRead4 == this.asFoundRead4 &&
+          other.asFoundDiff4 == this.asFoundDiff4 &&
+          other.asFoundTest5 == this.asFoundTest5 &&
+          other.asFoundRead5 == this.asFoundRead5 &&
+          other.asFoundDiff5 == this.asFoundDiff5 &&
+          other.asFoundTest6 == this.asFoundTest6 &&
+          other.asFoundRead6 == this.asFoundRead6 &&
+          other.asFoundDiff6 == this.asFoundDiff6 &&
+          other.asLeftTest1 == this.asLeftTest1 &&
+          other.asLeftRead1 == this.asLeftRead1 &&
+          other.asLeftDiff1 == this.asLeftDiff1 &&
+          other.asLeftTest2 == this.asLeftTest2 &&
+          other.asLeftRead2 == this.asLeftRead2 &&
+          other.asLeftDiff2 == this.asLeftDiff2 &&
+          other.asLeftTest3 == this.asLeftTest3 &&
+          other.asLeftRead3 == this.asLeftRead3 &&
+          other.asLeftDiff3 == this.asLeftDiff3 &&
+          other.asLeftTest4 == this.asLeftTest4 &&
+          other.asLeftRead4 == this.asLeftRead4 &&
+          other.asLeftDiff4 == this.asLeftDiff4 &&
+          other.asLeftTest5 == this.asLeftTest5 &&
+          other.asLeftRead5 == this.asLeftRead5 &&
+          other.asLeftDiff5 == this.asLeftDiff5 &&
+          other.asLeftTest6 == this.asLeftTest6 &&
+          other.asLeftRead6 == this.asLeftRead6 &&
+          other.asLeftDiff6 == this.asLeftDiff6 &&
+          other.notes == this.notes &&
+          other.weightTestUnit == this.weightTestUnit &&
+          other.timestamp == this.timestamp);
+}
+
+class WeightTestsCompanion extends UpdateCompanion<WeightTest> {
+  final Value<int> id;
+  final Value<int> serviceReportId;
+  final Value<String> eccentricityType;
+  final Value<int> eccentricityPoints;
+  final Value<String?> eccentricityDirections;
+  final Value<double?> eccentricity1;
+  final Value<double?> eccentricity2;
+  final Value<double?> eccentricity3;
+  final Value<double?> eccentricity4;
+  final Value<double?> eccentricity5;
+  final Value<double?> eccentricity6;
+  final Value<double?> eccentricity7;
+  final Value<double?> eccentricity8;
+  final Value<double?> eccentricity9;
+  final Value<double?> eccentricity10;
+  final Value<String?> eccentricityError;
+  final Value<double?> asFoundTest1;
+  final Value<double?> asFoundRead1;
+  final Value<double?> asFoundDiff1;
+  final Value<double?> asFoundTest2;
+  final Value<double?> asFoundRead2;
+  final Value<double?> asFoundDiff2;
+  final Value<double?> asFoundTest3;
+  final Value<double?> asFoundRead3;
+  final Value<double?> asFoundDiff3;
+  final Value<double?> asFoundTest4;
+  final Value<double?> asFoundRead4;
+  final Value<double?> asFoundDiff4;
+  final Value<double?> asFoundTest5;
+  final Value<double?> asFoundRead5;
+  final Value<double?> asFoundDiff5;
+  final Value<double?> asFoundTest6;
+  final Value<double?> asFoundRead6;
+  final Value<double?> asFoundDiff6;
+  final Value<double?> asLeftTest1;
+  final Value<double?> asLeftRead1;
+  final Value<double?> asLeftDiff1;
+  final Value<double?> asLeftTest2;
+  final Value<double?> asLeftRead2;
+  final Value<double?> asLeftDiff2;
+  final Value<double?> asLeftTest3;
+  final Value<double?> asLeftRead3;
+  final Value<double?> asLeftDiff3;
+  final Value<double?> asLeftTest4;
+  final Value<double?> asLeftRead4;
+  final Value<double?> asLeftDiff4;
+  final Value<double?> asLeftTest5;
+  final Value<double?> asLeftRead5;
+  final Value<double?> asLeftDiff5;
+  final Value<double?> asLeftTest6;
+  final Value<double?> asLeftRead6;
+  final Value<double?> asLeftDiff6;
+  final Value<String?> notes;
+  final Value<String?> weightTestUnit;
+  final Value<DateTime> timestamp;
+  const WeightTestsCompanion({
+    this.id = const Value.absent(),
+    this.serviceReportId = const Value.absent(),
+    this.eccentricityType = const Value.absent(),
+    this.eccentricityPoints = const Value.absent(),
+    this.eccentricityDirections = const Value.absent(),
+    this.eccentricity1 = const Value.absent(),
+    this.eccentricity2 = const Value.absent(),
+    this.eccentricity3 = const Value.absent(),
+    this.eccentricity4 = const Value.absent(),
+    this.eccentricity5 = const Value.absent(),
+    this.eccentricity6 = const Value.absent(),
+    this.eccentricity7 = const Value.absent(),
+    this.eccentricity8 = const Value.absent(),
+    this.eccentricity9 = const Value.absent(),
+    this.eccentricity10 = const Value.absent(),
+    this.eccentricityError = const Value.absent(),
+    this.asFoundTest1 = const Value.absent(),
+    this.asFoundRead1 = const Value.absent(),
+    this.asFoundDiff1 = const Value.absent(),
+    this.asFoundTest2 = const Value.absent(),
+    this.asFoundRead2 = const Value.absent(),
+    this.asFoundDiff2 = const Value.absent(),
+    this.asFoundTest3 = const Value.absent(),
+    this.asFoundRead3 = const Value.absent(),
+    this.asFoundDiff3 = const Value.absent(),
+    this.asFoundTest4 = const Value.absent(),
+    this.asFoundRead4 = const Value.absent(),
+    this.asFoundDiff4 = const Value.absent(),
+    this.asFoundTest5 = const Value.absent(),
+    this.asFoundRead5 = const Value.absent(),
+    this.asFoundDiff5 = const Value.absent(),
+    this.asFoundTest6 = const Value.absent(),
+    this.asFoundRead6 = const Value.absent(),
+    this.asFoundDiff6 = const Value.absent(),
+    this.asLeftTest1 = const Value.absent(),
+    this.asLeftRead1 = const Value.absent(),
+    this.asLeftDiff1 = const Value.absent(),
+    this.asLeftTest2 = const Value.absent(),
+    this.asLeftRead2 = const Value.absent(),
+    this.asLeftDiff2 = const Value.absent(),
+    this.asLeftTest3 = const Value.absent(),
+    this.asLeftRead3 = const Value.absent(),
+    this.asLeftDiff3 = const Value.absent(),
+    this.asLeftTest4 = const Value.absent(),
+    this.asLeftRead4 = const Value.absent(),
+    this.asLeftDiff4 = const Value.absent(),
+    this.asLeftTest5 = const Value.absent(),
+    this.asLeftRead5 = const Value.absent(),
+    this.asLeftDiff5 = const Value.absent(),
+    this.asLeftTest6 = const Value.absent(),
+    this.asLeftRead6 = const Value.absent(),
+    this.asLeftDiff6 = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.weightTestUnit = const Value.absent(),
+    this.timestamp = const Value.absent(),
+  });
+  WeightTestsCompanion.insert({
+    this.id = const Value.absent(),
+    required int serviceReportId,
+    required String eccentricityType,
+    this.eccentricityPoints = const Value.absent(),
+    this.eccentricityDirections = const Value.absent(),
+    this.eccentricity1 = const Value.absent(),
+    this.eccentricity2 = const Value.absent(),
+    this.eccentricity3 = const Value.absent(),
+    this.eccentricity4 = const Value.absent(),
+    this.eccentricity5 = const Value.absent(),
+    this.eccentricity6 = const Value.absent(),
+    this.eccentricity7 = const Value.absent(),
+    this.eccentricity8 = const Value.absent(),
+    this.eccentricity9 = const Value.absent(),
+    this.eccentricity10 = const Value.absent(),
+    this.eccentricityError = const Value.absent(),
+    this.asFoundTest1 = const Value.absent(),
+    this.asFoundRead1 = const Value.absent(),
+    this.asFoundDiff1 = const Value.absent(),
+    this.asFoundTest2 = const Value.absent(),
+    this.asFoundRead2 = const Value.absent(),
+    this.asFoundDiff2 = const Value.absent(),
+    this.asFoundTest3 = const Value.absent(),
+    this.asFoundRead3 = const Value.absent(),
+    this.asFoundDiff3 = const Value.absent(),
+    this.asFoundTest4 = const Value.absent(),
+    this.asFoundRead4 = const Value.absent(),
+    this.asFoundDiff4 = const Value.absent(),
+    this.asFoundTest5 = const Value.absent(),
+    this.asFoundRead5 = const Value.absent(),
+    this.asFoundDiff5 = const Value.absent(),
+    this.asFoundTest6 = const Value.absent(),
+    this.asFoundRead6 = const Value.absent(),
+    this.asFoundDiff6 = const Value.absent(),
+    this.asLeftTest1 = const Value.absent(),
+    this.asLeftRead1 = const Value.absent(),
+    this.asLeftDiff1 = const Value.absent(),
+    this.asLeftTest2 = const Value.absent(),
+    this.asLeftRead2 = const Value.absent(),
+    this.asLeftDiff2 = const Value.absent(),
+    this.asLeftTest3 = const Value.absent(),
+    this.asLeftRead3 = const Value.absent(),
+    this.asLeftDiff3 = const Value.absent(),
+    this.asLeftTest4 = const Value.absent(),
+    this.asLeftRead4 = const Value.absent(),
+    this.asLeftDiff4 = const Value.absent(),
+    this.asLeftTest5 = const Value.absent(),
+    this.asLeftRead5 = const Value.absent(),
+    this.asLeftDiff5 = const Value.absent(),
+    this.asLeftTest6 = const Value.absent(),
+    this.asLeftRead6 = const Value.absent(),
+    this.asLeftDiff6 = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.weightTestUnit = const Value.absent(),
+    this.timestamp = const Value.absent(),
+  })  : serviceReportId = Value(serviceReportId),
+        eccentricityType = Value(eccentricityType);
+  static Insertable<WeightTest> custom({
+    Expression<int>? id,
+    Expression<int>? serviceReportId,
+    Expression<String>? eccentricityType,
+    Expression<int>? eccentricityPoints,
+    Expression<String>? eccentricityDirections,
+    Expression<double>? eccentricity1,
+    Expression<double>? eccentricity2,
+    Expression<double>? eccentricity3,
+    Expression<double>? eccentricity4,
+    Expression<double>? eccentricity5,
+    Expression<double>? eccentricity6,
+    Expression<double>? eccentricity7,
+    Expression<double>? eccentricity8,
+    Expression<double>? eccentricity9,
+    Expression<double>? eccentricity10,
+    Expression<String>? eccentricityError,
+    Expression<double>? asFoundTest1,
+    Expression<double>? asFoundRead1,
+    Expression<double>? asFoundDiff1,
+    Expression<double>? asFoundTest2,
+    Expression<double>? asFoundRead2,
+    Expression<double>? asFoundDiff2,
+    Expression<double>? asFoundTest3,
+    Expression<double>? asFoundRead3,
+    Expression<double>? asFoundDiff3,
+    Expression<double>? asFoundTest4,
+    Expression<double>? asFoundRead4,
+    Expression<double>? asFoundDiff4,
+    Expression<double>? asFoundTest5,
+    Expression<double>? asFoundRead5,
+    Expression<double>? asFoundDiff5,
+    Expression<double>? asFoundTest6,
+    Expression<double>? asFoundRead6,
+    Expression<double>? asFoundDiff6,
+    Expression<double>? asLeftTest1,
+    Expression<double>? asLeftRead1,
+    Expression<double>? asLeftDiff1,
+    Expression<double>? asLeftTest2,
+    Expression<double>? asLeftRead2,
+    Expression<double>? asLeftDiff2,
+    Expression<double>? asLeftTest3,
+    Expression<double>? asLeftRead3,
+    Expression<double>? asLeftDiff3,
+    Expression<double>? asLeftTest4,
+    Expression<double>? asLeftRead4,
+    Expression<double>? asLeftDiff4,
+    Expression<double>? asLeftTest5,
+    Expression<double>? asLeftRead5,
+    Expression<double>? asLeftDiff5,
+    Expression<double>? asLeftTest6,
+    Expression<double>? asLeftRead6,
+    Expression<double>? asLeftDiff6,
+    Expression<String>? notes,
+    Expression<String>? weightTestUnit,
+    Expression<DateTime>? timestamp,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (serviceReportId != null) 'service_report_id': serviceReportId,
+      if (eccentricityType != null) 'eccentricity_type': eccentricityType,
+      if (eccentricityPoints != null) 'eccentricity_points': eccentricityPoints,
+      if (eccentricityDirections != null)
+        'eccentricity_directions': eccentricityDirections,
+      if (eccentricity1 != null) 'eccentricity1': eccentricity1,
+      if (eccentricity2 != null) 'eccentricity2': eccentricity2,
+      if (eccentricity3 != null) 'eccentricity3': eccentricity3,
+      if (eccentricity4 != null) 'eccentricity4': eccentricity4,
+      if (eccentricity5 != null) 'eccentricity5': eccentricity5,
+      if (eccentricity6 != null) 'eccentricity6': eccentricity6,
+      if (eccentricity7 != null) 'eccentricity7': eccentricity7,
+      if (eccentricity8 != null) 'eccentricity8': eccentricity8,
+      if (eccentricity9 != null) 'eccentricity9': eccentricity9,
+      if (eccentricity10 != null) 'eccentricity10': eccentricity10,
+      if (eccentricityError != null) 'eccentricity_error': eccentricityError,
+      if (asFoundTest1 != null) 'as_found_test1': asFoundTest1,
+      if (asFoundRead1 != null) 'as_found_read1': asFoundRead1,
+      if (asFoundDiff1 != null) 'as_found_diff1': asFoundDiff1,
+      if (asFoundTest2 != null) 'as_found_test2': asFoundTest2,
+      if (asFoundRead2 != null) 'as_found_read2': asFoundRead2,
+      if (asFoundDiff2 != null) 'as_found_diff2': asFoundDiff2,
+      if (asFoundTest3 != null) 'as_found_test3': asFoundTest3,
+      if (asFoundRead3 != null) 'as_found_read3': asFoundRead3,
+      if (asFoundDiff3 != null) 'as_found_diff3': asFoundDiff3,
+      if (asFoundTest4 != null) 'as_found_test4': asFoundTest4,
+      if (asFoundRead4 != null) 'as_found_read4': asFoundRead4,
+      if (asFoundDiff4 != null) 'as_found_diff4': asFoundDiff4,
+      if (asFoundTest5 != null) 'as_found_test5': asFoundTest5,
+      if (asFoundRead5 != null) 'as_found_read5': asFoundRead5,
+      if (asFoundDiff5 != null) 'as_found_diff5': asFoundDiff5,
+      if (asFoundTest6 != null) 'as_found_test6': asFoundTest6,
+      if (asFoundRead6 != null) 'as_found_read6': asFoundRead6,
+      if (asFoundDiff6 != null) 'as_found_diff6': asFoundDiff6,
+      if (asLeftTest1 != null) 'as_left_test1': asLeftTest1,
+      if (asLeftRead1 != null) 'as_left_read1': asLeftRead1,
+      if (asLeftDiff1 != null) 'as_left_diff1': asLeftDiff1,
+      if (asLeftTest2 != null) 'as_left_test2': asLeftTest2,
+      if (asLeftRead2 != null) 'as_left_read2': asLeftRead2,
+      if (asLeftDiff2 != null) 'as_left_diff2': asLeftDiff2,
+      if (asLeftTest3 != null) 'as_left_test3': asLeftTest3,
+      if (asLeftRead3 != null) 'as_left_read3': asLeftRead3,
+      if (asLeftDiff3 != null) 'as_left_diff3': asLeftDiff3,
+      if (asLeftTest4 != null) 'as_left_test4': asLeftTest4,
+      if (asLeftRead4 != null) 'as_left_read4': asLeftRead4,
+      if (asLeftDiff4 != null) 'as_left_diff4': asLeftDiff4,
+      if (asLeftTest5 != null) 'as_left_test5': asLeftTest5,
+      if (asLeftRead5 != null) 'as_left_read5': asLeftRead5,
+      if (asLeftDiff5 != null) 'as_left_diff5': asLeftDiff5,
+      if (asLeftTest6 != null) 'as_left_test6': asLeftTest6,
+      if (asLeftRead6 != null) 'as_left_read6': asLeftRead6,
+      if (asLeftDiff6 != null) 'as_left_diff6': asLeftDiff6,
+      if (notes != null) 'notes': notes,
+      if (weightTestUnit != null) 'weight_test_unit': weightTestUnit,
+      if (timestamp != null) 'timestamp': timestamp,
+    });
+  }
+
+  WeightTestsCompanion copyWith(
+      {Value<int>? id,
+      Value<int>? serviceReportId,
+      Value<String>? eccentricityType,
+      Value<int>? eccentricityPoints,
+      Value<String?>? eccentricityDirections,
+      Value<double?>? eccentricity1,
+      Value<double?>? eccentricity2,
+      Value<double?>? eccentricity3,
+      Value<double?>? eccentricity4,
+      Value<double?>? eccentricity5,
+      Value<double?>? eccentricity6,
+      Value<double?>? eccentricity7,
+      Value<double?>? eccentricity8,
+      Value<double?>? eccentricity9,
+      Value<double?>? eccentricity10,
+      Value<String?>? eccentricityError,
+      Value<double?>? asFoundTest1,
+      Value<double?>? asFoundRead1,
+      Value<double?>? asFoundDiff1,
+      Value<double?>? asFoundTest2,
+      Value<double?>? asFoundRead2,
+      Value<double?>? asFoundDiff2,
+      Value<double?>? asFoundTest3,
+      Value<double?>? asFoundRead3,
+      Value<double?>? asFoundDiff3,
+      Value<double?>? asFoundTest4,
+      Value<double?>? asFoundRead4,
+      Value<double?>? asFoundDiff4,
+      Value<double?>? asFoundTest5,
+      Value<double?>? asFoundRead5,
+      Value<double?>? asFoundDiff5,
+      Value<double?>? asFoundTest6,
+      Value<double?>? asFoundRead6,
+      Value<double?>? asFoundDiff6,
+      Value<double?>? asLeftTest1,
+      Value<double?>? asLeftRead1,
+      Value<double?>? asLeftDiff1,
+      Value<double?>? asLeftTest2,
+      Value<double?>? asLeftRead2,
+      Value<double?>? asLeftDiff2,
+      Value<double?>? asLeftTest3,
+      Value<double?>? asLeftRead3,
+      Value<double?>? asLeftDiff3,
+      Value<double?>? asLeftTest4,
+      Value<double?>? asLeftRead4,
+      Value<double?>? asLeftDiff4,
+      Value<double?>? asLeftTest5,
+      Value<double?>? asLeftRead5,
+      Value<double?>? asLeftDiff5,
+      Value<double?>? asLeftTest6,
+      Value<double?>? asLeftRead6,
+      Value<double?>? asLeftDiff6,
+      Value<String?>? notes,
+      Value<String?>? weightTestUnit,
+      Value<DateTime>? timestamp}) {
+    return WeightTestsCompanion(
+      id: id ?? this.id,
+      serviceReportId: serviceReportId ?? this.serviceReportId,
+      eccentricityType: eccentricityType ?? this.eccentricityType,
+      eccentricityPoints: eccentricityPoints ?? this.eccentricityPoints,
+      eccentricityDirections:
+          eccentricityDirections ?? this.eccentricityDirections,
+      eccentricity1: eccentricity1 ?? this.eccentricity1,
+      eccentricity2: eccentricity2 ?? this.eccentricity2,
+      eccentricity3: eccentricity3 ?? this.eccentricity3,
+      eccentricity4: eccentricity4 ?? this.eccentricity4,
+      eccentricity5: eccentricity5 ?? this.eccentricity5,
+      eccentricity6: eccentricity6 ?? this.eccentricity6,
+      eccentricity7: eccentricity7 ?? this.eccentricity7,
+      eccentricity8: eccentricity8 ?? this.eccentricity8,
+      eccentricity9: eccentricity9 ?? this.eccentricity9,
+      eccentricity10: eccentricity10 ?? this.eccentricity10,
+      eccentricityError: eccentricityError ?? this.eccentricityError,
+      asFoundTest1: asFoundTest1 ?? this.asFoundTest1,
+      asFoundRead1: asFoundRead1 ?? this.asFoundRead1,
+      asFoundDiff1: asFoundDiff1 ?? this.asFoundDiff1,
+      asFoundTest2: asFoundTest2 ?? this.asFoundTest2,
+      asFoundRead2: asFoundRead2 ?? this.asFoundRead2,
+      asFoundDiff2: asFoundDiff2 ?? this.asFoundDiff2,
+      asFoundTest3: asFoundTest3 ?? this.asFoundTest3,
+      asFoundRead3: asFoundRead3 ?? this.asFoundRead3,
+      asFoundDiff3: asFoundDiff3 ?? this.asFoundDiff3,
+      asFoundTest4: asFoundTest4 ?? this.asFoundTest4,
+      asFoundRead4: asFoundRead4 ?? this.asFoundRead4,
+      asFoundDiff4: asFoundDiff4 ?? this.asFoundDiff4,
+      asFoundTest5: asFoundTest5 ?? this.asFoundTest5,
+      asFoundRead5: asFoundRead5 ?? this.asFoundRead5,
+      asFoundDiff5: asFoundDiff5 ?? this.asFoundDiff5,
+      asFoundTest6: asFoundTest6 ?? this.asFoundTest6,
+      asFoundRead6: asFoundRead6 ?? this.asFoundRead6,
+      asFoundDiff6: asFoundDiff6 ?? this.asFoundDiff6,
+      asLeftTest1: asLeftTest1 ?? this.asLeftTest1,
+      asLeftRead1: asLeftRead1 ?? this.asLeftRead1,
+      asLeftDiff1: asLeftDiff1 ?? this.asLeftDiff1,
+      asLeftTest2: asLeftTest2 ?? this.asLeftTest2,
+      asLeftRead2: asLeftRead2 ?? this.asLeftRead2,
+      asLeftDiff2: asLeftDiff2 ?? this.asLeftDiff2,
+      asLeftTest3: asLeftTest3 ?? this.asLeftTest3,
+      asLeftRead3: asLeftRead3 ?? this.asLeftRead3,
+      asLeftDiff3: asLeftDiff3 ?? this.asLeftDiff3,
+      asLeftTest4: asLeftTest4 ?? this.asLeftTest4,
+      asLeftRead4: asLeftRead4 ?? this.asLeftRead4,
+      asLeftDiff4: asLeftDiff4 ?? this.asLeftDiff4,
+      asLeftTest5: asLeftTest5 ?? this.asLeftTest5,
+      asLeftRead5: asLeftRead5 ?? this.asLeftRead5,
+      asLeftDiff5: asLeftDiff5 ?? this.asLeftDiff5,
+      asLeftTest6: asLeftTest6 ?? this.asLeftTest6,
+      asLeftRead6: asLeftRead6 ?? this.asLeftRead6,
+      asLeftDiff6: asLeftDiff6 ?? this.asLeftDiff6,
+      notes: notes ?? this.notes,
+      weightTestUnit: weightTestUnit ?? this.weightTestUnit,
+      timestamp: timestamp ?? this.timestamp,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (serviceReportId.present) {
+      map['service_report_id'] = Variable<int>(serviceReportId.value);
+    }
+    if (eccentricityType.present) {
+      map['eccentricity_type'] = Variable<String>(eccentricityType.value);
+    }
+    if (eccentricityPoints.present) {
+      map['eccentricity_points'] = Variable<int>(eccentricityPoints.value);
+    }
+    if (eccentricityDirections.present) {
+      map['eccentricity_directions'] =
+          Variable<String>(eccentricityDirections.value);
+    }
+    if (eccentricity1.present) {
+      map['eccentricity1'] = Variable<double>(eccentricity1.value);
+    }
+    if (eccentricity2.present) {
+      map['eccentricity2'] = Variable<double>(eccentricity2.value);
+    }
+    if (eccentricity3.present) {
+      map['eccentricity3'] = Variable<double>(eccentricity3.value);
+    }
+    if (eccentricity4.present) {
+      map['eccentricity4'] = Variable<double>(eccentricity4.value);
+    }
+    if (eccentricity5.present) {
+      map['eccentricity5'] = Variable<double>(eccentricity5.value);
+    }
+    if (eccentricity6.present) {
+      map['eccentricity6'] = Variable<double>(eccentricity6.value);
+    }
+    if (eccentricity7.present) {
+      map['eccentricity7'] = Variable<double>(eccentricity7.value);
+    }
+    if (eccentricity8.present) {
+      map['eccentricity8'] = Variable<double>(eccentricity8.value);
+    }
+    if (eccentricity9.present) {
+      map['eccentricity9'] = Variable<double>(eccentricity9.value);
+    }
+    if (eccentricity10.present) {
+      map['eccentricity10'] = Variable<double>(eccentricity10.value);
+    }
+    if (eccentricityError.present) {
+      map['eccentricity_error'] = Variable<String>(eccentricityError.value);
+    }
+    if (asFoundTest1.present) {
+      map['as_found_test1'] = Variable<double>(asFoundTest1.value);
+    }
+    if (asFoundRead1.present) {
+      map['as_found_read1'] = Variable<double>(asFoundRead1.value);
+    }
+    if (asFoundDiff1.present) {
+      map['as_found_diff1'] = Variable<double>(asFoundDiff1.value);
+    }
+    if (asFoundTest2.present) {
+      map['as_found_test2'] = Variable<double>(asFoundTest2.value);
+    }
+    if (asFoundRead2.present) {
+      map['as_found_read2'] = Variable<double>(asFoundRead2.value);
+    }
+    if (asFoundDiff2.present) {
+      map['as_found_diff2'] = Variable<double>(asFoundDiff2.value);
+    }
+    if (asFoundTest3.present) {
+      map['as_found_test3'] = Variable<double>(asFoundTest3.value);
+    }
+    if (asFoundRead3.present) {
+      map['as_found_read3'] = Variable<double>(asFoundRead3.value);
+    }
+    if (asFoundDiff3.present) {
+      map['as_found_diff3'] = Variable<double>(asFoundDiff3.value);
+    }
+    if (asFoundTest4.present) {
+      map['as_found_test4'] = Variable<double>(asFoundTest4.value);
+    }
+    if (asFoundRead4.present) {
+      map['as_found_read4'] = Variable<double>(asFoundRead4.value);
+    }
+    if (asFoundDiff4.present) {
+      map['as_found_diff4'] = Variable<double>(asFoundDiff4.value);
+    }
+    if (asFoundTest5.present) {
+      map['as_found_test5'] = Variable<double>(asFoundTest5.value);
+    }
+    if (asFoundRead5.present) {
+      map['as_found_read5'] = Variable<double>(asFoundRead5.value);
+    }
+    if (asFoundDiff5.present) {
+      map['as_found_diff5'] = Variable<double>(asFoundDiff5.value);
+    }
+    if (asFoundTest6.present) {
+      map['as_found_test6'] = Variable<double>(asFoundTest6.value);
+    }
+    if (asFoundRead6.present) {
+      map['as_found_read6'] = Variable<double>(asFoundRead6.value);
+    }
+    if (asFoundDiff6.present) {
+      map['as_found_diff6'] = Variable<double>(asFoundDiff6.value);
+    }
+    if (asLeftTest1.present) {
+      map['as_left_test1'] = Variable<double>(asLeftTest1.value);
+    }
+    if (asLeftRead1.present) {
+      map['as_left_read1'] = Variable<double>(asLeftRead1.value);
+    }
+    if (asLeftDiff1.present) {
+      map['as_left_diff1'] = Variable<double>(asLeftDiff1.value);
+    }
+    if (asLeftTest2.present) {
+      map['as_left_test2'] = Variable<double>(asLeftTest2.value);
+    }
+    if (asLeftRead2.present) {
+      map['as_left_read2'] = Variable<double>(asLeftRead2.value);
+    }
+    if (asLeftDiff2.present) {
+      map['as_left_diff2'] = Variable<double>(asLeftDiff2.value);
+    }
+    if (asLeftTest3.present) {
+      map['as_left_test3'] = Variable<double>(asLeftTest3.value);
+    }
+    if (asLeftRead3.present) {
+      map['as_left_read3'] = Variable<double>(asLeftRead3.value);
+    }
+    if (asLeftDiff3.present) {
+      map['as_left_diff3'] = Variable<double>(asLeftDiff3.value);
+    }
+    if (asLeftTest4.present) {
+      map['as_left_test4'] = Variable<double>(asLeftTest4.value);
+    }
+    if (asLeftRead4.present) {
+      map['as_left_read4'] = Variable<double>(asLeftRead4.value);
+    }
+    if (asLeftDiff4.present) {
+      map['as_left_diff4'] = Variable<double>(asLeftDiff4.value);
+    }
+    if (asLeftTest5.present) {
+      map['as_left_test5'] = Variable<double>(asLeftTest5.value);
+    }
+    if (asLeftRead5.present) {
+      map['as_left_read5'] = Variable<double>(asLeftRead5.value);
+    }
+    if (asLeftDiff5.present) {
+      map['as_left_diff5'] = Variable<double>(asLeftDiff5.value);
+    }
+    if (asLeftTest6.present) {
+      map['as_left_test6'] = Variable<double>(asLeftTest6.value);
+    }
+    if (asLeftRead6.present) {
+      map['as_left_read6'] = Variable<double>(asLeftRead6.value);
+    }
+    if (asLeftDiff6.present) {
+      map['as_left_diff6'] = Variable<double>(asLeftDiff6.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (weightTestUnit.present) {
+      map['weight_test_unit'] = Variable<String>(weightTestUnit.value);
+    }
+    if (timestamp.present) {
+      map['timestamp'] = Variable<DateTime>(timestamp.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('WeightTestsCompanion(')
+          ..write('id: $id, ')
+          ..write('serviceReportId: $serviceReportId, ')
+          ..write('eccentricityType: $eccentricityType, ')
+          ..write('eccentricityPoints: $eccentricityPoints, ')
+          ..write('eccentricityDirections: $eccentricityDirections, ')
+          ..write('eccentricity1: $eccentricity1, ')
+          ..write('eccentricity2: $eccentricity2, ')
+          ..write('eccentricity3: $eccentricity3, ')
+          ..write('eccentricity4: $eccentricity4, ')
+          ..write('eccentricity5: $eccentricity5, ')
+          ..write('eccentricity6: $eccentricity6, ')
+          ..write('eccentricity7: $eccentricity7, ')
+          ..write('eccentricity8: $eccentricity8, ')
+          ..write('eccentricity9: $eccentricity9, ')
+          ..write('eccentricity10: $eccentricity10, ')
+          ..write('eccentricityError: $eccentricityError, ')
+          ..write('asFoundTest1: $asFoundTest1, ')
+          ..write('asFoundRead1: $asFoundRead1, ')
+          ..write('asFoundDiff1: $asFoundDiff1, ')
+          ..write('asFoundTest2: $asFoundTest2, ')
+          ..write('asFoundRead2: $asFoundRead2, ')
+          ..write('asFoundDiff2: $asFoundDiff2, ')
+          ..write('asFoundTest3: $asFoundTest3, ')
+          ..write('asFoundRead3: $asFoundRead3, ')
+          ..write('asFoundDiff3: $asFoundDiff3, ')
+          ..write('asFoundTest4: $asFoundTest4, ')
+          ..write('asFoundRead4: $asFoundRead4, ')
+          ..write('asFoundDiff4: $asFoundDiff4, ')
+          ..write('asFoundTest5: $asFoundTest5, ')
+          ..write('asFoundRead5: $asFoundRead5, ')
+          ..write('asFoundDiff5: $asFoundDiff5, ')
+          ..write('asFoundTest6: $asFoundTest6, ')
+          ..write('asFoundRead6: $asFoundRead6, ')
+          ..write('asFoundDiff6: $asFoundDiff6, ')
+          ..write('asLeftTest1: $asLeftTest1, ')
+          ..write('asLeftRead1: $asLeftRead1, ')
+          ..write('asLeftDiff1: $asLeftDiff1, ')
+          ..write('asLeftTest2: $asLeftTest2, ')
+          ..write('asLeftRead2: $asLeftRead2, ')
+          ..write('asLeftDiff2: $asLeftDiff2, ')
+          ..write('asLeftTest3: $asLeftTest3, ')
+          ..write('asLeftRead3: $asLeftRead3, ')
+          ..write('asLeftDiff3: $asLeftDiff3, ')
+          ..write('asLeftTest4: $asLeftTest4, ')
+          ..write('asLeftRead4: $asLeftRead4, ')
+          ..write('asLeftDiff4: $asLeftDiff4, ')
+          ..write('asLeftTest5: $asLeftTest5, ')
+          ..write('asLeftRead5: $asLeftRead5, ')
+          ..write('asLeftDiff5: $asLeftDiff5, ')
+          ..write('asLeftTest6: $asLeftTest6, ')
+          ..write('asLeftRead6: $asLeftRead6, ')
+          ..write('asLeftDiff6: $asLeftDiff6, ')
+          ..write('notes: $notes, ')
+          ..write('weightTestUnit: $weightTestUnit, ')
+          ..write('timestamp: $timestamp')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3706,18 +6251,20 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $WorkOrdersTable workOrders = $WorkOrdersTable(this);
   late final $ScalesTable scales = $ScalesTable(this);
   late final $ServiceReportsTable serviceReports = $ServiceReportsTable(this);
+  late final $WeightTestsTable weightTests = $WeightTestsTable(this);
   late final CustomerDao customerDao = CustomerDao(this as AppDatabase);
   late final ContactDao contactDao = ContactDao(this as AppDatabase);
   late final WorkOrderDao workOrderDao = WorkOrderDao(this as AppDatabase);
   late final ScaleDao scaleDao = ScaleDao(this as AppDatabase);
   late final ServiceReportDao serviceReportDao =
       ServiceReportDao(this as AppDatabase);
+  late final WeightTestDao weightTestDao = WeightTestDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [customers, contacts, workOrders, scales, serviceReports];
+      [customers, contacts, workOrders, scales, serviceReports, weightTests];
 }
 
 typedef $$CustomersTableCreateCompanionBuilder = CustomersCompanion Function({
@@ -5699,6 +8246,22 @@ final class $$ServiceReportsTableReferences
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: [item]));
   }
+
+  static MultiTypedResultKey<$WeightTestsTable, List<WeightTest>>
+      _weightTestsRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.weightTests,
+              aliasName: $_aliasNameGenerator(
+                  db.serviceReports.id, db.weightTests.serviceReportId));
+
+  $$WeightTestsTableProcessedTableManager get weightTestsRefs {
+    final manager = $$WeightTestsTableTableManager($_db, $_db.weightTests)
+        .filter(
+            (f) => f.serviceReportId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_weightTestsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
 }
 
 class $$ServiceReportsTableFilterComposer
@@ -5766,6 +8329,27 @@ class $$ServiceReportsTableFilterComposer
                   $removeJoinBuilderFromRootComposer,
             ));
     return composer;
+  }
+
+  Expression<bool> weightTestsRefs(
+      Expression<bool> Function($$WeightTestsTableFilterComposer f) f) {
+    final $$WeightTestsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.weightTests,
+        getReferencedColumn: (t) => t.serviceReportId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WeightTestsTableFilterComposer(
+              $db: $db,
+              $table: $db.weightTests,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
   }
 }
 
@@ -5903,6 +8487,27 @@ class $$ServiceReportsTableAnnotationComposer
             ));
     return composer;
   }
+
+  Expression<T> weightTestsRefs<T extends Object>(
+      Expression<T> Function($$WeightTestsTableAnnotationComposer a) f) {
+    final $$WeightTestsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.weightTests,
+        getReferencedColumn: (t) => t.serviceReportId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WeightTestsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.weightTests,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$ServiceReportsTableTableManager extends RootTableManager<
@@ -5916,7 +8521,8 @@ class $$ServiceReportsTableTableManager extends RootTableManager<
     $$ServiceReportsTableUpdateCompanionBuilder,
     (ServiceReport, $$ServiceReportsTableReferences),
     ServiceReport,
-    PrefetchHooks Function({bool workOrderId, bool scaleId})> {
+    PrefetchHooks Function(
+        {bool workOrderId, bool scaleId, bool weightTestsRefs})> {
   $$ServiceReportsTableTableManager(
       _$AppDatabase db, $ServiceReportsTable table)
       : super(TableManagerState(
@@ -5974,10 +8580,11 @@ class $$ServiceReportsTableTableManager extends RootTableManager<
                     $$ServiceReportsTableReferences(db, table, e)
                   ))
               .toList(),
-          prefetchHooksCallback: ({workOrderId = false, scaleId = false}) {
+          prefetchHooksCallback: (
+              {workOrderId = false, scaleId = false, weightTestsRefs = false}) {
             return PrefetchHooks(
               db: db,
-              explicitlyWatchedTables: [],
+              explicitlyWatchedTables: [if (weightTestsRefs) db.weightTests],
               addJoins: <
                   T extends TableManagerState<
                       dynamic,
@@ -6016,7 +8623,21 @@ class $$ServiceReportsTableTableManager extends RootTableManager<
                 return state;
               },
               getPrefetchedDataCallback: (items) async {
-                return [];
+                return [
+                  if (weightTestsRefs)
+                    await $_getPrefetchedData<ServiceReport,
+                            $ServiceReportsTable, WeightTest>(
+                        currentTable: table,
+                        referencedTable: $$ServiceReportsTableReferences
+                            ._weightTestsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$ServiceReportsTableReferences(db, table, p0)
+                                .weightTestsRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.serviceReportId == item.id),
+                        typedResults: items)
+                ];
               },
             );
           },
@@ -6034,7 +8655,1067 @@ typedef $$ServiceReportsTableProcessedTableManager = ProcessedTableManager<
     $$ServiceReportsTableUpdateCompanionBuilder,
     (ServiceReport, $$ServiceReportsTableReferences),
     ServiceReport,
-    PrefetchHooks Function({bool workOrderId, bool scaleId})>;
+    PrefetchHooks Function(
+        {bool workOrderId, bool scaleId, bool weightTestsRefs})>;
+typedef $$WeightTestsTableCreateCompanionBuilder = WeightTestsCompanion
+    Function({
+  Value<int> id,
+  required int serviceReportId,
+  required String eccentricityType,
+  Value<int> eccentricityPoints,
+  Value<String?> eccentricityDirections,
+  Value<double?> eccentricity1,
+  Value<double?> eccentricity2,
+  Value<double?> eccentricity3,
+  Value<double?> eccentricity4,
+  Value<double?> eccentricity5,
+  Value<double?> eccentricity6,
+  Value<double?> eccentricity7,
+  Value<double?> eccentricity8,
+  Value<double?> eccentricity9,
+  Value<double?> eccentricity10,
+  Value<String?> eccentricityError,
+  Value<double?> asFoundTest1,
+  Value<double?> asFoundRead1,
+  Value<double?> asFoundDiff1,
+  Value<double?> asFoundTest2,
+  Value<double?> asFoundRead2,
+  Value<double?> asFoundDiff2,
+  Value<double?> asFoundTest3,
+  Value<double?> asFoundRead3,
+  Value<double?> asFoundDiff3,
+  Value<double?> asFoundTest4,
+  Value<double?> asFoundRead4,
+  Value<double?> asFoundDiff4,
+  Value<double?> asFoundTest5,
+  Value<double?> asFoundRead5,
+  Value<double?> asFoundDiff5,
+  Value<double?> asFoundTest6,
+  Value<double?> asFoundRead6,
+  Value<double?> asFoundDiff6,
+  Value<double?> asLeftTest1,
+  Value<double?> asLeftRead1,
+  Value<double?> asLeftDiff1,
+  Value<double?> asLeftTest2,
+  Value<double?> asLeftRead2,
+  Value<double?> asLeftDiff2,
+  Value<double?> asLeftTest3,
+  Value<double?> asLeftRead3,
+  Value<double?> asLeftDiff3,
+  Value<double?> asLeftTest4,
+  Value<double?> asLeftRead4,
+  Value<double?> asLeftDiff4,
+  Value<double?> asLeftTest5,
+  Value<double?> asLeftRead5,
+  Value<double?> asLeftDiff5,
+  Value<double?> asLeftTest6,
+  Value<double?> asLeftRead6,
+  Value<double?> asLeftDiff6,
+  Value<String?> notes,
+  Value<String?> weightTestUnit,
+  Value<DateTime> timestamp,
+});
+typedef $$WeightTestsTableUpdateCompanionBuilder = WeightTestsCompanion
+    Function({
+  Value<int> id,
+  Value<int> serviceReportId,
+  Value<String> eccentricityType,
+  Value<int> eccentricityPoints,
+  Value<String?> eccentricityDirections,
+  Value<double?> eccentricity1,
+  Value<double?> eccentricity2,
+  Value<double?> eccentricity3,
+  Value<double?> eccentricity4,
+  Value<double?> eccentricity5,
+  Value<double?> eccentricity6,
+  Value<double?> eccentricity7,
+  Value<double?> eccentricity8,
+  Value<double?> eccentricity9,
+  Value<double?> eccentricity10,
+  Value<String?> eccentricityError,
+  Value<double?> asFoundTest1,
+  Value<double?> asFoundRead1,
+  Value<double?> asFoundDiff1,
+  Value<double?> asFoundTest2,
+  Value<double?> asFoundRead2,
+  Value<double?> asFoundDiff2,
+  Value<double?> asFoundTest3,
+  Value<double?> asFoundRead3,
+  Value<double?> asFoundDiff3,
+  Value<double?> asFoundTest4,
+  Value<double?> asFoundRead4,
+  Value<double?> asFoundDiff4,
+  Value<double?> asFoundTest5,
+  Value<double?> asFoundRead5,
+  Value<double?> asFoundDiff5,
+  Value<double?> asFoundTest6,
+  Value<double?> asFoundRead6,
+  Value<double?> asFoundDiff6,
+  Value<double?> asLeftTest1,
+  Value<double?> asLeftRead1,
+  Value<double?> asLeftDiff1,
+  Value<double?> asLeftTest2,
+  Value<double?> asLeftRead2,
+  Value<double?> asLeftDiff2,
+  Value<double?> asLeftTest3,
+  Value<double?> asLeftRead3,
+  Value<double?> asLeftDiff3,
+  Value<double?> asLeftTest4,
+  Value<double?> asLeftRead4,
+  Value<double?> asLeftDiff4,
+  Value<double?> asLeftTest5,
+  Value<double?> asLeftRead5,
+  Value<double?> asLeftDiff5,
+  Value<double?> asLeftTest6,
+  Value<double?> asLeftRead6,
+  Value<double?> asLeftDiff6,
+  Value<String?> notes,
+  Value<String?> weightTestUnit,
+  Value<DateTime> timestamp,
+});
+
+final class $$WeightTestsTableReferences
+    extends BaseReferences<_$AppDatabase, $WeightTestsTable, WeightTest> {
+  $$WeightTestsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $ServiceReportsTable _serviceReportIdTable(_$AppDatabase db) =>
+      db.serviceReports.createAlias($_aliasNameGenerator(
+          db.weightTests.serviceReportId, db.serviceReports.id));
+
+  $$ServiceReportsTableProcessedTableManager get serviceReportId {
+    final $_column = $_itemColumn<int>('service_report_id')!;
+
+    final manager = $$ServiceReportsTableTableManager($_db, $_db.serviceReports)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_serviceReportIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$WeightTestsTableFilterComposer
+    extends Composer<_$AppDatabase, $WeightTestsTable> {
+  $$WeightTestsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get eccentricityType => $composableBuilder(
+      column: $table.eccentricityType,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get eccentricityPoints => $composableBuilder(
+      column: $table.eccentricityPoints,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get eccentricityDirections => $composableBuilder(
+      column: $table.eccentricityDirections,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get eccentricity1 => $composableBuilder(
+      column: $table.eccentricity1, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get eccentricity2 => $composableBuilder(
+      column: $table.eccentricity2, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get eccentricity3 => $composableBuilder(
+      column: $table.eccentricity3, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get eccentricity4 => $composableBuilder(
+      column: $table.eccentricity4, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get eccentricity5 => $composableBuilder(
+      column: $table.eccentricity5, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get eccentricity6 => $composableBuilder(
+      column: $table.eccentricity6, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get eccentricity7 => $composableBuilder(
+      column: $table.eccentricity7, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get eccentricity8 => $composableBuilder(
+      column: $table.eccentricity8, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get eccentricity9 => $composableBuilder(
+      column: $table.eccentricity9, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get eccentricity10 => $composableBuilder(
+      column: $table.eccentricity10,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get eccentricityError => $composableBuilder(
+      column: $table.eccentricityError,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asFoundTest1 => $composableBuilder(
+      column: $table.asFoundTest1, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asFoundRead1 => $composableBuilder(
+      column: $table.asFoundRead1, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asFoundDiff1 => $composableBuilder(
+      column: $table.asFoundDiff1, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asFoundTest2 => $composableBuilder(
+      column: $table.asFoundTest2, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asFoundRead2 => $composableBuilder(
+      column: $table.asFoundRead2, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asFoundDiff2 => $composableBuilder(
+      column: $table.asFoundDiff2, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asFoundTest3 => $composableBuilder(
+      column: $table.asFoundTest3, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asFoundRead3 => $composableBuilder(
+      column: $table.asFoundRead3, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asFoundDiff3 => $composableBuilder(
+      column: $table.asFoundDiff3, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asFoundTest4 => $composableBuilder(
+      column: $table.asFoundTest4, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asFoundRead4 => $composableBuilder(
+      column: $table.asFoundRead4, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asFoundDiff4 => $composableBuilder(
+      column: $table.asFoundDiff4, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asFoundTest5 => $composableBuilder(
+      column: $table.asFoundTest5, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asFoundRead5 => $composableBuilder(
+      column: $table.asFoundRead5, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asFoundDiff5 => $composableBuilder(
+      column: $table.asFoundDiff5, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asFoundTest6 => $composableBuilder(
+      column: $table.asFoundTest6, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asFoundRead6 => $composableBuilder(
+      column: $table.asFoundRead6, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asFoundDiff6 => $composableBuilder(
+      column: $table.asFoundDiff6, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftTest1 => $composableBuilder(
+      column: $table.asLeftTest1, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftRead1 => $composableBuilder(
+      column: $table.asLeftRead1, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftDiff1 => $composableBuilder(
+      column: $table.asLeftDiff1, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftTest2 => $composableBuilder(
+      column: $table.asLeftTest2, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftRead2 => $composableBuilder(
+      column: $table.asLeftRead2, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftDiff2 => $composableBuilder(
+      column: $table.asLeftDiff2, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftTest3 => $composableBuilder(
+      column: $table.asLeftTest3, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftRead3 => $composableBuilder(
+      column: $table.asLeftRead3, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftDiff3 => $composableBuilder(
+      column: $table.asLeftDiff3, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftTest4 => $composableBuilder(
+      column: $table.asLeftTest4, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftRead4 => $composableBuilder(
+      column: $table.asLeftRead4, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftDiff4 => $composableBuilder(
+      column: $table.asLeftDiff4, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftTest5 => $composableBuilder(
+      column: $table.asLeftTest5, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftRead5 => $composableBuilder(
+      column: $table.asLeftRead5, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftDiff5 => $composableBuilder(
+      column: $table.asLeftDiff5, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftTest6 => $composableBuilder(
+      column: $table.asLeftTest6, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftRead6 => $composableBuilder(
+      column: $table.asLeftRead6, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftDiff6 => $composableBuilder(
+      column: $table.asLeftDiff6, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get notes => $composableBuilder(
+      column: $table.notes, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get weightTestUnit => $composableBuilder(
+      column: $table.weightTestUnit,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get timestamp => $composableBuilder(
+      column: $table.timestamp, builder: (column) => ColumnFilters(column));
+
+  $$ServiceReportsTableFilterComposer get serviceReportId {
+    final $$ServiceReportsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.serviceReportId,
+        referencedTable: $db.serviceReports,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ServiceReportsTableFilterComposer(
+              $db: $db,
+              $table: $db.serviceReports,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$WeightTestsTableOrderingComposer
+    extends Composer<_$AppDatabase, $WeightTestsTable> {
+  $$WeightTestsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get eccentricityType => $composableBuilder(
+      column: $table.eccentricityType,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get eccentricityPoints => $composableBuilder(
+      column: $table.eccentricityPoints,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get eccentricityDirections => $composableBuilder(
+      column: $table.eccentricityDirections,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get eccentricity1 => $composableBuilder(
+      column: $table.eccentricity1,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get eccentricity2 => $composableBuilder(
+      column: $table.eccentricity2,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get eccentricity3 => $composableBuilder(
+      column: $table.eccentricity3,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get eccentricity4 => $composableBuilder(
+      column: $table.eccentricity4,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get eccentricity5 => $composableBuilder(
+      column: $table.eccentricity5,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get eccentricity6 => $composableBuilder(
+      column: $table.eccentricity6,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get eccentricity7 => $composableBuilder(
+      column: $table.eccentricity7,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get eccentricity8 => $composableBuilder(
+      column: $table.eccentricity8,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get eccentricity9 => $composableBuilder(
+      column: $table.eccentricity9,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get eccentricity10 => $composableBuilder(
+      column: $table.eccentricity10,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get eccentricityError => $composableBuilder(
+      column: $table.eccentricityError,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asFoundTest1 => $composableBuilder(
+      column: $table.asFoundTest1,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asFoundRead1 => $composableBuilder(
+      column: $table.asFoundRead1,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asFoundDiff1 => $composableBuilder(
+      column: $table.asFoundDiff1,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asFoundTest2 => $composableBuilder(
+      column: $table.asFoundTest2,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asFoundRead2 => $composableBuilder(
+      column: $table.asFoundRead2,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asFoundDiff2 => $composableBuilder(
+      column: $table.asFoundDiff2,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asFoundTest3 => $composableBuilder(
+      column: $table.asFoundTest3,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asFoundRead3 => $composableBuilder(
+      column: $table.asFoundRead3,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asFoundDiff3 => $composableBuilder(
+      column: $table.asFoundDiff3,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asFoundTest4 => $composableBuilder(
+      column: $table.asFoundTest4,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asFoundRead4 => $composableBuilder(
+      column: $table.asFoundRead4,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asFoundDiff4 => $composableBuilder(
+      column: $table.asFoundDiff4,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asFoundTest5 => $composableBuilder(
+      column: $table.asFoundTest5,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asFoundRead5 => $composableBuilder(
+      column: $table.asFoundRead5,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asFoundDiff5 => $composableBuilder(
+      column: $table.asFoundDiff5,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asFoundTest6 => $composableBuilder(
+      column: $table.asFoundTest6,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asFoundRead6 => $composableBuilder(
+      column: $table.asFoundRead6,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asFoundDiff6 => $composableBuilder(
+      column: $table.asFoundDiff6,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftTest1 => $composableBuilder(
+      column: $table.asLeftTest1, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftRead1 => $composableBuilder(
+      column: $table.asLeftRead1, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftDiff1 => $composableBuilder(
+      column: $table.asLeftDiff1, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftTest2 => $composableBuilder(
+      column: $table.asLeftTest2, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftRead2 => $composableBuilder(
+      column: $table.asLeftRead2, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftDiff2 => $composableBuilder(
+      column: $table.asLeftDiff2, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftTest3 => $composableBuilder(
+      column: $table.asLeftTest3, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftRead3 => $composableBuilder(
+      column: $table.asLeftRead3, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftDiff3 => $composableBuilder(
+      column: $table.asLeftDiff3, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftTest4 => $composableBuilder(
+      column: $table.asLeftTest4, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftRead4 => $composableBuilder(
+      column: $table.asLeftRead4, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftDiff4 => $composableBuilder(
+      column: $table.asLeftDiff4, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftTest5 => $composableBuilder(
+      column: $table.asLeftTest5, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftRead5 => $composableBuilder(
+      column: $table.asLeftRead5, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftDiff5 => $composableBuilder(
+      column: $table.asLeftDiff5, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftTest6 => $composableBuilder(
+      column: $table.asLeftTest6, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftRead6 => $composableBuilder(
+      column: $table.asLeftRead6, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftDiff6 => $composableBuilder(
+      column: $table.asLeftDiff6, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+      column: $table.notes, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get weightTestUnit => $composableBuilder(
+      column: $table.weightTestUnit,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get timestamp => $composableBuilder(
+      column: $table.timestamp, builder: (column) => ColumnOrderings(column));
+
+  $$ServiceReportsTableOrderingComposer get serviceReportId {
+    final $$ServiceReportsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.serviceReportId,
+        referencedTable: $db.serviceReports,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ServiceReportsTableOrderingComposer(
+              $db: $db,
+              $table: $db.serviceReports,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$WeightTestsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $WeightTestsTable> {
+  $$WeightTestsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get eccentricityType => $composableBuilder(
+      column: $table.eccentricityType, builder: (column) => column);
+
+  GeneratedColumn<int> get eccentricityPoints => $composableBuilder(
+      column: $table.eccentricityPoints, builder: (column) => column);
+
+  GeneratedColumn<String> get eccentricityDirections => $composableBuilder(
+      column: $table.eccentricityDirections, builder: (column) => column);
+
+  GeneratedColumn<double> get eccentricity1 => $composableBuilder(
+      column: $table.eccentricity1, builder: (column) => column);
+
+  GeneratedColumn<double> get eccentricity2 => $composableBuilder(
+      column: $table.eccentricity2, builder: (column) => column);
+
+  GeneratedColumn<double> get eccentricity3 => $composableBuilder(
+      column: $table.eccentricity3, builder: (column) => column);
+
+  GeneratedColumn<double> get eccentricity4 => $composableBuilder(
+      column: $table.eccentricity4, builder: (column) => column);
+
+  GeneratedColumn<double> get eccentricity5 => $composableBuilder(
+      column: $table.eccentricity5, builder: (column) => column);
+
+  GeneratedColumn<double> get eccentricity6 => $composableBuilder(
+      column: $table.eccentricity6, builder: (column) => column);
+
+  GeneratedColumn<double> get eccentricity7 => $composableBuilder(
+      column: $table.eccentricity7, builder: (column) => column);
+
+  GeneratedColumn<double> get eccentricity8 => $composableBuilder(
+      column: $table.eccentricity8, builder: (column) => column);
+
+  GeneratedColumn<double> get eccentricity9 => $composableBuilder(
+      column: $table.eccentricity9, builder: (column) => column);
+
+  GeneratedColumn<double> get eccentricity10 => $composableBuilder(
+      column: $table.eccentricity10, builder: (column) => column);
+
+  GeneratedColumn<String> get eccentricityError => $composableBuilder(
+      column: $table.eccentricityError, builder: (column) => column);
+
+  GeneratedColumn<double> get asFoundTest1 => $composableBuilder(
+      column: $table.asFoundTest1, builder: (column) => column);
+
+  GeneratedColumn<double> get asFoundRead1 => $composableBuilder(
+      column: $table.asFoundRead1, builder: (column) => column);
+
+  GeneratedColumn<double> get asFoundDiff1 => $composableBuilder(
+      column: $table.asFoundDiff1, builder: (column) => column);
+
+  GeneratedColumn<double> get asFoundTest2 => $composableBuilder(
+      column: $table.asFoundTest2, builder: (column) => column);
+
+  GeneratedColumn<double> get asFoundRead2 => $composableBuilder(
+      column: $table.asFoundRead2, builder: (column) => column);
+
+  GeneratedColumn<double> get asFoundDiff2 => $composableBuilder(
+      column: $table.asFoundDiff2, builder: (column) => column);
+
+  GeneratedColumn<double> get asFoundTest3 => $composableBuilder(
+      column: $table.asFoundTest3, builder: (column) => column);
+
+  GeneratedColumn<double> get asFoundRead3 => $composableBuilder(
+      column: $table.asFoundRead3, builder: (column) => column);
+
+  GeneratedColumn<double> get asFoundDiff3 => $composableBuilder(
+      column: $table.asFoundDiff3, builder: (column) => column);
+
+  GeneratedColumn<double> get asFoundTest4 => $composableBuilder(
+      column: $table.asFoundTest4, builder: (column) => column);
+
+  GeneratedColumn<double> get asFoundRead4 => $composableBuilder(
+      column: $table.asFoundRead4, builder: (column) => column);
+
+  GeneratedColumn<double> get asFoundDiff4 => $composableBuilder(
+      column: $table.asFoundDiff4, builder: (column) => column);
+
+  GeneratedColumn<double> get asFoundTest5 => $composableBuilder(
+      column: $table.asFoundTest5, builder: (column) => column);
+
+  GeneratedColumn<double> get asFoundRead5 => $composableBuilder(
+      column: $table.asFoundRead5, builder: (column) => column);
+
+  GeneratedColumn<double> get asFoundDiff5 => $composableBuilder(
+      column: $table.asFoundDiff5, builder: (column) => column);
+
+  GeneratedColumn<double> get asFoundTest6 => $composableBuilder(
+      column: $table.asFoundTest6, builder: (column) => column);
+
+  GeneratedColumn<double> get asFoundRead6 => $composableBuilder(
+      column: $table.asFoundRead6, builder: (column) => column);
+
+  GeneratedColumn<double> get asFoundDiff6 => $composableBuilder(
+      column: $table.asFoundDiff6, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftTest1 => $composableBuilder(
+      column: $table.asLeftTest1, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftRead1 => $composableBuilder(
+      column: $table.asLeftRead1, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftDiff1 => $composableBuilder(
+      column: $table.asLeftDiff1, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftTest2 => $composableBuilder(
+      column: $table.asLeftTest2, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftRead2 => $composableBuilder(
+      column: $table.asLeftRead2, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftDiff2 => $composableBuilder(
+      column: $table.asLeftDiff2, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftTest3 => $composableBuilder(
+      column: $table.asLeftTest3, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftRead3 => $composableBuilder(
+      column: $table.asLeftRead3, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftDiff3 => $composableBuilder(
+      column: $table.asLeftDiff3, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftTest4 => $composableBuilder(
+      column: $table.asLeftTest4, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftRead4 => $composableBuilder(
+      column: $table.asLeftRead4, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftDiff4 => $composableBuilder(
+      column: $table.asLeftDiff4, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftTest5 => $composableBuilder(
+      column: $table.asLeftTest5, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftRead5 => $composableBuilder(
+      column: $table.asLeftRead5, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftDiff5 => $composableBuilder(
+      column: $table.asLeftDiff5, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftTest6 => $composableBuilder(
+      column: $table.asLeftTest6, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftRead6 => $composableBuilder(
+      column: $table.asLeftRead6, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftDiff6 => $composableBuilder(
+      column: $table.asLeftDiff6, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<String> get weightTestUnit => $composableBuilder(
+      column: $table.weightTestUnit, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get timestamp =>
+      $composableBuilder(column: $table.timestamp, builder: (column) => column);
+
+  $$ServiceReportsTableAnnotationComposer get serviceReportId {
+    final $$ServiceReportsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.serviceReportId,
+        referencedTable: $db.serviceReports,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ServiceReportsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.serviceReports,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$WeightTestsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $WeightTestsTable,
+    WeightTest,
+    $$WeightTestsTableFilterComposer,
+    $$WeightTestsTableOrderingComposer,
+    $$WeightTestsTableAnnotationComposer,
+    $$WeightTestsTableCreateCompanionBuilder,
+    $$WeightTestsTableUpdateCompanionBuilder,
+    (WeightTest, $$WeightTestsTableReferences),
+    WeightTest,
+    PrefetchHooks Function({bool serviceReportId})> {
+  $$WeightTestsTableTableManager(_$AppDatabase db, $WeightTestsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$WeightTestsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$WeightTestsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$WeightTestsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<int> serviceReportId = const Value.absent(),
+            Value<String> eccentricityType = const Value.absent(),
+            Value<int> eccentricityPoints = const Value.absent(),
+            Value<String?> eccentricityDirections = const Value.absent(),
+            Value<double?> eccentricity1 = const Value.absent(),
+            Value<double?> eccentricity2 = const Value.absent(),
+            Value<double?> eccentricity3 = const Value.absent(),
+            Value<double?> eccentricity4 = const Value.absent(),
+            Value<double?> eccentricity5 = const Value.absent(),
+            Value<double?> eccentricity6 = const Value.absent(),
+            Value<double?> eccentricity7 = const Value.absent(),
+            Value<double?> eccentricity8 = const Value.absent(),
+            Value<double?> eccentricity9 = const Value.absent(),
+            Value<double?> eccentricity10 = const Value.absent(),
+            Value<String?> eccentricityError = const Value.absent(),
+            Value<double?> asFoundTest1 = const Value.absent(),
+            Value<double?> asFoundRead1 = const Value.absent(),
+            Value<double?> asFoundDiff1 = const Value.absent(),
+            Value<double?> asFoundTest2 = const Value.absent(),
+            Value<double?> asFoundRead2 = const Value.absent(),
+            Value<double?> asFoundDiff2 = const Value.absent(),
+            Value<double?> asFoundTest3 = const Value.absent(),
+            Value<double?> asFoundRead3 = const Value.absent(),
+            Value<double?> asFoundDiff3 = const Value.absent(),
+            Value<double?> asFoundTest4 = const Value.absent(),
+            Value<double?> asFoundRead4 = const Value.absent(),
+            Value<double?> asFoundDiff4 = const Value.absent(),
+            Value<double?> asFoundTest5 = const Value.absent(),
+            Value<double?> asFoundRead5 = const Value.absent(),
+            Value<double?> asFoundDiff5 = const Value.absent(),
+            Value<double?> asFoundTest6 = const Value.absent(),
+            Value<double?> asFoundRead6 = const Value.absent(),
+            Value<double?> asFoundDiff6 = const Value.absent(),
+            Value<double?> asLeftTest1 = const Value.absent(),
+            Value<double?> asLeftRead1 = const Value.absent(),
+            Value<double?> asLeftDiff1 = const Value.absent(),
+            Value<double?> asLeftTest2 = const Value.absent(),
+            Value<double?> asLeftRead2 = const Value.absent(),
+            Value<double?> asLeftDiff2 = const Value.absent(),
+            Value<double?> asLeftTest3 = const Value.absent(),
+            Value<double?> asLeftRead3 = const Value.absent(),
+            Value<double?> asLeftDiff3 = const Value.absent(),
+            Value<double?> asLeftTest4 = const Value.absent(),
+            Value<double?> asLeftRead4 = const Value.absent(),
+            Value<double?> asLeftDiff4 = const Value.absent(),
+            Value<double?> asLeftTest5 = const Value.absent(),
+            Value<double?> asLeftRead5 = const Value.absent(),
+            Value<double?> asLeftDiff5 = const Value.absent(),
+            Value<double?> asLeftTest6 = const Value.absent(),
+            Value<double?> asLeftRead6 = const Value.absent(),
+            Value<double?> asLeftDiff6 = const Value.absent(),
+            Value<String?> notes = const Value.absent(),
+            Value<String?> weightTestUnit = const Value.absent(),
+            Value<DateTime> timestamp = const Value.absent(),
+          }) =>
+              WeightTestsCompanion(
+            id: id,
+            serviceReportId: serviceReportId,
+            eccentricityType: eccentricityType,
+            eccentricityPoints: eccentricityPoints,
+            eccentricityDirections: eccentricityDirections,
+            eccentricity1: eccentricity1,
+            eccentricity2: eccentricity2,
+            eccentricity3: eccentricity3,
+            eccentricity4: eccentricity4,
+            eccentricity5: eccentricity5,
+            eccentricity6: eccentricity6,
+            eccentricity7: eccentricity7,
+            eccentricity8: eccentricity8,
+            eccentricity9: eccentricity9,
+            eccentricity10: eccentricity10,
+            eccentricityError: eccentricityError,
+            asFoundTest1: asFoundTest1,
+            asFoundRead1: asFoundRead1,
+            asFoundDiff1: asFoundDiff1,
+            asFoundTest2: asFoundTest2,
+            asFoundRead2: asFoundRead2,
+            asFoundDiff2: asFoundDiff2,
+            asFoundTest3: asFoundTest3,
+            asFoundRead3: asFoundRead3,
+            asFoundDiff3: asFoundDiff3,
+            asFoundTest4: asFoundTest4,
+            asFoundRead4: asFoundRead4,
+            asFoundDiff4: asFoundDiff4,
+            asFoundTest5: asFoundTest5,
+            asFoundRead5: asFoundRead5,
+            asFoundDiff5: asFoundDiff5,
+            asFoundTest6: asFoundTest6,
+            asFoundRead6: asFoundRead6,
+            asFoundDiff6: asFoundDiff6,
+            asLeftTest1: asLeftTest1,
+            asLeftRead1: asLeftRead1,
+            asLeftDiff1: asLeftDiff1,
+            asLeftTest2: asLeftTest2,
+            asLeftRead2: asLeftRead2,
+            asLeftDiff2: asLeftDiff2,
+            asLeftTest3: asLeftTest3,
+            asLeftRead3: asLeftRead3,
+            asLeftDiff3: asLeftDiff3,
+            asLeftTest4: asLeftTest4,
+            asLeftRead4: asLeftRead4,
+            asLeftDiff4: asLeftDiff4,
+            asLeftTest5: asLeftTest5,
+            asLeftRead5: asLeftRead5,
+            asLeftDiff5: asLeftDiff5,
+            asLeftTest6: asLeftTest6,
+            asLeftRead6: asLeftRead6,
+            asLeftDiff6: asLeftDiff6,
+            notes: notes,
+            weightTestUnit: weightTestUnit,
+            timestamp: timestamp,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required int serviceReportId,
+            required String eccentricityType,
+            Value<int> eccentricityPoints = const Value.absent(),
+            Value<String?> eccentricityDirections = const Value.absent(),
+            Value<double?> eccentricity1 = const Value.absent(),
+            Value<double?> eccentricity2 = const Value.absent(),
+            Value<double?> eccentricity3 = const Value.absent(),
+            Value<double?> eccentricity4 = const Value.absent(),
+            Value<double?> eccentricity5 = const Value.absent(),
+            Value<double?> eccentricity6 = const Value.absent(),
+            Value<double?> eccentricity7 = const Value.absent(),
+            Value<double?> eccentricity8 = const Value.absent(),
+            Value<double?> eccentricity9 = const Value.absent(),
+            Value<double?> eccentricity10 = const Value.absent(),
+            Value<String?> eccentricityError = const Value.absent(),
+            Value<double?> asFoundTest1 = const Value.absent(),
+            Value<double?> asFoundRead1 = const Value.absent(),
+            Value<double?> asFoundDiff1 = const Value.absent(),
+            Value<double?> asFoundTest2 = const Value.absent(),
+            Value<double?> asFoundRead2 = const Value.absent(),
+            Value<double?> asFoundDiff2 = const Value.absent(),
+            Value<double?> asFoundTest3 = const Value.absent(),
+            Value<double?> asFoundRead3 = const Value.absent(),
+            Value<double?> asFoundDiff3 = const Value.absent(),
+            Value<double?> asFoundTest4 = const Value.absent(),
+            Value<double?> asFoundRead4 = const Value.absent(),
+            Value<double?> asFoundDiff4 = const Value.absent(),
+            Value<double?> asFoundTest5 = const Value.absent(),
+            Value<double?> asFoundRead5 = const Value.absent(),
+            Value<double?> asFoundDiff5 = const Value.absent(),
+            Value<double?> asFoundTest6 = const Value.absent(),
+            Value<double?> asFoundRead6 = const Value.absent(),
+            Value<double?> asFoundDiff6 = const Value.absent(),
+            Value<double?> asLeftTest1 = const Value.absent(),
+            Value<double?> asLeftRead1 = const Value.absent(),
+            Value<double?> asLeftDiff1 = const Value.absent(),
+            Value<double?> asLeftTest2 = const Value.absent(),
+            Value<double?> asLeftRead2 = const Value.absent(),
+            Value<double?> asLeftDiff2 = const Value.absent(),
+            Value<double?> asLeftTest3 = const Value.absent(),
+            Value<double?> asLeftRead3 = const Value.absent(),
+            Value<double?> asLeftDiff3 = const Value.absent(),
+            Value<double?> asLeftTest4 = const Value.absent(),
+            Value<double?> asLeftRead4 = const Value.absent(),
+            Value<double?> asLeftDiff4 = const Value.absent(),
+            Value<double?> asLeftTest5 = const Value.absent(),
+            Value<double?> asLeftRead5 = const Value.absent(),
+            Value<double?> asLeftDiff5 = const Value.absent(),
+            Value<double?> asLeftTest6 = const Value.absent(),
+            Value<double?> asLeftRead6 = const Value.absent(),
+            Value<double?> asLeftDiff6 = const Value.absent(),
+            Value<String?> notes = const Value.absent(),
+            Value<String?> weightTestUnit = const Value.absent(),
+            Value<DateTime> timestamp = const Value.absent(),
+          }) =>
+              WeightTestsCompanion.insert(
+            id: id,
+            serviceReportId: serviceReportId,
+            eccentricityType: eccentricityType,
+            eccentricityPoints: eccentricityPoints,
+            eccentricityDirections: eccentricityDirections,
+            eccentricity1: eccentricity1,
+            eccentricity2: eccentricity2,
+            eccentricity3: eccentricity3,
+            eccentricity4: eccentricity4,
+            eccentricity5: eccentricity5,
+            eccentricity6: eccentricity6,
+            eccentricity7: eccentricity7,
+            eccentricity8: eccentricity8,
+            eccentricity9: eccentricity9,
+            eccentricity10: eccentricity10,
+            eccentricityError: eccentricityError,
+            asFoundTest1: asFoundTest1,
+            asFoundRead1: asFoundRead1,
+            asFoundDiff1: asFoundDiff1,
+            asFoundTest2: asFoundTest2,
+            asFoundRead2: asFoundRead2,
+            asFoundDiff2: asFoundDiff2,
+            asFoundTest3: asFoundTest3,
+            asFoundRead3: asFoundRead3,
+            asFoundDiff3: asFoundDiff3,
+            asFoundTest4: asFoundTest4,
+            asFoundRead4: asFoundRead4,
+            asFoundDiff4: asFoundDiff4,
+            asFoundTest5: asFoundTest5,
+            asFoundRead5: asFoundRead5,
+            asFoundDiff5: asFoundDiff5,
+            asFoundTest6: asFoundTest6,
+            asFoundRead6: asFoundRead6,
+            asFoundDiff6: asFoundDiff6,
+            asLeftTest1: asLeftTest1,
+            asLeftRead1: asLeftRead1,
+            asLeftDiff1: asLeftDiff1,
+            asLeftTest2: asLeftTest2,
+            asLeftRead2: asLeftRead2,
+            asLeftDiff2: asLeftDiff2,
+            asLeftTest3: asLeftTest3,
+            asLeftRead3: asLeftRead3,
+            asLeftDiff3: asLeftDiff3,
+            asLeftTest4: asLeftTest4,
+            asLeftRead4: asLeftRead4,
+            asLeftDiff4: asLeftDiff4,
+            asLeftTest5: asLeftTest5,
+            asLeftRead5: asLeftRead5,
+            asLeftDiff5: asLeftDiff5,
+            asLeftTest6: asLeftTest6,
+            asLeftRead6: asLeftRead6,
+            asLeftDiff6: asLeftDiff6,
+            notes: notes,
+            weightTestUnit: weightTestUnit,
+            timestamp: timestamp,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$WeightTestsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({serviceReportId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (serviceReportId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.serviceReportId,
+                    referencedTable:
+                        $$WeightTestsTableReferences._serviceReportIdTable(db),
+                    referencedColumn: $$WeightTestsTableReferences
+                        ._serviceReportIdTable(db)
+                        .id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$WeightTestsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $WeightTestsTable,
+    WeightTest,
+    $$WeightTestsTableFilterComposer,
+    $$WeightTestsTableOrderingComposer,
+    $$WeightTestsTableAnnotationComposer,
+    $$WeightTestsTableCreateCompanionBuilder,
+    $$WeightTestsTableUpdateCompanionBuilder,
+    (WeightTest, $$WeightTestsTableReferences),
+    WeightTest,
+    PrefetchHooks Function({bool serviceReportId})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -6049,4 +9730,6 @@ class $AppDatabaseManager {
       $$ScalesTableTableManager(_db, _db.scales);
   $$ServiceReportsTableTableManager get serviceReports =>
       $$ServiceReportsTableTableManager(_db, _db.serviceReports);
+  $$WeightTestsTableTableManager get weightTests =>
+      $$WeightTestsTableTableManager(_db, _db.weightTests);
 }

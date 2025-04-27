@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/database.dart';
 import 'drift_providers.dart';
 
-final customerListProvider = FutureProvider((ref) async {
+final customerListProvider = FutureProvider<List<Customer>>((ref) async {
   final db = ref.read(databaseProvider);
-  return db.customerDao.getAllActiveCustomers();
+  return await db.customerDao.getAllActiveCustomers();
 });
