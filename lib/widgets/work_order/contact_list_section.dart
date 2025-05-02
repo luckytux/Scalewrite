@@ -10,7 +10,7 @@ class ContactListSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final controller = ref.watch(workOrderFormProvider);
+    final controller = ref.watch(workOrderFormProvider); // <<< FIXED: watch, not read.notifier
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

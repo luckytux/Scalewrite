@@ -8,7 +8,7 @@ part 'weight_test_dao.g.dart';
 
 @DriftAccessor(tables: [WeightTests])
 class WeightTestDao extends DatabaseAccessor<AppDatabase> with _$WeightTestDaoMixin {
-  WeightTestDao(AppDatabase db) : super(db);
+  WeightTestDao(super.db);
 
   Future<int> insertWeightTest(WeightTestsCompanion entry) =>
       into(weightTests).insert(entry);

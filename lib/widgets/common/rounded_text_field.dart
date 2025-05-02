@@ -1,4 +1,4 @@
-// File: lib/widgets/rounded_text_field.dart
+// File: lib/widgets/common/rounded_text_field.dart
 import 'package:flutter/material.dart';
 
 class RoundedTextField extends StatelessWidget {
@@ -9,6 +9,7 @@ class RoundedTextField extends StatelessWidget {
   final bool readOnly;
   final String? Function(String?)? validator;
   final VoidCallback? onEditingComplete;
+  final Widget? suffixIcon; // <-- ✅ NEW
 
   const RoundedTextField({
     super.key,
@@ -19,6 +20,7 @@ class RoundedTextField extends StatelessWidget {
     this.readOnly = false,
     this.validator,
     this.onEditingComplete,
+    this.suffixIcon, // <-- ✅ NEW
   });
 
   @override
@@ -32,9 +34,10 @@ class RoundedTextField extends StatelessWidget {
       onEditingComplete: onEditingComplete,
       decoration: InputDecoration(
         labelText: label,
+        suffixIcon: suffixIcon, // <-- ✅ NEW
         filled: true,
         fillColor: readOnly ? Colors.grey.shade200 : Colors.teal.shade50,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // << COMPACT padding
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
         ),

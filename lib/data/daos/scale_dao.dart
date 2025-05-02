@@ -8,7 +8,7 @@ part 'scale_dao.g.dart';
 
 @DriftAccessor(tables: [Scales])
 class ScaleDao extends DatabaseAccessor<AppDatabase> with _$ScaleDaoMixin {
-  ScaleDao(AppDatabase db) : super(db);
+  ScaleDao(super.db);
 
   Future<int> insertScale(ScalesCompanion entry) {
     return into(scales).insert(entry);

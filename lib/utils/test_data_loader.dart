@@ -6,11 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' show Value;
 import '../data/database.dart';
-import '../data/tables/customers.dart';
-import '../data/tables/contacts.dart';
-import '../data/tables/work_orders.dart';
-import '../data/tables/scales.dart';
-import '../data/tables/service_reports.dart';
 import '../providers/drift_providers.dart';
 
 final testDataLoaderProvider = ChangeNotifierProvider((ref) => TestDataLoader(ref));

@@ -1,4 +1,5 @@
 // File: lib/data/daos/contact_dao.dart
+
 import 'package:drift/drift.dart';
 import '../database.dart';
 import '../tables/contacts.dart';
@@ -7,7 +8,7 @@ part 'contact_dao.g.dart';
 
 @DriftAccessor(tables: [Contacts])
 class ContactDao extends DatabaseAccessor<AppDatabase> with _$ContactDaoMixin {
-  ContactDao(AppDatabase db) : super(db);
+  ContactDao(super.db);
 
   Future<int> insertContact(ContactsCompanion entry) => into(contacts).insert(entry);
 
@@ -29,5 +30,15 @@ class ContactDao extends DatabaseAccessor<AppDatabase> with _$ContactDaoMixin {
 
   Future<void> insertOrUpdateContact(ContactsCompanion entry) async {
     await into(contacts).insertOnConflictUpdate(entry);
+  }
+
+  // 🔵 NEW: Fetch active contacts sorted by isMain first
+  Future<List<Contact>> getActiveContactsByCustomerId(int customerId) {
+    return (select(contacts)
+          ..where((c) => c.customerId.equals(customerId) & c.deactivate.equals(false))
+          ..orderBy([
+            (c) => OrderingTerm(expression: c.isMain, mode: OrderingMode.desc),
+          ]))
+        .get();
   }
 }

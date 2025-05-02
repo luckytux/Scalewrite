@@ -7,7 +7,9 @@ import 'package:scalewrite_v2/widgets/common/rounded_text_field.dart';
 import 'package:scalewrite_v2/widgets/work_order/province_dropdown.dart';
 
 class BillingAddressSection extends ConsumerWidget {
-  const BillingAddressSection({super.key});
+  final bool enabled;
+
+  const BillingAddressSection({super.key, required this.enabled});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,33 +25,37 @@ class BillingAddressSection extends ConsumerWidget {
         RoundedTextField(
           controller: controller.billingAddressController,
           label: 'Street Address',
-          readOnly: !controller.customerFieldsEnabled,
+          readOnly: !enabled,
         ),
         const SizedBox(height: 8),
         Row(
           children: [
             Expanded(
-              flex: 2,
+              flex: 3,
               child: RoundedTextField(
                 controller: controller.billingCityController,
                 label: 'City',
-                readOnly: !controller.customerFieldsEnabled,
+                readOnly: !enabled,
               ),
             ),
             const SizedBox(width: 8),
             Expanded(
-              flex: 1,
+              flex: 2,
               child: ProvinceDropdown(
                 controller: controller.billingProvinceController,
+                enabled: enabled,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              flex: 2,
+              child: RoundedTextField(
+                controller: controller.billingPostalController,
+                label: 'Postal Code',
+                readOnly: !enabled,
               ),
             ),
           ],
-        ),
-        const SizedBox(height: 8),
-        RoundedTextField(
-          controller: controller.billingPostalController,
-          label: 'Postal Code',
-          readOnly: !controller.customerFieldsEnabled,
         ),
       ],
     );

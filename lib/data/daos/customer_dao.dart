@@ -8,7 +8,7 @@ part 'customer_dao.g.dart';
 
 @DriftAccessor(tables: [Customers])
 class CustomerDao extends DatabaseAccessor<AppDatabase> with _$CustomerDaoMixin {
-  CustomerDao(AppDatabase db) : super(db);
+  CustomerDao(super.db);
 
   Future<Customer?> getCustomerById(int id) {
     return (select(customers)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();

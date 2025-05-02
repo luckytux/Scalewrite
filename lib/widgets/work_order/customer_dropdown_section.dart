@@ -29,24 +29,29 @@ class CustomerDropdownSection extends ConsumerWidget {
       ),
     );
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        DropdownButtonFormField<int>(
-          decoration: const InputDecoration(labelText: 'Customer'),
-          value: controller.selectedCustomerId,
-          items: dropdownItems,
-          onChanged: (value) {
-            controller.selectCustomer(value, customers);
-          },
-          validator: (val) => val == null ? 'Please select a customer' : null,
+    return DropdownButtonFormField<int>(
+      decoration: InputDecoration(
+        labelText: 'Customer',
+        filled: true,
+        fillColor: Colors.teal.shade50,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
-        if (controller.workOrderNumber != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 16),
-            child: Text('Work Order #: ${controller.workOrderNumber!}'),
-          ),
-      ],
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.teal.shade200),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        focusedBorder: const OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.teal, width: 2),
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+        ),
+      ),
+      value: controller.selectedCustomerId,
+      items: dropdownItems,
+      onChanged: controller.editingWorkOrderId == null
+          ? (value) => controller.selectCustomer(value, customers)
+          : null,
+      validator: (val) => val == null ? 'Please select or create a customer' : null,
     );
   }
 }

@@ -9,7 +9,7 @@ part 'work_order_dao.g.dart';
 
 @DriftAccessor(tables: [WorkOrders, Customers])
 class WorkOrderDao extends DatabaseAccessor<AppDatabase> with _$WorkOrderDaoMixin {
-  WorkOrderDao(AppDatabase db) : super(db);
+  WorkOrderDao(super.db);
 
   Future<int> insertWorkOrder(WorkOrdersCompanion entry) =>
       into(workOrders).insert(entry);
@@ -25,7 +25,8 @@ class WorkOrderDao extends DatabaseAccessor<AppDatabase> with _$WorkOrderDaoMixi
     return (select(workOrders)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
   }
 
-  Future<void> updateWorkOrder(WorkOrder updated) async {
+  // 🛠 PATCH: Existing WorkOrder model version (keep it)
+  Future<void> updateWorkOrderFromModel(WorkOrder updated) async {
     await (update(workOrders)..where((w) => w.id.equals(updated.id))).write(
       WorkOrdersCompanion(
         id: Value(updated.id),
@@ -48,6 +49,12 @@ class WorkOrderDao extends DatabaseAccessor<AppDatabase> with _$WorkOrderDaoMixi
     );
   }
 
+  // 🛠 PATCH: New Companion version for form saving
+  Future<void> updateWorkOrder(int id, WorkOrdersCompanion entry) async {
+    await (update(workOrders)..where((w) => w.id.equals(id))).write(entry);
+  }
+
+
   Future<WorkOrder?> getMostRecentForCustomer(int customerId) {
     return (select(workOrders)
           ..where((w) => w.customerId.equals(customerId))
@@ -64,7 +71,6 @@ class WorkOrderDao extends DatabaseAccessor<AppDatabase> with _$WorkOrderDaoMixi
         .get();
   }
 
-  // ✅ THIS is the missing method used in the Service Report page
   Future<List<(WorkOrder, Customer)>> getAllWorkOrdersWithCustomers() {
     final query = select(workOrders).join([
       innerJoin(customers, customers.id.equalsExp(workOrders.customerId)),

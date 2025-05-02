@@ -29,7 +29,7 @@ class SectionDiagramPainter extends CustomPainter {
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
 
-    final textPaint = (String text, Offset offset) {
+    textPaint(String text, Offset offset) {
       final tp = TextPainter(
         text: TextSpan(
           text: text,
@@ -39,7 +39,7 @@ class SectionDiagramPainter extends CustomPainter {
       );
       tp.layout();
       tp.paint(canvas, offset);
-    };
+    }
 
     final center = Offset(size.width / 2, size.height / 2);
     final radius = min(size.width, size.height) / 3;

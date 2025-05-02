@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:scalewrite_v2/data/database.dart';
 import 'package:scalewrite_v2/pages/create_service_report_page.dart';
 import 'package:scalewrite_v2/providers/drift_providers.dart';
 import 'package:scalewrite_v2/providers/work_order_form_provider.dart';
@@ -24,7 +23,7 @@ class WorkOrderActionButtons extends ConsumerWidget {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Work Order Saved')),
                 );
-                Navigator.pop(context); // return to home
+                Navigator.pop(context); // Return to home
               }
             },
             icon: const Icon(Icons.save),
@@ -42,27 +41,36 @@ class WorkOrderActionButtons extends ConsumerWidget {
             onPressed: () async {
               final customerId = controller.selectedCustomerId;
               if (customerId == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Please select a customer before proceeding.')),
-                );
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please select a customer before proceeding.')),
+                  );
+                }
                 return;
               }
 
               final success = await controller.save();
-              if (context.mounted && success) {
+              if (!context.mounted || !success) return;
+
+              int? workOrderId = controller.editingWorkOrderId;
+
+              // If no editing ID, fetch the most recent saved
+              if (workOrderId == null) {
                 final db = ref.read(databaseProvider);
                 final latest = await db.workOrderDao.getMostRecentForCustomer(customerId);
-                if (latest != null && context.mounted) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => CreateServiceReportPage(
-                        customerId: latest.customerId,
-                        workOrderId: latest.id,
-                      ),
+                workOrderId = latest?.id;
+              }
+
+              if (workOrderId != null && context.mounted) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CreateServiceReportPage(
+                      customerId: customerId,
+                      workOrderId: workOrderId,
                     ),
-                  );
-                }
+                  ),
+                );
               }
             },
             icon: const Icon(Icons.note_add),

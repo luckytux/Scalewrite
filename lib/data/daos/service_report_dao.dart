@@ -9,7 +9,7 @@ part 'service_report_dao.g.dart';
 @DriftAccessor(tables: [ServiceReports])
 class ServiceReportDao extends DatabaseAccessor<AppDatabase>
     with _$ServiceReportDaoMixin {
-  ServiceReportDao(AppDatabase db) : super(db);
+  ServiceReportDao(super.db);
 
   Future<int> insertReport(ServiceReportsCompanion entry) {
     return into(serviceReports).insert(entry);

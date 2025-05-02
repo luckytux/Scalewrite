@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:drift/drift.dart' as drift;
 import '../data/database.dart';
-import '../data/tables/customers.dart';
 import '../data/daos/customer_dao.dart';
 
 class CustomerFormController extends ChangeNotifier {

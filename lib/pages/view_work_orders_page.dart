@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/drift_providers.dart';
 import '../data/database.dart';
+import 'create_work_order_page.dart';
 
 class ViewWorkOrdersPage extends ConsumerWidget {
   const ViewWorkOrdersPage({super.key});
@@ -33,13 +34,25 @@ class ViewWorkOrdersPage extends ConsumerWidget {
             itemBuilder: (context, index) {
               final wo = workOrders[index];
               return ListTile(
-                title: Text('Work Order #: ${wo.workOrderNumber ?? 'Unknown'}'),
-                subtitle: Text('Customer ID: ${wo.customerId}'),
+                title: Text(
+                  wo.workOrderNumber,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Customer ID: ${wo.customerId}'),
+                    Text('${wo.siteCity}, ${wo.siteProvince}'),
+                    Text('Last Modified: ${_formatDate(wo.lastModified)}'),
+                  ],
+                ),
                 trailing: const Icon(Icons.arrow_forward_ios),
                 onTap: () {
-                  // Later you can open Work Order details
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Open Work Order ${wo.workOrderNumber}')),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => CreateWorkOrderPage(existingWorkOrder: wo),
+                    ),
                   );
                 },
               );
@@ -48,5 +61,9 @@ class ViewWorkOrdersPage extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 }
