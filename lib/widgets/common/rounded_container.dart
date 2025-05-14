@@ -6,10 +6,24 @@ class RoundedContainer extends StatelessWidget {
   final Widget child;
   final String? label;
 
-  const RoundedContainer({super.key, required this.child, this.label});
+  /// Controls whether the container is in editable (true) or read-only (false) mode.
+  final bool editable;
+
+  /// Optional override for background color.
+  final Color? fillColor;
+
+  const RoundedContainer({
+    super.key,
+    required this.child,
+    this.label,
+    this.editable = false,
+    this.fillColor,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final defaultFill = editable ? Colors.teal.shade50 : Colors.grey.shade200;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -20,7 +34,7 @@ class RoundedContainer extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.teal.shade50,
+            color: fillColor ?? defaultFill,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.teal, width: 1),
           ),

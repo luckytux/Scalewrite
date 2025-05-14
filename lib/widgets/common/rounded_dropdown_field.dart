@@ -9,6 +9,9 @@ class RoundedDropdownField<T> extends StatelessWidget {
   final ValueChanged<T?>? onChanged;
   final bool enabled;
 
+  /// Optional override for background fill color
+  final Color? fillColor;
+
   const RoundedDropdownField({
     super.key,
     required this.label,
@@ -16,10 +19,13 @@ class RoundedDropdownField<T> extends StatelessWidget {
     required this.items,
     required this.onChanged,
     this.enabled = true,
+    this.fillColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    final defaultFill = enabled ? Colors.teal.shade50 : Colors.grey.shade200;
+
     return DropdownButtonFormField<T>(
       value: value,
       items: items,
@@ -27,8 +33,9 @@ class RoundedDropdownField<T> extends StatelessWidget {
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: enabled ? Colors.white : Colors.grey.shade200,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        fillColor: fillColor ?? defaultFill,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Colors.teal),

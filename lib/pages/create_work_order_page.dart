@@ -10,7 +10,6 @@ import 'package:scalewrite_v2/widgets/work_order/site_address_section.dart';
 import 'package:scalewrite_v2/widgets/work_order/billing_address_section.dart';
 import 'package:scalewrite_v2/widgets/work_order/contact_list_section.dart';
 import 'package:scalewrite_v2/widgets/work_order/work_order_action_buttons.dart';
-import 'package:scalewrite_v2/widgets/common/rounded_text_field.dart';
 
 class CreateWorkOrderPage extends ConsumerStatefulWidget {
   final WorkOrder? existingWorkOrder;
@@ -18,20 +17,23 @@ class CreateWorkOrderPage extends ConsumerStatefulWidget {
   const CreateWorkOrderPage({super.key, this.existingWorkOrder});
 
   @override
-  ConsumerState<CreateWorkOrderPage> createState() => _CreateWorkOrderPageState();
+  ConsumerState<CreateWorkOrderPage> createState() =>
+      _CreateWorkOrderPageState();
 }
 
 class _CreateWorkOrderPageState extends ConsumerState<CreateWorkOrderPage> {
   @override
   void initState() {
     super.initState();
-    // Reset controller to clear old state if creating a new WO
-    final controller = ref.read(workOrderFormProvider);
-    if (widget.existingWorkOrder == null) {
-      controller.resetForm();
-    } else {
-      controller.loadExistingWorkOrder(widget.existingWorkOrder!);
-    }
+
+    Future.microtask(() {
+      final controller = ref.read(workOrderFormProvider);
+      if (widget.existingWorkOrder == null) {
+        controller.resetForm();
+      } else {
+        controller.loadExistingWorkOrder(widget.existingWorkOrder!);
+      }
+    });
   }
 
   @override
@@ -44,59 +46,83 @@ class _CreateWorkOrderPageState extends ConsumerState<CreateWorkOrderPage> {
       body: customersAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error loading customers: $e')),
-        data: (customers) => Padding(
-          padding: const EdgeInsets.all(16),
-          child: Form(
-            key: controller.formKey,
-            child: ListView(
-              children: [
-                if (controller.workOrderNumber != null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Text(
-                      'Work Order #: ${controller.workOrderNumber!}',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        data: (customers) {
+          if (controller.selectedCustomerId != null &&
+              !customers.any((c) => c.id == controller.selectedCustomerId)) {
+            controller.selectedCustomerId = null;
+          }
+
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: Form(
+              key: controller.formKey,
+              child: ListView(
+                children: [
+                  if (controller.workOrderNumber != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Text(
+                        'Work Order #: ${controller.workOrderNumber!}',
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
                     ),
+
+                  CustomerDropdownSection(customers: customers),
+                  const SizedBox(height: 16),
+
+                  if (controller.selectedCustomerId != null)
+                    Container(
+                      color: Colors.grey.shade200,
+                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.only(bottom: 12),
+                      child: const Text(
+                        'This work order is linked to an existing customer.\nTo make changes, enable "Edit Customer Fields".',
+                        style: TextStyle(fontWeight: FontWeight.w500),
+                      ),
+                    ),
+
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Edit Customer Fields'),
+                    value: controller.customerFieldsEnabled,
+                    onChanged: controller.selectedCustomerId != null
+                        ? (val) => controller.enableCustomerEditing(val)
+                        : null,
                   ),
-                CustomerDropdownSection(customers: customers),
-                const SizedBox(height: 16),
-                RoundedTextField(
-                  controller: controller.businessNameController,
-                  label: 'Business Name (Required)',
-                  readOnly: controller.selectedCustomerId != null && !controller.customerFieldsEnabled,
-                  validator: (val) {
-                    if (val == null || val.trim().isEmpty) {
-                      return 'Business Name is required';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                SwitchListTile(
-                  title: const Text('Edit Customer Fields'),
-                  value: controller.customerFieldsEnabled,
-                  onChanged: controller.selectedCustomerId != null
-                      ? (val) => controller.enableCustomerEditing(val)
-                      : null,
-                ),
-                SiteAddressSection(enabled: controller.selectedCustomerId == null || controller.customerFieldsEnabled),
-                const SizedBox(height: 24),
-                SwitchListTile(
-                  title: const Text('Use Separate Billing Address'),
-                  value: controller.showBilling,
-                  onChanged: controller.selectedCustomerId == null || controller.customerFieldsEnabled
-                      ? (val) => controller.toggleBillingVisibility(val)
-                      : null,
-                ),
-                BillingAddressSection(enabled: controller.selectedCustomerId == null || controller.customerFieldsEnabled),
-                const SizedBox(height: 24),
-                const ContactListSection(),
-                const SizedBox(height: 24),
-                const WorkOrderActionButtons(),
-              ],
+
+                  SiteAddressSection(
+                    enabled: controller.selectedCustomerId == null ||
+                        controller.customerFieldsEnabled,
+                  ),
+                  const SizedBox(height: 24),
+
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Use Separate Billing Address'),
+                    value: controller.showBilling,
+                    onChanged: controller.selectedCustomerId == null ||
+                            controller.customerFieldsEnabled
+                        ? (val) =>
+                            controller.toggleBillingVisibility(val)
+                        : null,
+                  ),
+
+                  BillingAddressSection(
+                    enabled: controller.selectedCustomerId == null ||
+                        controller.customerFieldsEnabled,
+                  ),
+                  const SizedBox(height: 24),
+
+                  const ContactListSection(),
+                  const SizedBox(height: 24),
+
+                  const WorkOrderActionButtons(),
+                ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

@@ -35,7 +35,7 @@ class ScaleCapacitySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fillColor = editable ? Colors.teal.shade50 : Colors.red.shade50;
+    final fillColor = editable ? Colors.teal.shade50 : Colors.grey.shade200;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,

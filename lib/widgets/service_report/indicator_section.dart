@@ -26,7 +26,7 @@ class IndicatorSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fillColor = editable ? Colors.teal.shade50 : Colors.red.shade50;
+    final fillColor = editable ? Colors.teal.shade50 : Colors.grey.shade200;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,8 +58,14 @@ class IndicatorSection extends StatelessWidget {
                 'Approval Code',
                 approvalCodeController,
                 fillColor,
-                validator: approvalCodeValidator,
                 requiredField: false,
+                validator: approvalCodeValidator ?? (value) {
+                  debugPrint('🔍 Validating Approval Code: "$value"');
+                  if (!editable) return null;
+                  if (value == null || value.isEmpty) return null;
+                  if (!RegExp(r'^\d{4}$').hasMatch(value)) return 'Must be a 4-digit number';
+                  return null;
+                },
               ),
             ),
           ],
@@ -77,6 +83,8 @@ class IndicatorSection extends StatelessWidget {
   }) {
     return TextFormField(
       controller: controller,
+      readOnly: !editable,
+      keyboardType: label.contains('Approval') ? TextInputType.number : TextInputType.text,
       decoration: InputDecoration(
         labelText: label,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -87,7 +95,6 @@ class IndicatorSection extends StatelessWidget {
           (requiredField
               ? (value) => (value == null || value.isEmpty) ? 'Enter $label' : null
               : null),
-      readOnly: !editable,
     );
   }
-} 
+}

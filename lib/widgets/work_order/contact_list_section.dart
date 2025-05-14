@@ -10,7 +10,7 @@ class ContactListSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final controller = ref.watch(workOrderFormProvider); // <<< FIXED: watch, not read.notifier
+    final controller = ref.watch(workOrderFormProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -22,21 +22,29 @@ class ContactListSection extends ConsumerWidget {
               child: ContactInputTile(
                 contact: contact,
                 isMain: contact.isMain,
-                readOnly: !controller.customerFieldsEnabled,
-                onMakeMain: () => controller.makeMainContact(contact),
-                onRemove: () => controller.removeContact(contact),
+                readOnly: controller.contactsReadOnly,
+                onMakeMain: controller.contactsReadOnly ? null : () => controller.makeMainContact(contact),
+                onRemove: controller.contactsReadOnly ? () {} : () => controller.removeContact(contact),
                 onUpdate: (updated) => controller.updateContact(updated),
               ),
             )),
+        if (controller.contactValidationError)
+          const Padding(
+            padding: EdgeInsets.only(top: 4, left: 8),
+            child: Text(
+              'At least one contact must have a name and a phone number or email.',
+              style: TextStyle(color: Colors.red, fontSize: 13),
+            ),
+          ),
         const SizedBox(height: 8),
         Align(
           alignment: Alignment.centerLeft,
           child: TextButton.icon(
-            onPressed: controller.customerFieldsEnabled ? controller.addNewContact : null,
+            onPressed: controller.contactsReadOnly ? null : controller.addNewContact,
             icon: const Icon(Icons.add),
             label: const Text('Add Contact'),
             style: TextButton.styleFrom(
-              foregroundColor: controller.customerFieldsEnabled ? Colors.teal : Colors.grey,
+              foregroundColor: controller.contactsReadOnly ? Colors.grey : Colors.teal,
             ),
           ),
         ),

@@ -2,15 +2,27 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:scalewrite_v2/providers/work_order_form_provider.dart';
+import 'package:scalewrite_v2/utils/formatters.dart';
 import 'package:scalewrite_v2/widgets/common/rounded_text_field.dart';
 import 'package:scalewrite_v2/widgets/work_order/province_dropdown.dart';
+import 'package:scalewrite_v2/widgets/map_picker_page.dart';
+import 'package:scalewrite_v2/widgets/map_picker_page_desktop.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gm;
+import 'package:latlong2/latlong.dart' as lm;
+import 'package:geocoding/geocoding.dart';
 
 class SiteAddressSection extends ConsumerWidget {
   final bool enabled;
+  final Color? fillColor;
 
-  const SiteAddressSection({super.key, required this.enabled});
+  const SiteAddressSection({
+    super.key,
+    required this.enabled,
+    this.fillColor,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,7 +37,7 @@ class SiteAddressSection extends ConsumerWidget {
           controller: controller.siteAddressController,
           label: 'Street Address',
           readOnly: !enabled,
-        ),
+                ),
         const SizedBox(height: 8),
         Row(
           children: [
@@ -35,7 +47,7 @@ class SiteAddressSection extends ConsumerWidget {
                 controller: controller.siteCityController,
                 label: 'City',
                 readOnly: !enabled,
-              ),
+                            ),
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -52,8 +64,17 @@ class SiteAddressSection extends ConsumerWidget {
                 controller: controller.sitePostalController,
                 label: 'Postal Code',
                 readOnly: !enabled,
+                keyboardType: TextInputType.text,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9 ]')),
+                  PostalCodeFormatter(),
+                ],
+                validator: (value) => isValidCanadianPostalCode(value ?? '')
+                    ? null
+                    : 'Format: A1A 1A1',
               ),
             ),
+
           ],
         ),
         const SizedBox(height: 8),
@@ -64,7 +85,7 @@ class SiteAddressSection extends ConsumerWidget {
               controller: controller.gpsLocationController,
               label: 'GPS Location (Optional)',
               readOnly: !enabled,
-              suffixIcon: IconButton(
+                          suffixIcon: IconButton(
                 icon: const Icon(Icons.location_on),
                 onPressed: () {
                   final gps = controller.gpsLocationController.text.trim();
@@ -91,14 +112,63 @@ class SiteAddressSection extends ConsumerWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    controller.gpsLocationController.text = '51.0486,-114.0708';
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Dummy GPS location filled')),
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => Theme.of(context).platform == TargetPlatform.android
+                            ? const MapPickerPage()
+                            : const MapPickerPageDesktop(),
+                      ),
                     );
+
+                    if (result is gm.LatLng || result is lm.LatLng) {
+                      final lat = result.latitude;
+                      final lng = result.longitude;
+                      controller.gpsLocationController.text =
+                          '${lat.toStringAsFixed(6)},${lng.toStringAsFixed(6)}';
+
+                      final placemarks = await placemarkFromCoordinates(lat, lng);
+                      if (placemarks.isNotEmpty) {
+                        final place = placemarks.first;
+
+                        Future<void> maybeOverwrite(TextEditingController ctrl, String label, String? newVal) async {
+                          if (newVal == null || newVal.trim().isEmpty) return;
+                          if (ctrl.text.trim().isEmpty) {
+                            ctrl.text = newVal;
+                          } else {
+                            final confirm = await showDialog<bool>(
+                              context: context,
+                              builder: (_) => AlertDialog(
+                                title: Text('Overwrite $label?'),
+                                content: Text('Detected "$newVal" for $label. Overwrite existing value "${ctrl.text}"?'),
+                                actions: [
+                                  TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('No')),
+                                  TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Yes')),
+                                ],
+                              ),
+                            );
+                            if (confirm == true) ctrl.text = newVal;
+                          }
+                        }
+
+                        await maybeOverwrite(controller.siteAddressController, 'Street Address', place.street);
+                        await maybeOverwrite(controller.siteCityController, 'City', place.locality);
+                        await maybeOverwrite(controller.siteProvinceController, 'Province', place.administrativeArea);
+                        await maybeOverwrite(controller.sitePostalController, 'Postal Code', place.postalCode);
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('GPS location used to detect address.')),
+                        );
+                      }
+                    } else if (result != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Invalid location result returned')),
+                      );
+                    }
                   },
                   icon: const Icon(Icons.my_location),
-                  label: const Text('Use Current Location'),
+                  label: const Text('Pin Location'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.teal.shade100,
                     foregroundColor: Colors.teal.shade900,

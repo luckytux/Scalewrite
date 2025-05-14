@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import '../database.dart';
 import '../tables/contacts.dart';
 
+
 part 'contact_dao.g.dart';
 
 @DriftAccessor(tables: [Contacts])
@@ -32,7 +33,6 @@ class ContactDao extends DatabaseAccessor<AppDatabase> with _$ContactDaoMixin {
     await into(contacts).insertOnConflictUpdate(entry);
   }
 
-  // 🔵 NEW: Fetch active contacts sorted by isMain first
   Future<List<Contact>> getActiveContactsByCustomerId(int customerId) {
     return (select(contacts)
           ..where((c) => c.customerId.equals(customerId) & c.deactivate.equals(false))
@@ -40,5 +40,15 @@ class ContactDao extends DatabaseAccessor<AppDatabase> with _$ContactDaoMixin {
             (c) => OrderingTerm(expression: c.isMain, mode: OrderingMode.desc),
           ]))
         .get();
+  }
+
+  /// Marks all contacts for a customer as deactivated instead of deleting them.
+  Future<void> deactivateContactsForCustomer(int customerId) {
+    return (update(contacts)..where((c) => c.customerId.equals(customerId))).write(
+      const ContactsCompanion(
+        deactivate: Value(true),
+        auditFlag: Value(true),
+      ),
+    );
   }
 }

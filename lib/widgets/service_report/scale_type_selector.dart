@@ -1,24 +1,24 @@
+// File: lib/widgets/service_report/scale_type_selector.dart
+
 import 'package:flutter/material.dart';
 
 class ScaleTypeSelector extends StatelessWidget {
-  final String? selectedMainType;
+  final String? selectedType;
   final String? selectedSubtype;
-  final String? otherType;
-  final ValueChanged<String?> onMainTypeChanged;
+  final bool enabled;
+  final ValueChanged<String?> onTypeChanged;
   final ValueChanged<String?> onSubtypeChanged;
-  final ValueChanged<String?> onOtherTypeChanged;
 
   const ScaleTypeSelector({
     super.key,
-    required this.selectedMainType,
+    required this.selectedType,
     required this.selectedSubtype,
-    required this.otherType,
-    required this.onMainTypeChanged,
+    required this.enabled,
+    required this.onTypeChanged,
     required this.onSubtypeChanged,
-    required this.onOtherTypeChanged,
   });
 
-  static const List<String> mainTypes = [
+  static const List<String> scaleTypes = [
     'Truck',
     'Floor',
     'Bench',
@@ -27,65 +27,70 @@ class ScaleTypeSelector extends StatelessWidget {
     'Squeeze',
     'Rail',
     'Axle',
-    'Other'
+    'Hopper',
+    'Crane',
+    'Other',
   ];
 
   static const List<String> subtypes = [
     'Electronic',
     'Mechanical',
-    'Electro-mechanical'
+    'Electro-Mechanical',
   ];
 
   @override
   Widget build(BuildContext context) {
+    final validSelectedType = scaleTypes.contains(selectedType) ? selectedType : null;
+    final validSelectedSubtype = subtypes.contains(selectedSubtype) ? selectedSubtype : null;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        DropdownButtonFormField<String>(
-          value: selectedMainType,
-          items: mainTypes.map((type) => DropdownMenuItem(
-            value: type,
-            child: Text(type),
-          )).toList(),
-          onChanged: onMainTypeChanged,
-          decoration: InputDecoration(
-            labelText: 'Scale Type',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            filled: true,
-            fillColor: Colors.teal.shade50,
-          ),
-          validator: (val) => val == null || val.isEmpty ? 'Select a scale type' : null,
+        const Text('Scale Type & Subtype', style: TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: DropdownButtonFormField<String>(
+                value: validSelectedType,
+                items: scaleTypes.map((type) {
+                  return DropdownMenuItem(
+                    value: type,
+                    child: Text(type),
+                  );
+                }).toList(),
+                onChanged: enabled ? onTypeChanged : null,
+                decoration: InputDecoration(
+                  labelText: 'Type',
+                  filled: true,
+                  fillColor: enabled ? Colors.teal.shade50 : Colors.grey.shade200,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: DropdownButtonFormField<String>(
+                value: validSelectedSubtype,
+                items: subtypes.map((subtype) {
+                  return DropdownMenuItem(
+                    value: subtype,
+                    child: Text(subtype),
+                  );
+                }).toList(),
+                onChanged: enabled ? onSubtypeChanged : null,
+                decoration: InputDecoration(
+                  labelText: 'Subtype',
+                  filled: true,
+                  fillColor: enabled ? Colors.teal.shade50 : Colors.grey.shade200,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 10),
-        if (selectedMainType != null && selectedMainType != 'Other')
-          DropdownButtonFormField<String>(
-            value: selectedSubtype,
-            items: subtypes.map((type) => DropdownMenuItem(
-              value: type,
-              child: Text(type),
-            )).toList(),
-            onChanged: onSubtypeChanged,
-            decoration: InputDecoration(
-              labelText: 'Subtype',
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              filled: true,
-              fillColor: Colors.teal.shade50,
-            ),
-            validator: (val) => val == null || val.isEmpty ? 'Select a subtype' : null,
-          ),
-        if (selectedMainType == 'Other')
-          TextFormField(
-            initialValue: otherType,
-            onChanged: onOtherTypeChanged,
-            decoration: InputDecoration(
-              labelText: 'Custom Scale Type',
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              filled: true,
-              fillColor: Colors.teal.shade50,
-            ),
-            validator: (val) => val == null || val.isEmpty ? 'Enter custom type' : null,
-          ),
       ],
     );
   }
+
 }

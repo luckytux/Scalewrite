@@ -37,6 +37,10 @@ class WorkOrderFormController extends ChangeNotifier {
   List<Contact> _contacts = [];
   List<Contact> get contacts => List.unmodifiable(_contacts);
 
+  bool contactValidationError = false;
+
+  bool get contactsReadOnly => selectedCustomerId != null && !customerFieldsEnabled;
+
   Contact? get mainContact {
     try {
       return _contacts.firstWhere((c) => c.isMain);
@@ -50,9 +54,10 @@ class WorkOrderFormController extends ChangeNotifier {
   void resetForm() {
     selectedCustomerId = null;
     editingWorkOrderId = null;
-    workOrderNumber = generateWorkOrderNumber(101); // Temporary UID
+    workOrderNumber = generateWorkOrderNumber(101);
     customerFieldsEnabled = true;
     showBilling = false;
+    contactValidationError = false;
 
     businessNameController.clear();
     siteAddressController.clear();
@@ -84,7 +89,7 @@ class WorkOrderFormController extends ChangeNotifier {
     return '$uid-$date-$time';
   }
 
-  void loadExistingWorkOrder(WorkOrder wo) {
+  void loadExistingWorkOrder(WorkOrder wo) async {
     editingWorkOrderId = wo.id;
     selectedCustomerId = wo.customerId;
     workOrderNumber = wo.workOrderNumber;
@@ -101,40 +106,58 @@ class WorkOrderFormController extends ChangeNotifier {
     billingPostalController.text = wo.billingPostalCode ?? '';
 
     showBilling = wo.billingAddress != null;
+
+    final customerDao = ref.read(customerDaoProvider);
+    final customer = await customerDao.getCustomerById(wo.customerId);
+
+    if (customer != null) {
+      businessNameController.text = customer.businessName;
+    } else {
+      businessNameController.text = '[Missing Customer]';
+    }
+
     notifyListeners();
   }
 
   Future<void> selectCustomer(int? customerId, List<Customer> customers) async {
-  selectedCustomerId = customerId;
+    selectedCustomerId = customerId;
 
-  if (customerId == null) {
-    _clearFields();
-    customerFieldsEnabled = true; // Allow editing for new customers
-  } else {
-    final customer = customers.firstWhere((c) => c.id == customerId);
+    if (customerId == null) {
+      _clearFields();
+      customerFieldsEnabled = true;
+    } else {
+      final customer = customers.firstWhere((c) => c.id == customerId);
 
-    businessNameController.text = customer.businessName;
-    siteAddressController.text = customer.siteAddress ?? '';
-    siteCityController.text = customer.siteCity ?? '';
-    siteProvinceController.text = (customer.siteProvince?.isNotEmpty ?? false) ? customer.siteProvince! : 'Alberta';
-    sitePostalController.text = customer.sitePostalCode ?? '';
-    gpsLocationController.text = customer.gpsLocation ?? '';
+      businessNameController.text = customer.businessName;
+      siteAddressController.text = customer.siteAddress ?? '';
+      siteCityController.text = customer.siteCity ?? '';
+      siteProvinceController.text = (customer.siteProvince?.isNotEmpty ?? false) ? customer.siteProvince! : 'Alberta';
+      sitePostalController.text = customer.sitePostalCode ?? '';
+      gpsLocationController.text = customer.gpsLocation ?? '';
 
-    billingAddressController.text = customer.billingAddress ?? '';
-    billingCityController.text = customer.billingCity ?? '';
-    billingProvinceController.text = (customer.billingProvince?.isNotEmpty ?? false) ? customer.billingProvince! : 'Alberta';
-    billingPostalController.text = customer.billingPostalCode ?? '';
+      billingAddressController.text = customer.billingAddress ?? '';
+      billingCityController.text = customer.billingCity ?? '';
+      billingProvinceController.text = (customer.billingProvince?.isNotEmpty ?? false) ? customer.billingProvince! : 'Alberta';
+      billingPostalController.text = customer.billingPostalCode ?? '';
 
-    customerFieldsEnabled = false; // Lock fields by default for existing customers
+      customerFieldsEnabled = false;
 
-    final contactDao = ref.read(contactDaoProvider);
-    final customerContacts = await contactDao.getContactsForCustomer(customerId);
-    _contacts = customerContacts;
+      final contactDao = ref.read(contactDaoProvider);
+      final customerContacts = await contactDao.getContactsForCustomer(customerId);
+      _contacts = customerContacts;
+    }
+
+    notifyListeners();
   }
 
-  notifyListeners();
-}
-
+  void setIsCreatingNewCustomer(String name) {
+    selectedCustomerId = null;
+    customerFieldsEnabled = true;
+    businessNameController.text = name;
+    _contacts.clear();
+    addNewContact();
+    notifyListeners();
+  }
 
   void _clearFields() {
     businessNameController.clear();
@@ -175,18 +198,23 @@ class WorkOrderFormController extends ChangeNotifier {
       auditFlag: true,
       synced: false,
     ));
+    contactValidationError = false;
     notifyListeners();
   }
 
   void makeMainContact(Contact contact) {
     _contacts = _contacts.map((c) {
-      if (c.id == contact.id) {
-        return c.copyWith(isMain: true, auditFlag: true);
-      } else if (c.isMain) {
-        return c.copyWith(isMain: false, auditFlag: true);
-      }
-      return c;
+      return c.id == contact.id
+          ? c.copyWith(isMain: true, auditFlag: true)
+          : (c.isMain ? c.copyWith(isMain: false, auditFlag: true) : c);
     }).toList();
+
+    _contacts.sort((a, b) {
+      if (a.isMain) return -1;
+      if (b.isMain) return 1;
+      return 0;
+    });
+
     notifyListeners();
   }
 
@@ -214,17 +242,24 @@ class WorkOrderFormController extends ChangeNotifier {
       return false;
     }
 
+    final hasValidContact = _contacts.any((c) {
+      final hasName = c.name.trim().isNotEmpty ?? false;
+      final hasPhoneOrEmail = (c.phone?.trim().isNotEmpty ?? false) || (c.email?.trim().isNotEmpty ?? false);
+      return hasName && hasPhoneOrEmail;
+    });
+
+    if (!hasValidContact) {
+      contactValidationError = true;
+      notifyListeners();
+      return false;
+    }
+
     final db = ref.read(databaseProvider);
+    final contactDao = ref.read(contactDaoProvider);
 
     int? customerId = selectedCustomerId;
 
     if (customerId == null) {
-      if (businessNameController.text.trim().isEmpty ||
-          siteAddressController.text.trim().isEmpty ||
-          siteCityController.text.trim().isEmpty) {
-        return false;
-      }
-
       final customerEntry = CustomersCompanion(
         businessName: drift.Value(businessNameController.text),
         siteAddress: drift.Value(siteAddressController.text),
@@ -264,9 +299,28 @@ class WorkOrderFormController extends ChangeNotifier {
     if (editingWorkOrderId != null) {
       await db.workOrderDao.updateWorkOrder(editingWorkOrderId!, workOrderEntry);
     } else {
-      await db.workOrderDao.insertWorkOrder(workOrderEntry);
+      editingWorkOrderId = await db.workOrderDao.insertWorkOrder(workOrderEntry);
     }
 
+    await contactDao.deactivateContactsForCustomer(customerId);
+
+    for (final c in _contacts) {
+      final contactEntry = ContactsCompanion(
+        customerId: drift.Value(customerId),
+        name: drift.Value(c.name ?? ''),
+        phone: drift.Value(c.phone ?? ''),
+        email: drift.Value(c.email ?? ''),
+        notes: drift.Value(c.notes ?? ''),
+        isMain: drift.Value(c.isMain),
+        deactivate: drift.Value(c.deactivate),
+        auditFlag: drift.Value(true),
+        synced: drift.Value(false),
+      );
+
+      await contactDao.insertContact(contactEntry);
+    }
+
+    contactValidationError = false;
     return true;
   }
 

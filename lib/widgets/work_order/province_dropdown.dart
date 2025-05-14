@@ -4,40 +4,45 @@ import 'package:flutter/material.dart';
 
 class ProvinceDropdown extends StatelessWidget {
   final TextEditingController controller;
-  final List<String> provinces;
   final bool enabled;
+
+  static const Map<String, String> provinceMap = {
+    'AB': 'Alberta',
+    'BC': 'British Columbia',
+    'SK': 'Saskatchewan',
+    'MB': 'Manitoba',
+    'ON': 'Ontario',
+    'QC': 'Quebec',
+    'NB': 'New Brunswick',
+    'NS': 'Nova Scotia',
+    'PE': 'Prince Edward Island',
+    'NL': 'Newfoundland and Labrador',
+    'YT': 'Yukon',
+    'NT': 'Northwest Territories',
+    'NU': 'Nunavut',
+  };
 
   const ProvinceDropdown({
     super.key,
     required this.controller,
-    this.provinces = const [
-      'Alberta',
-      'British Columbia',
-      'Saskatchewan',
-      'Manitoba',
-      'Ontario',
-      'Quebec',
-      'New Brunswick',
-      'Nova Scotia',
-      'Prince Edward Island',
-      'Newfoundland and Labrador',
-      'Yukon',
-      'Northwest Territories',
-      'Nunavut',
-    ],
     this.enabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    final provinceCodes = provinceMap.keys.toList();
+    final currentValue = controller.text.isEmpty || !provinceMap.containsKey(controller.text)
+        ? null
+        : controller.text;
+
     return DropdownButtonFormField<String>(
       isExpanded: true,
-      value: controller.text.isEmpty ? null : controller.text,
+      value: currentValue,
       onChanged: enabled ? (value) => controller.text = value ?? '' : null,
-      items: provinces.map((prov) {
+      items: provinceCodes.map((code) {
         return DropdownMenuItem(
-          value: prov,
-          child: Text(prov, overflow: TextOverflow.ellipsis),
+          value: code,
+          child: Text(provinceMap[code] ?? code, overflow: TextOverflow.ellipsis),
         );
       }).toList(),
       decoration: InputDecoration(

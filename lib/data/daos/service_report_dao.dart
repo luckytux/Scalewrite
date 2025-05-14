@@ -1,12 +1,13 @@
-// File: lib/data/daos/service_report_dao.dart
-
+// File: lib\data\daos\service_report_dao.dart
 import 'package:drift/drift.dart';
 import '../database.dart';
 import '../tables/service_reports.dart';
+import '../tables/scales.dart';
+import '../../models/service_report_with_scale.dart';
 
 part 'service_report_dao.g.dart';
 
-@DriftAccessor(tables: [ServiceReports])
+@DriftAccessor(tables: [ServiceReports, Scales])
 class ServiceReportDao extends DatabaseAccessor<AppDatabase>
     with _$ServiceReportDaoMixin {
   ServiceReportDao(super.db);
@@ -25,8 +26,25 @@ class ServiceReportDao extends DatabaseAccessor<AppDatabase>
 
   Future<List<ServiceReport>> getReportsForWorkOrder(int workOrderId) {
     return (select(serviceReports)
-          ..where((tbl) => tbl.workOrderId.equals(workOrderId)))
+          ..where((tbl) => tbl.workOrderId.equals(workOrderId))
+          ..orderBy([
+            (tbl) => OrderingTerm(expression: tbl.id, mode: OrderingMode.desc),
+          ]))
         .get();
+  }
+
+  Future<List<ServiceReportWithScale>> getReportsWithScaleByWorkOrder(int workOrderId) async {
+    final query = select(serviceReports).join([
+      innerJoin(scales, scales.id.equalsExp(serviceReports.scaleId)),
+    ])..where(serviceReports.workOrderId.equals(workOrderId));
+
+    final rows = await query.get();
+
+    return rows.map((row) {
+      final report = row.readTable(serviceReports);
+      final scale = row.readTable(scales);
+      return ServiceReportWithScale(report: report, scale: scale);
+    }).toList();
   }
 
   Future<void> markReportComplete(int id) {

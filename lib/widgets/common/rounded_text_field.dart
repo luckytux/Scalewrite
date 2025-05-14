@@ -1,5 +1,7 @@
 // File: lib/widgets/common/rounded_text_field.dart
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class RoundedTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -9,7 +11,11 @@ class RoundedTextField extends StatelessWidget {
   final bool readOnly;
   final String? Function(String?)? validator;
   final VoidCallback? onEditingComplete;
-  final Widget? suffixIcon; // <-- ✅ NEW
+  final ValueChanged<String>? onChanged;
+  final VoidCallback? onTap; // ✅ NEW
+  final Widget? suffixIcon;
+  final Color? fillColor;
+  final List<TextInputFormatter>? inputFormatters;
 
   const RoundedTextField({
     super.key,
@@ -20,11 +26,17 @@ class RoundedTextField extends StatelessWidget {
     this.readOnly = false,
     this.validator,
     this.onEditingComplete,
-    this.suffixIcon, // <-- ✅ NEW
+    this.onChanged,
+    this.onTap, // ✅ NEW
+    this.suffixIcon,
+    this.fillColor,
+    this.inputFormatters,
   });
 
   @override
   Widget build(BuildContext context) {
+    final defaultFill = readOnly ? Colors.grey.shade200 : Colors.teal.shade50;
+
     return TextFormField(
       controller: controller,
       readOnly: readOnly,
@@ -32,11 +44,14 @@ class RoundedTextField extends StatelessWidget {
       maxLines: maxLines,
       validator: validator,
       onEditingComplete: onEditingComplete,
+      onChanged: onChanged,
+      onTap: onTap, // ✅ Hook it in
+      inputFormatters: inputFormatters,
       decoration: InputDecoration(
         labelText: label,
-        suffixIcon: suffixIcon, // <-- ✅ NEW
+        suffixIcon: suffixIcon,
         filled: true,
-        fillColor: readOnly ? Colors.grey.shade200 : Colors.teal.shade50,
+        fillColor: fillColor ?? defaultFill,
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),

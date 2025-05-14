@@ -12,6 +12,7 @@ class WorkOrderActionButtons extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = ref.watch(workOrderFormProvider);
+    final db = ref.read(databaseProvider);
 
     return Row(
       children: [
@@ -39,39 +40,30 @@ class WorkOrderActionButtons extends ConsumerWidget {
         Expanded(
           child: ElevatedButton.icon(
             onPressed: () async {
-              final customerId = controller.selectedCustomerId;
-              if (customerId == null) {
+              final success = await controller.save();
+              if (!context.mounted || !success) return;
+
+              final workOrderId = controller.editingWorkOrderId;
+              if (workOrderId == null) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please select a customer before proceeding.')),
+                    const SnackBar(
+                      content: Text('Please complete and save the Work Order before proceeding.'),
+                    ),
                   );
                 }
                 return;
               }
 
-              final success = await controller.save();
-              if (!context.mounted || !success) return;
+              final workOrder = await db.workOrderDao.getWorkOrderById(workOrderId);
+              if (workOrder == null) return;
 
-              int? workOrderId = controller.editingWorkOrderId;
-
-              // If no editing ID, fetch the most recent saved
-              if (workOrderId == null) {
-                final db = ref.read(databaseProvider);
-                final latest = await db.workOrderDao.getMostRecentForCustomer(customerId);
-                workOrderId = latest?.id;
-              }
-
-              if (workOrderId != null && context.mounted) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => CreateServiceReportPage(
-                      customerId: customerId,
-                      workOrderId: workOrderId,
-                    ),
-                  ),
-                );
-              }
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                 builder: (_) => CreateServiceReportPage(workOrderId: workOrder.id),
+                ),
+              );
             },
             icon: const Icon(Icons.note_add),
             label: const Text('Create Service Report'),

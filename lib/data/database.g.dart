@@ -2089,6 +2089,18 @@ class $ScalesTable extends Scales with TableInfo<$ScalesTable, Scale> {
   late final GeneratedColumn<String> scaleType = GeneratedColumn<String>(
       'scale_type', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _scaleSubtypeMeta =
+      const VerificationMeta('scaleSubtype');
+  @override
+  late final GeneratedColumn<String> scaleSubtype = GeneratedColumn<String>(
+      'scale_subtype', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _customTypeDescriptionMeta =
+      const VerificationMeta('customTypeDescription');
+  @override
+  late final GeneratedColumn<String> customTypeDescription =
+      GeneratedColumn<String>('custom_type_description', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _indicatorMakeMeta =
       const VerificationMeta('indicatorMake');
   @override
@@ -2197,6 +2209,34 @@ class $ScalesTable extends Scales with TableInfo<$ScalesTable, Scale> {
   late final GeneratedColumn<String> loadCellCapacityUnit =
       GeneratedColumn<String>('load_cell_capacity_unit', aliasedName, false,
           type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _legalForTradeMeta =
+      const VerificationMeta('legalForTrade');
+  @override
+  late final GeneratedColumn<bool> legalForTrade = GeneratedColumn<bool>(
+      'legal_for_trade', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("legal_for_trade" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _inspectionExpiryMeta =
+      const VerificationMeta('inspectionExpiry');
+  @override
+  late final GeneratedColumn<DateTime> inspectionExpiry =
+      GeneratedColumn<DateTime>('inspection_expiry', aliasedName, true,
+          type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _sealStatusMeta =
+      const VerificationMeta('sealStatus');
+  @override
+  late final GeneratedColumn<String> sealStatus = GeneratedColumn<String>(
+      'seal_status', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _inspectionResultMeta =
+      const VerificationMeta('inspectionResult');
+  @override
+  late final GeneratedColumn<String> inspectionResult = GeneratedColumn<String>(
+      'inspection_result', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _notesMeta = const VerificationMeta('notes');
   @override
   late final GeneratedColumn<String> notes = GeneratedColumn<String>(
@@ -2237,6 +2277,8 @@ class $ScalesTable extends Scales with TableInfo<$ScalesTable, Scale> {
         customerId,
         configuration,
         scaleType,
+        scaleSubtype,
+        customTypeDescription,
         indicatorMake,
         indicatorModel,
         indicatorSerial,
@@ -2255,6 +2297,10 @@ class $ScalesTable extends Scales with TableInfo<$ScalesTable, Scale> {
         loadCellModel,
         loadCellCapacity,
         loadCellCapacityUnit,
+        legalForTrade,
+        inspectionExpiry,
+        sealStatus,
+        inspectionResult,
         notes,
         deactivate,
         auditFlag,
@@ -2294,6 +2340,20 @@ class $ScalesTable extends Scales with TableInfo<$ScalesTable, Scale> {
           scaleType.isAcceptableOrUnknown(data['scale_type']!, _scaleTypeMeta));
     } else if (isInserting) {
       context.missing(_scaleTypeMeta);
+    }
+    if (data.containsKey('scale_subtype')) {
+      context.handle(
+          _scaleSubtypeMeta,
+          scaleSubtype.isAcceptableOrUnknown(
+              data['scale_subtype']!, _scaleSubtypeMeta));
+    } else if (isInserting) {
+      context.missing(_scaleSubtypeMeta);
+    }
+    if (data.containsKey('custom_type_description')) {
+      context.handle(
+          _customTypeDescriptionMeta,
+          customTypeDescription.isAcceptableOrUnknown(
+              data['custom_type_description']!, _customTypeDescriptionMeta));
     }
     if (data.containsKey('indicator_make')) {
       context.handle(
@@ -2421,6 +2481,30 @@ class $ScalesTable extends Scales with TableInfo<$ScalesTable, Scale> {
     } else if (isInserting) {
       context.missing(_loadCellCapacityUnitMeta);
     }
+    if (data.containsKey('legal_for_trade')) {
+      context.handle(
+          _legalForTradeMeta,
+          legalForTrade.isAcceptableOrUnknown(
+              data['legal_for_trade']!, _legalForTradeMeta));
+    }
+    if (data.containsKey('inspection_expiry')) {
+      context.handle(
+          _inspectionExpiryMeta,
+          inspectionExpiry.isAcceptableOrUnknown(
+              data['inspection_expiry']!, _inspectionExpiryMeta));
+    }
+    if (data.containsKey('seal_status')) {
+      context.handle(
+          _sealStatusMeta,
+          sealStatus.isAcceptableOrUnknown(
+              data['seal_status']!, _sealStatusMeta));
+    }
+    if (data.containsKey('inspection_result')) {
+      context.handle(
+          _inspectionResultMeta,
+          inspectionResult.isAcceptableOrUnknown(
+              data['inspection_result']!, _inspectionResultMeta));
+    }
     if (data.containsKey('notes')) {
       context.handle(
           _notesMeta, notes.isAcceptableOrUnknown(data['notes']!, _notesMeta));
@@ -2456,6 +2540,11 @@ class $ScalesTable extends Scales with TableInfo<$ScalesTable, Scale> {
           .read(DriftSqlType.bool, data['${effectivePrefix}configuration'])!,
       scaleType: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}scale_type'])!,
+      scaleSubtype: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}scale_subtype'])!,
+      customTypeDescription: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}custom_type_description']),
       indicatorMake: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}indicator_make'])!,
       indicatorModel: attachedDatabase.typeMapping.read(
@@ -2493,6 +2582,14 @@ class $ScalesTable extends Scales with TableInfo<$ScalesTable, Scale> {
       loadCellCapacityUnit: attachedDatabase.typeMapping.read(
           DriftSqlType.string,
           data['${effectivePrefix}load_cell_capacity_unit'])!,
+      legalForTrade: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}legal_for_trade'])!,
+      inspectionExpiry: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}inspection_expiry']),
+      sealStatus: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}seal_status']),
+      inspectionResult: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}inspection_result']),
       notes: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}notes']),
       deactivate: attachedDatabase.typeMapping
@@ -2515,6 +2612,8 @@ class Scale extends DataClass implements Insertable<Scale> {
   final int customerId;
   final bool configuration;
   final String scaleType;
+  final String scaleSubtype;
+  final String? customTypeDescription;
   final String indicatorMake;
   final String indicatorModel;
   final String indicatorSerial;
@@ -2533,6 +2632,10 @@ class Scale extends DataClass implements Insertable<Scale> {
   final String loadCellModel;
   final double loadCellCapacity;
   final String loadCellCapacityUnit;
+  final bool legalForTrade;
+  final DateTime? inspectionExpiry;
+  final String? sealStatus;
+  final String? inspectionResult;
   final String? notes;
   final bool deactivate;
   final bool auditFlag;
@@ -2542,6 +2645,8 @@ class Scale extends DataClass implements Insertable<Scale> {
       required this.customerId,
       required this.configuration,
       required this.scaleType,
+      required this.scaleSubtype,
+      this.customTypeDescription,
       required this.indicatorMake,
       required this.indicatorModel,
       required this.indicatorSerial,
@@ -2560,6 +2665,10 @@ class Scale extends DataClass implements Insertable<Scale> {
       required this.loadCellModel,
       required this.loadCellCapacity,
       required this.loadCellCapacityUnit,
+      required this.legalForTrade,
+      this.inspectionExpiry,
+      this.sealStatus,
+      this.inspectionResult,
       this.notes,
       required this.deactivate,
       required this.auditFlag,
@@ -2571,6 +2680,10 @@ class Scale extends DataClass implements Insertable<Scale> {
     map['customer_id'] = Variable<int>(customerId);
     map['configuration'] = Variable<bool>(configuration);
     map['scale_type'] = Variable<String>(scaleType);
+    map['scale_subtype'] = Variable<String>(scaleSubtype);
+    if (!nullToAbsent || customTypeDescription != null) {
+      map['custom_type_description'] = Variable<String>(customTypeDescription);
+    }
     map['indicator_make'] = Variable<String>(indicatorMake);
     map['indicator_model'] = Variable<String>(indicatorModel);
     map['indicator_serial'] = Variable<String>(indicatorSerial);
@@ -2599,6 +2712,16 @@ class Scale extends DataClass implements Insertable<Scale> {
     map['load_cell_model'] = Variable<String>(loadCellModel);
     map['load_cell_capacity'] = Variable<double>(loadCellCapacity);
     map['load_cell_capacity_unit'] = Variable<String>(loadCellCapacityUnit);
+    map['legal_for_trade'] = Variable<bool>(legalForTrade);
+    if (!nullToAbsent || inspectionExpiry != null) {
+      map['inspection_expiry'] = Variable<DateTime>(inspectionExpiry);
+    }
+    if (!nullToAbsent || sealStatus != null) {
+      map['seal_status'] = Variable<String>(sealStatus);
+    }
+    if (!nullToAbsent || inspectionResult != null) {
+      map['inspection_result'] = Variable<String>(inspectionResult);
+    }
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
     }
@@ -2614,6 +2737,10 @@ class Scale extends DataClass implements Insertable<Scale> {
       customerId: Value(customerId),
       configuration: Value(configuration),
       scaleType: Value(scaleType),
+      scaleSubtype: Value(scaleSubtype),
+      customTypeDescription: customTypeDescription == null && nullToAbsent
+          ? const Value.absent()
+          : Value(customTypeDescription),
       indicatorMake: Value(indicatorMake),
       indicatorModel: Value(indicatorModel),
       indicatorSerial: Value(indicatorSerial),
@@ -2642,6 +2769,16 @@ class Scale extends DataClass implements Insertable<Scale> {
       loadCellModel: Value(loadCellModel),
       loadCellCapacity: Value(loadCellCapacity),
       loadCellCapacityUnit: Value(loadCellCapacityUnit),
+      legalForTrade: Value(legalForTrade),
+      inspectionExpiry: inspectionExpiry == null && nullToAbsent
+          ? const Value.absent()
+          : Value(inspectionExpiry),
+      sealStatus: sealStatus == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sealStatus),
+      inspectionResult: inspectionResult == null && nullToAbsent
+          ? const Value.absent()
+          : Value(inspectionResult),
       notes:
           notes == null && nullToAbsent ? const Value.absent() : Value(notes),
       deactivate: Value(deactivate),
@@ -2658,6 +2795,9 @@ class Scale extends DataClass implements Insertable<Scale> {
       customerId: serializer.fromJson<int>(json['customerId']),
       configuration: serializer.fromJson<bool>(json['configuration']),
       scaleType: serializer.fromJson<String>(json['scaleType']),
+      scaleSubtype: serializer.fromJson<String>(json['scaleSubtype']),
+      customTypeDescription:
+          serializer.fromJson<String?>(json['customTypeDescription']),
       indicatorMake: serializer.fromJson<String>(json['indicatorMake']),
       indicatorModel: serializer.fromJson<String>(json['indicatorModel']),
       indicatorSerial: serializer.fromJson<String>(json['indicatorSerial']),
@@ -2679,6 +2819,11 @@ class Scale extends DataClass implements Insertable<Scale> {
       loadCellCapacity: serializer.fromJson<double>(json['loadCellCapacity']),
       loadCellCapacityUnit:
           serializer.fromJson<String>(json['loadCellCapacityUnit']),
+      legalForTrade: serializer.fromJson<bool>(json['legalForTrade']),
+      inspectionExpiry:
+          serializer.fromJson<DateTime?>(json['inspectionExpiry']),
+      sealStatus: serializer.fromJson<String?>(json['sealStatus']),
+      inspectionResult: serializer.fromJson<String?>(json['inspectionResult']),
       notes: serializer.fromJson<String?>(json['notes']),
       deactivate: serializer.fromJson<bool>(json['deactivate']),
       auditFlag: serializer.fromJson<bool>(json['auditFlag']),
@@ -2693,6 +2838,9 @@ class Scale extends DataClass implements Insertable<Scale> {
       'customerId': serializer.toJson<int>(customerId),
       'configuration': serializer.toJson<bool>(configuration),
       'scaleType': serializer.toJson<String>(scaleType),
+      'scaleSubtype': serializer.toJson<String>(scaleSubtype),
+      'customTypeDescription':
+          serializer.toJson<String?>(customTypeDescription),
       'indicatorMake': serializer.toJson<String>(indicatorMake),
       'indicatorModel': serializer.toJson<String>(indicatorModel),
       'indicatorSerial': serializer.toJson<String>(indicatorSerial),
@@ -2711,6 +2859,10 @@ class Scale extends DataClass implements Insertable<Scale> {
       'loadCellModel': serializer.toJson<String>(loadCellModel),
       'loadCellCapacity': serializer.toJson<double>(loadCellCapacity),
       'loadCellCapacityUnit': serializer.toJson<String>(loadCellCapacityUnit),
+      'legalForTrade': serializer.toJson<bool>(legalForTrade),
+      'inspectionExpiry': serializer.toJson<DateTime?>(inspectionExpiry),
+      'sealStatus': serializer.toJson<String?>(sealStatus),
+      'inspectionResult': serializer.toJson<String?>(inspectionResult),
       'notes': serializer.toJson<String?>(notes),
       'deactivate': serializer.toJson<bool>(deactivate),
       'auditFlag': serializer.toJson<bool>(auditFlag),
@@ -2723,6 +2875,8 @@ class Scale extends DataClass implements Insertable<Scale> {
           int? customerId,
           bool? configuration,
           String? scaleType,
+          String? scaleSubtype,
+          Value<String?> customTypeDescription = const Value.absent(),
           String? indicatorMake,
           String? indicatorModel,
           String? indicatorSerial,
@@ -2741,6 +2895,10 @@ class Scale extends DataClass implements Insertable<Scale> {
           String? loadCellModel,
           double? loadCellCapacity,
           String? loadCellCapacityUnit,
+          bool? legalForTrade,
+          Value<DateTime?> inspectionExpiry = const Value.absent(),
+          Value<String?> sealStatus = const Value.absent(),
+          Value<String?> inspectionResult = const Value.absent(),
           Value<String?> notes = const Value.absent(),
           bool? deactivate,
           bool? auditFlag,
@@ -2750,6 +2908,10 @@ class Scale extends DataClass implements Insertable<Scale> {
         customerId: customerId ?? this.customerId,
         configuration: configuration ?? this.configuration,
         scaleType: scaleType ?? this.scaleType,
+        scaleSubtype: scaleSubtype ?? this.scaleSubtype,
+        customTypeDescription: customTypeDescription.present
+            ? customTypeDescription.value
+            : this.customTypeDescription,
         indicatorMake: indicatorMake ?? this.indicatorMake,
         indicatorModel: indicatorModel ?? this.indicatorModel,
         indicatorSerial: indicatorSerial ?? this.indicatorSerial,
@@ -2772,6 +2934,14 @@ class Scale extends DataClass implements Insertable<Scale> {
         loadCellModel: loadCellModel ?? this.loadCellModel,
         loadCellCapacity: loadCellCapacity ?? this.loadCellCapacity,
         loadCellCapacityUnit: loadCellCapacityUnit ?? this.loadCellCapacityUnit,
+        legalForTrade: legalForTrade ?? this.legalForTrade,
+        inspectionExpiry: inspectionExpiry.present
+            ? inspectionExpiry.value
+            : this.inspectionExpiry,
+        sealStatus: sealStatus.present ? sealStatus.value : this.sealStatus,
+        inspectionResult: inspectionResult.present
+            ? inspectionResult.value
+            : this.inspectionResult,
         notes: notes.present ? notes.value : this.notes,
         deactivate: deactivate ?? this.deactivate,
         auditFlag: auditFlag ?? this.auditFlag,
@@ -2786,6 +2956,12 @@ class Scale extends DataClass implements Insertable<Scale> {
           ? data.configuration.value
           : this.configuration,
       scaleType: data.scaleType.present ? data.scaleType.value : this.scaleType,
+      scaleSubtype: data.scaleSubtype.present
+          ? data.scaleSubtype.value
+          : this.scaleSubtype,
+      customTypeDescription: data.customTypeDescription.present
+          ? data.customTypeDescription.value
+          : this.customTypeDescription,
       indicatorMake: data.indicatorMake.present
           ? data.indicatorMake.value
           : this.indicatorMake,
@@ -2831,6 +3007,17 @@ class Scale extends DataClass implements Insertable<Scale> {
       loadCellCapacityUnit: data.loadCellCapacityUnit.present
           ? data.loadCellCapacityUnit.value
           : this.loadCellCapacityUnit,
+      legalForTrade: data.legalForTrade.present
+          ? data.legalForTrade.value
+          : this.legalForTrade,
+      inspectionExpiry: data.inspectionExpiry.present
+          ? data.inspectionExpiry.value
+          : this.inspectionExpiry,
+      sealStatus:
+          data.sealStatus.present ? data.sealStatus.value : this.sealStatus,
+      inspectionResult: data.inspectionResult.present
+          ? data.inspectionResult.value
+          : this.inspectionResult,
       notes: data.notes.present ? data.notes.value : this.notes,
       deactivate:
           data.deactivate.present ? data.deactivate.value : this.deactivate,
@@ -2846,6 +3033,8 @@ class Scale extends DataClass implements Insertable<Scale> {
           ..write('customerId: $customerId, ')
           ..write('configuration: $configuration, ')
           ..write('scaleType: $scaleType, ')
+          ..write('scaleSubtype: $scaleSubtype, ')
+          ..write('customTypeDescription: $customTypeDescription, ')
           ..write('indicatorMake: $indicatorMake, ')
           ..write('indicatorModel: $indicatorModel, ')
           ..write('indicatorSerial: $indicatorSerial, ')
@@ -2864,6 +3053,10 @@ class Scale extends DataClass implements Insertable<Scale> {
           ..write('loadCellModel: $loadCellModel, ')
           ..write('loadCellCapacity: $loadCellCapacity, ')
           ..write('loadCellCapacityUnit: $loadCellCapacityUnit, ')
+          ..write('legalForTrade: $legalForTrade, ')
+          ..write('inspectionExpiry: $inspectionExpiry, ')
+          ..write('sealStatus: $sealStatus, ')
+          ..write('inspectionResult: $inspectionResult, ')
           ..write('notes: $notes, ')
           ..write('deactivate: $deactivate, ')
           ..write('auditFlag: $auditFlag, ')
@@ -2878,6 +3071,8 @@ class Scale extends DataClass implements Insertable<Scale> {
         customerId,
         configuration,
         scaleType,
+        scaleSubtype,
+        customTypeDescription,
         indicatorMake,
         indicatorModel,
         indicatorSerial,
@@ -2896,6 +3091,10 @@ class Scale extends DataClass implements Insertable<Scale> {
         loadCellModel,
         loadCellCapacity,
         loadCellCapacityUnit,
+        legalForTrade,
+        inspectionExpiry,
+        sealStatus,
+        inspectionResult,
         notes,
         deactivate,
         auditFlag,
@@ -2909,6 +3108,8 @@ class Scale extends DataClass implements Insertable<Scale> {
           other.customerId == this.customerId &&
           other.configuration == this.configuration &&
           other.scaleType == this.scaleType &&
+          other.scaleSubtype == this.scaleSubtype &&
+          other.customTypeDescription == this.customTypeDescription &&
           other.indicatorMake == this.indicatorMake &&
           other.indicatorModel == this.indicatorModel &&
           other.indicatorSerial == this.indicatorSerial &&
@@ -2927,6 +3128,10 @@ class Scale extends DataClass implements Insertable<Scale> {
           other.loadCellModel == this.loadCellModel &&
           other.loadCellCapacity == this.loadCellCapacity &&
           other.loadCellCapacityUnit == this.loadCellCapacityUnit &&
+          other.legalForTrade == this.legalForTrade &&
+          other.inspectionExpiry == this.inspectionExpiry &&
+          other.sealStatus == this.sealStatus &&
+          other.inspectionResult == this.inspectionResult &&
           other.notes == this.notes &&
           other.deactivate == this.deactivate &&
           other.auditFlag == this.auditFlag &&
@@ -2938,6 +3143,8 @@ class ScalesCompanion extends UpdateCompanion<Scale> {
   final Value<int> customerId;
   final Value<bool> configuration;
   final Value<String> scaleType;
+  final Value<String> scaleSubtype;
+  final Value<String?> customTypeDescription;
   final Value<String> indicatorMake;
   final Value<String> indicatorModel;
   final Value<String> indicatorSerial;
@@ -2956,6 +3163,10 @@ class ScalesCompanion extends UpdateCompanion<Scale> {
   final Value<String> loadCellModel;
   final Value<double> loadCellCapacity;
   final Value<String> loadCellCapacityUnit;
+  final Value<bool> legalForTrade;
+  final Value<DateTime?> inspectionExpiry;
+  final Value<String?> sealStatus;
+  final Value<String?> inspectionResult;
   final Value<String?> notes;
   final Value<bool> deactivate;
   final Value<bool> auditFlag;
@@ -2965,6 +3176,8 @@ class ScalesCompanion extends UpdateCompanion<Scale> {
     this.customerId = const Value.absent(),
     this.configuration = const Value.absent(),
     this.scaleType = const Value.absent(),
+    this.scaleSubtype = const Value.absent(),
+    this.customTypeDescription = const Value.absent(),
     this.indicatorMake = const Value.absent(),
     this.indicatorModel = const Value.absent(),
     this.indicatorSerial = const Value.absent(),
@@ -2983,6 +3196,10 @@ class ScalesCompanion extends UpdateCompanion<Scale> {
     this.loadCellModel = const Value.absent(),
     this.loadCellCapacity = const Value.absent(),
     this.loadCellCapacityUnit = const Value.absent(),
+    this.legalForTrade = const Value.absent(),
+    this.inspectionExpiry = const Value.absent(),
+    this.sealStatus = const Value.absent(),
+    this.inspectionResult = const Value.absent(),
     this.notes = const Value.absent(),
     this.deactivate = const Value.absent(),
     this.auditFlag = const Value.absent(),
@@ -2993,6 +3210,8 @@ class ScalesCompanion extends UpdateCompanion<Scale> {
     required int customerId,
     required bool configuration,
     required String scaleType,
+    required String scaleSubtype,
+    this.customTypeDescription = const Value.absent(),
     required String indicatorMake,
     required String indicatorModel,
     required String indicatorSerial,
@@ -3011,6 +3230,10 @@ class ScalesCompanion extends UpdateCompanion<Scale> {
     required String loadCellModel,
     required double loadCellCapacity,
     required String loadCellCapacityUnit,
+    this.legalForTrade = const Value.absent(),
+    this.inspectionExpiry = const Value.absent(),
+    this.sealStatus = const Value.absent(),
+    this.inspectionResult = const Value.absent(),
     this.notes = const Value.absent(),
     this.deactivate = const Value.absent(),
     this.auditFlag = const Value.absent(),
@@ -3018,6 +3241,7 @@ class ScalesCompanion extends UpdateCompanion<Scale> {
   })  : customerId = Value(customerId),
         configuration = Value(configuration),
         scaleType = Value(scaleType),
+        scaleSubtype = Value(scaleSubtype),
         indicatorMake = Value(indicatorMake),
         indicatorModel = Value(indicatorModel),
         indicatorSerial = Value(indicatorSerial),
@@ -3036,6 +3260,8 @@ class ScalesCompanion extends UpdateCompanion<Scale> {
     Expression<int>? customerId,
     Expression<bool>? configuration,
     Expression<String>? scaleType,
+    Expression<String>? scaleSubtype,
+    Expression<String>? customTypeDescription,
     Expression<String>? indicatorMake,
     Expression<String>? indicatorModel,
     Expression<String>? indicatorSerial,
@@ -3054,6 +3280,10 @@ class ScalesCompanion extends UpdateCompanion<Scale> {
     Expression<String>? loadCellModel,
     Expression<double>? loadCellCapacity,
     Expression<String>? loadCellCapacityUnit,
+    Expression<bool>? legalForTrade,
+    Expression<DateTime>? inspectionExpiry,
+    Expression<String>? sealStatus,
+    Expression<String>? inspectionResult,
     Expression<String>? notes,
     Expression<bool>? deactivate,
     Expression<bool>? auditFlag,
@@ -3064,6 +3294,9 @@ class ScalesCompanion extends UpdateCompanion<Scale> {
       if (customerId != null) 'customer_id': customerId,
       if (configuration != null) 'configuration': configuration,
       if (scaleType != null) 'scale_type': scaleType,
+      if (scaleSubtype != null) 'scale_subtype': scaleSubtype,
+      if (customTypeDescription != null)
+        'custom_type_description': customTypeDescription,
       if (indicatorMake != null) 'indicator_make': indicatorMake,
       if (indicatorModel != null) 'indicator_model': indicatorModel,
       if (indicatorSerial != null) 'indicator_serial': indicatorSerial,
@@ -3085,6 +3318,10 @@ class ScalesCompanion extends UpdateCompanion<Scale> {
       if (loadCellCapacity != null) 'load_cell_capacity': loadCellCapacity,
       if (loadCellCapacityUnit != null)
         'load_cell_capacity_unit': loadCellCapacityUnit,
+      if (legalForTrade != null) 'legal_for_trade': legalForTrade,
+      if (inspectionExpiry != null) 'inspection_expiry': inspectionExpiry,
+      if (sealStatus != null) 'seal_status': sealStatus,
+      if (inspectionResult != null) 'inspection_result': inspectionResult,
       if (notes != null) 'notes': notes,
       if (deactivate != null) 'deactivate': deactivate,
       if (auditFlag != null) 'audit_flag': auditFlag,
@@ -3097,6 +3334,8 @@ class ScalesCompanion extends UpdateCompanion<Scale> {
       Value<int>? customerId,
       Value<bool>? configuration,
       Value<String>? scaleType,
+      Value<String>? scaleSubtype,
+      Value<String?>? customTypeDescription,
       Value<String>? indicatorMake,
       Value<String>? indicatorModel,
       Value<String>? indicatorSerial,
@@ -3115,6 +3354,10 @@ class ScalesCompanion extends UpdateCompanion<Scale> {
       Value<String>? loadCellModel,
       Value<double>? loadCellCapacity,
       Value<String>? loadCellCapacityUnit,
+      Value<bool>? legalForTrade,
+      Value<DateTime?>? inspectionExpiry,
+      Value<String?>? sealStatus,
+      Value<String?>? inspectionResult,
       Value<String?>? notes,
       Value<bool>? deactivate,
       Value<bool>? auditFlag,
@@ -3124,6 +3367,9 @@ class ScalesCompanion extends UpdateCompanion<Scale> {
       customerId: customerId ?? this.customerId,
       configuration: configuration ?? this.configuration,
       scaleType: scaleType ?? this.scaleType,
+      scaleSubtype: scaleSubtype ?? this.scaleSubtype,
+      customTypeDescription:
+          customTypeDescription ?? this.customTypeDescription,
       indicatorMake: indicatorMake ?? this.indicatorMake,
       indicatorModel: indicatorModel ?? this.indicatorModel,
       indicatorSerial: indicatorSerial ?? this.indicatorSerial,
@@ -3142,6 +3388,10 @@ class ScalesCompanion extends UpdateCompanion<Scale> {
       loadCellModel: loadCellModel ?? this.loadCellModel,
       loadCellCapacity: loadCellCapacity ?? this.loadCellCapacity,
       loadCellCapacityUnit: loadCellCapacityUnit ?? this.loadCellCapacityUnit,
+      legalForTrade: legalForTrade ?? this.legalForTrade,
+      inspectionExpiry: inspectionExpiry ?? this.inspectionExpiry,
+      sealStatus: sealStatus ?? this.sealStatus,
+      inspectionResult: inspectionResult ?? this.inspectionResult,
       notes: notes ?? this.notes,
       deactivate: deactivate ?? this.deactivate,
       auditFlag: auditFlag ?? this.auditFlag,
@@ -3163,6 +3413,13 @@ class ScalesCompanion extends UpdateCompanion<Scale> {
     }
     if (scaleType.present) {
       map['scale_type'] = Variable<String>(scaleType.value);
+    }
+    if (scaleSubtype.present) {
+      map['scale_subtype'] = Variable<String>(scaleSubtype.value);
+    }
+    if (customTypeDescription.present) {
+      map['custom_type_description'] =
+          Variable<String>(customTypeDescription.value);
     }
     if (indicatorMake.present) {
       map['indicator_make'] = Variable<String>(indicatorMake.value);
@@ -3219,6 +3476,18 @@ class ScalesCompanion extends UpdateCompanion<Scale> {
       map['load_cell_capacity_unit'] =
           Variable<String>(loadCellCapacityUnit.value);
     }
+    if (legalForTrade.present) {
+      map['legal_for_trade'] = Variable<bool>(legalForTrade.value);
+    }
+    if (inspectionExpiry.present) {
+      map['inspection_expiry'] = Variable<DateTime>(inspectionExpiry.value);
+    }
+    if (sealStatus.present) {
+      map['seal_status'] = Variable<String>(sealStatus.value);
+    }
+    if (inspectionResult.present) {
+      map['inspection_result'] = Variable<String>(inspectionResult.value);
+    }
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
@@ -3241,6 +3510,8 @@ class ScalesCompanion extends UpdateCompanion<Scale> {
           ..write('customerId: $customerId, ')
           ..write('configuration: $configuration, ')
           ..write('scaleType: $scaleType, ')
+          ..write('scaleSubtype: $scaleSubtype, ')
+          ..write('customTypeDescription: $customTypeDescription, ')
           ..write('indicatorMake: $indicatorMake, ')
           ..write('indicatorModel: $indicatorModel, ')
           ..write('indicatorSerial: $indicatorSerial, ')
@@ -3259,6 +3530,10 @@ class ScalesCompanion extends UpdateCompanion<Scale> {
           ..write('loadCellModel: $loadCellModel, ')
           ..write('loadCellCapacity: $loadCellCapacity, ')
           ..write('loadCellCapacityUnit: $loadCellCapacityUnit, ')
+          ..write('legalForTrade: $legalForTrade, ')
+          ..write('inspectionExpiry: $inspectionExpiry, ')
+          ..write('sealStatus: $sealStatus, ')
+          ..write('inspectionResult: $inspectionResult, ')
           ..write('notes: $notes, ')
           ..write('deactivate: $deactivate, ')
           ..write('auditFlag: $auditFlag, ')
@@ -6259,6 +6534,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final ServiceReportDao serviceReportDao =
       ServiceReportDao(this as AppDatabase);
   late final WeightTestDao weightTestDao = WeightTestDao(this as AppDatabase);
+  late final WorkOrderWithCustomerDao workOrderWithCustomerDao =
+      WorkOrderWithCustomerDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -7518,6 +7795,8 @@ typedef $$ScalesTableCreateCompanionBuilder = ScalesCompanion Function({
   required int customerId,
   required bool configuration,
   required String scaleType,
+  required String scaleSubtype,
+  Value<String?> customTypeDescription,
   required String indicatorMake,
   required String indicatorModel,
   required String indicatorSerial,
@@ -7536,6 +7815,10 @@ typedef $$ScalesTableCreateCompanionBuilder = ScalesCompanion Function({
   required String loadCellModel,
   required double loadCellCapacity,
   required String loadCellCapacityUnit,
+  Value<bool> legalForTrade,
+  Value<DateTime?> inspectionExpiry,
+  Value<String?> sealStatus,
+  Value<String?> inspectionResult,
   Value<String?> notes,
   Value<bool> deactivate,
   Value<bool> auditFlag,
@@ -7546,6 +7829,8 @@ typedef $$ScalesTableUpdateCompanionBuilder = ScalesCompanion Function({
   Value<int> customerId,
   Value<bool> configuration,
   Value<String> scaleType,
+  Value<String> scaleSubtype,
+  Value<String?> customTypeDescription,
   Value<String> indicatorMake,
   Value<String> indicatorModel,
   Value<String> indicatorSerial,
@@ -7564,6 +7849,10 @@ typedef $$ScalesTableUpdateCompanionBuilder = ScalesCompanion Function({
   Value<String> loadCellModel,
   Value<double> loadCellCapacity,
   Value<String> loadCellCapacityUnit,
+  Value<bool> legalForTrade,
+  Value<DateTime?> inspectionExpiry,
+  Value<String?> sealStatus,
+  Value<String?> inspectionResult,
   Value<String?> notes,
   Value<bool> deactivate,
   Value<bool> auditFlag,
@@ -7621,6 +7910,13 @@ class $$ScalesTableFilterComposer
 
   ColumnFilters<String> get scaleType => $composableBuilder(
       column: $table.scaleType, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get scaleSubtype => $composableBuilder(
+      column: $table.scaleSubtype, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get customTypeDescription => $composableBuilder(
+      column: $table.customTypeDescription,
+      builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get indicatorMake => $composableBuilder(
       column: $table.indicatorMake, builder: (column) => ColumnFilters(column));
@@ -7684,6 +7980,20 @@ class $$ScalesTableFilterComposer
 
   ColumnFilters<String> get loadCellCapacityUnit => $composableBuilder(
       column: $table.loadCellCapacityUnit,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get legalForTrade => $composableBuilder(
+      column: $table.legalForTrade, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get inspectionExpiry => $composableBuilder(
+      column: $table.inspectionExpiry,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get sealStatus => $composableBuilder(
+      column: $table.sealStatus, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get inspectionResult => $composableBuilder(
+      column: $table.inspectionResult,
       builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get notes => $composableBuilder(
@@ -7759,6 +8069,14 @@ class $$ScalesTableOrderingComposer
   ColumnOrderings<String> get scaleType => $composableBuilder(
       column: $table.scaleType, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get scaleSubtype => $composableBuilder(
+      column: $table.scaleSubtype,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get customTypeDescription => $composableBuilder(
+      column: $table.customTypeDescription,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get indicatorMake => $composableBuilder(
       column: $table.indicatorMake,
       builder: (column) => ColumnOrderings(column));
@@ -7826,6 +8144,21 @@ class $$ScalesTableOrderingComposer
       column: $table.loadCellCapacityUnit,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<bool> get legalForTrade => $composableBuilder(
+      column: $table.legalForTrade,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get inspectionExpiry => $composableBuilder(
+      column: $table.inspectionExpiry,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get sealStatus => $composableBuilder(
+      column: $table.sealStatus, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get inspectionResult => $composableBuilder(
+      column: $table.inspectionResult,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get notes => $composableBuilder(
       column: $table.notes, builder: (column) => ColumnOrderings(column));
 
@@ -7876,6 +8209,12 @@ class $$ScalesTableAnnotationComposer
 
   GeneratedColumn<String> get scaleType =>
       $composableBuilder(column: $table.scaleType, builder: (column) => column);
+
+  GeneratedColumn<String> get scaleSubtype => $composableBuilder(
+      column: $table.scaleSubtype, builder: (column) => column);
+
+  GeneratedColumn<String> get customTypeDescription => $composableBuilder(
+      column: $table.customTypeDescription, builder: (column) => column);
 
   GeneratedColumn<String> get indicatorMake => $composableBuilder(
       column: $table.indicatorMake, builder: (column) => column);
@@ -7930,6 +8269,18 @@ class $$ScalesTableAnnotationComposer
 
   GeneratedColumn<String> get loadCellCapacityUnit => $composableBuilder(
       column: $table.loadCellCapacityUnit, builder: (column) => column);
+
+  GeneratedColumn<bool> get legalForTrade => $composableBuilder(
+      column: $table.legalForTrade, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get inspectionExpiry => $composableBuilder(
+      column: $table.inspectionExpiry, builder: (column) => column);
+
+  GeneratedColumn<String> get sealStatus => $composableBuilder(
+      column: $table.sealStatus, builder: (column) => column);
+
+  GeneratedColumn<String> get inspectionResult => $composableBuilder(
+      column: $table.inspectionResult, builder: (column) => column);
 
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
@@ -8012,6 +8363,8 @@ class $$ScalesTableTableManager extends RootTableManager<
             Value<int> customerId = const Value.absent(),
             Value<bool> configuration = const Value.absent(),
             Value<String> scaleType = const Value.absent(),
+            Value<String> scaleSubtype = const Value.absent(),
+            Value<String?> customTypeDescription = const Value.absent(),
             Value<String> indicatorMake = const Value.absent(),
             Value<String> indicatorModel = const Value.absent(),
             Value<String> indicatorSerial = const Value.absent(),
@@ -8030,6 +8383,10 @@ class $$ScalesTableTableManager extends RootTableManager<
             Value<String> loadCellModel = const Value.absent(),
             Value<double> loadCellCapacity = const Value.absent(),
             Value<String> loadCellCapacityUnit = const Value.absent(),
+            Value<bool> legalForTrade = const Value.absent(),
+            Value<DateTime?> inspectionExpiry = const Value.absent(),
+            Value<String?> sealStatus = const Value.absent(),
+            Value<String?> inspectionResult = const Value.absent(),
             Value<String?> notes = const Value.absent(),
             Value<bool> deactivate = const Value.absent(),
             Value<bool> auditFlag = const Value.absent(),
@@ -8040,6 +8397,8 @@ class $$ScalesTableTableManager extends RootTableManager<
             customerId: customerId,
             configuration: configuration,
             scaleType: scaleType,
+            scaleSubtype: scaleSubtype,
+            customTypeDescription: customTypeDescription,
             indicatorMake: indicatorMake,
             indicatorModel: indicatorModel,
             indicatorSerial: indicatorSerial,
@@ -8058,6 +8417,10 @@ class $$ScalesTableTableManager extends RootTableManager<
             loadCellModel: loadCellModel,
             loadCellCapacity: loadCellCapacity,
             loadCellCapacityUnit: loadCellCapacityUnit,
+            legalForTrade: legalForTrade,
+            inspectionExpiry: inspectionExpiry,
+            sealStatus: sealStatus,
+            inspectionResult: inspectionResult,
             notes: notes,
             deactivate: deactivate,
             auditFlag: auditFlag,
@@ -8068,6 +8431,8 @@ class $$ScalesTableTableManager extends RootTableManager<
             required int customerId,
             required bool configuration,
             required String scaleType,
+            required String scaleSubtype,
+            Value<String?> customTypeDescription = const Value.absent(),
             required String indicatorMake,
             required String indicatorModel,
             required String indicatorSerial,
@@ -8086,6 +8451,10 @@ class $$ScalesTableTableManager extends RootTableManager<
             required String loadCellModel,
             required double loadCellCapacity,
             required String loadCellCapacityUnit,
+            Value<bool> legalForTrade = const Value.absent(),
+            Value<DateTime?> inspectionExpiry = const Value.absent(),
+            Value<String?> sealStatus = const Value.absent(),
+            Value<String?> inspectionResult = const Value.absent(),
             Value<String?> notes = const Value.absent(),
             Value<bool> deactivate = const Value.absent(),
             Value<bool> auditFlag = const Value.absent(),
@@ -8096,6 +8465,8 @@ class $$ScalesTableTableManager extends RootTableManager<
             customerId: customerId,
             configuration: configuration,
             scaleType: scaleType,
+            scaleSubtype: scaleSubtype,
+            customTypeDescription: customTypeDescription,
             indicatorMake: indicatorMake,
             indicatorModel: indicatorModel,
             indicatorSerial: indicatorSerial,
@@ -8114,6 +8485,10 @@ class $$ScalesTableTableManager extends RootTableManager<
             loadCellModel: loadCellModel,
             loadCellCapacity: loadCellCapacity,
             loadCellCapacityUnit: loadCellCapacityUnit,
+            legalForTrade: legalForTrade,
+            inspectionExpiry: inspectionExpiry,
+            sealStatus: sealStatus,
+            inspectionResult: inspectionResult,
             notes: notes,
             deactivate: deactivate,
             auditFlag: auditFlag,

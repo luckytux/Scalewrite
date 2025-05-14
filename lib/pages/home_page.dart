@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:scalewrite_v2/pages/create_work_order_page.dart';
 import 'package:scalewrite_v2/pages/create_service_report_page.dart';
+import 'package:scalewrite_v2/pages/create_customer_page.dart';
 import 'package:scalewrite_v2/pages/view_work_orders_page.dart';
 import 'package:scalewrite_v2/pages/view_service_reports_page.dart';
 import 'package:scalewrite_v2/pages/view_weight_tests_page.dart';
@@ -69,11 +70,10 @@ class _HomePageState extends ConsumerState<HomePage> {
                     context,
                     icon: Icons.add_business,
                     label: 'Customer',
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Create Customer - Coming soon')),
-                      );
-                    },
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const CreateCustomerPage()),
+                    ),
                   ),
                   _buildTileButton(
                     context,

@@ -1,5 +1,7 @@
 // File: lib/widgets/contact_input_tile.dart
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:scalewrite_v2/data/database.dart';
 import '../common/rounded_text_field.dart';
 import 'package:drift/drift.dart' as drift;
@@ -7,7 +9,7 @@ import 'package:drift/drift.dart' as drift;
 class ContactInputTile extends StatefulWidget {
   final Contact contact;
   final bool isMain;
-  final VoidCallback? onMakeMain; // <- made nullable
+  final VoidCallback? onMakeMain;
   final VoidCallback onRemove;
   final void Function(Contact updated) onUpdate;
   final bool readOnly;
@@ -36,19 +38,28 @@ class _ContactInputTileState extends State<ContactInputTile> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.contact.name);
-    _phoneController = TextEditingController(text: widget.contact.phone ?? '');
+    _phoneController = TextEditingController(text: _formatPhone(widget.contact.phone ?? ''));
     _emailController = TextEditingController(text: widget.contact.email ?? '');
     _notesController = TextEditingController(text: widget.contact.notes ?? '');
   }
 
   void _handleUpdate() {
+    final cleanedPhone = _phoneController.text.replaceAll(RegExp(r'\D'), '');
+
     final updated = widget.contact.copyWith(
       name: _nameController.text,
-      phone: drift.Value(_phoneController.text),
+      phone: drift.Value(cleanedPhone),
       email: drift.Value(_emailController.text),
       notes: drift.Value(_notesController.text),
     );
     widget.onUpdate(updated);
+  }
+
+  String _formatPhone(String digits) {
+    digits = digits.replaceAll(RegExp(r'\D'), '');
+    if (digits.length != 10) return digits;
+
+    return '(${digits.substring(0, 3)}) ${digits.substring(3, 6)}-${digits.substring(6)}';
   }
 
   @override
@@ -74,7 +85,7 @@ class _ContactInputTileState extends State<ContactInputTile> {
               controller: _nameController,
               label: 'Name',
               readOnly: widget.readOnly,
-              onEditingComplete: _handleUpdate,
+              onChanged: (_) => _handleUpdate(),
             ),
             Row(
               children: [
@@ -83,10 +94,21 @@ class _ContactInputTileState extends State<ContactInputTile> {
                     controller: _phoneController,
                     label: 'Phone',
                     keyboardType: TextInputType.phone,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      _PhoneNumberFormatter(),
+                    ],
                     readOnly: widget.readOnly,
-                    onEditingComplete: _handleUpdate,
+                    onChanged: (_) => _handleUpdate(),
+                    validator: (value) {
+                      final digits = value?.replaceAll(RegExp(r'\D'), '') ?? '';
+                      if (digits.isEmpty) return null; // optional field
+                      if (digits.length != 10) return 'Enter a 10-digit phone number';
+                      return null;
+                    },
                   ),
                 ),
+
                 const SizedBox(width: 12),
                 Expanded(
                   child: RoundedTextField(
@@ -94,7 +116,15 @@ class _ContactInputTileState extends State<ContactInputTile> {
                     label: 'Email',
                     keyboardType: TextInputType.emailAddress,
                     readOnly: widget.readOnly,
-                    onEditingComplete: _handleUpdate,
+                    onChanged: (_) => _handleUpdate(),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) return null;
+                      final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+                      if (!emailRegex.hasMatch(value.trim())) {
+                        return 'Enter a valid email address';
+                      }
+                      return null;
+                    },
                   ),
                 ),
               ],
@@ -104,7 +134,7 @@ class _ContactInputTileState extends State<ContactInputTile> {
               label: 'Notes',
               maxLines: 2,
               readOnly: widget.readOnly,
-              onEditingComplete: _handleUpdate,
+              onChanged: (_) => _handleUpdate(),
             ),
             const SizedBox(height: 8),
             Row(
@@ -133,6 +163,29 @@ class _ContactInputTileState extends State<ContactInputTile> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _PhoneNumberFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    var digits = newValue.text.replaceAll(RegExp(r'\D'), '');
+    final buffer = StringBuffer();
+
+    for (int i = 0; i < digits.length && i < 10; i++) {
+      if (i == 0) buffer.write('(');
+      if (i == 3) buffer.write(') ');
+      if (i == 6) buffer.write('-');
+      buffer.write(digits[i]);
+    }
+
+    return TextEditingValue(
+      text: buffer.toString(),
+      selection: TextSelection.collapsed(offset: buffer.length),
     );
   }
 }

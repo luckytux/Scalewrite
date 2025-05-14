@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../data/database.dart';
 import '../providers/service_report_form_provider.dart';
 import '../providers/drift_providers.dart';
 import '../widgets/service_report/work_order_dropdown.dart';
@@ -12,6 +11,8 @@ import '../widgets/service_report/indicator_section.dart';
 import '../widgets/service_report/base_section.dart';
 import '../widgets/service_report/load_cell_section.dart';
 import '../widgets/service_report/scale_capacity_section.dart';
+import '../widgets/service_report/scale_type_selector.dart';
+import '../widgets/service_report/legal_status_section.dart';
 import 'create_weight_test_page.dart';
 
 class CreateServiceReportPage extends ConsumerStatefulWidget {
@@ -25,252 +26,91 @@ class CreateServiceReportPage extends ConsumerStatefulWidget {
 }
 
 class _CreateServiceReportPageState extends ConsumerState<CreateServiceReportPage> {
-  late final ServiceReportFormController controller;
-  late final GlobalKey<FormState> _formKey;
-  
-  final indicatorMakeController = TextEditingController();
-  final indicatorModelController = TextEditingController();
-  final indicatorSerialController = TextEditingController();
-  final indicatorApprovalCodeController = TextEditingController();
-  String indicatorPrefix = 'AM';
-
-  final baseMakeController = TextEditingController();
-  final baseModelController = TextEditingController();
-  final baseSerialController = TextEditingController();
-  final baseApprovalCodeController = TextEditingController();
-  String basePrefix = 'AM';
-
-  final loadCellModelController = TextEditingController();
-  final loadCellCapacityController = TextEditingController();
-  String loadCellCapacityUnit = 'kg';
-
-  final capacityController = TextEditingController();
-  String capacityUnit = 'kg';
-  final divisionController = TextEditingController();
-  String divisionUnit = 'kg';
-  final loadCellsController = TextEditingController();
-  final sectionsController = TextEditingController();
-
-  bool configuration = false;
-  int? selectedWorkOrderId;
-  int? customerId;
+  bool initialized = false;
 
   @override
-  void initState() {
-    super.initState();
-    controller = ref.read(serviceReportFormProvider.notifier);
-    _formKey = controller.formKey;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.workOrderId != null) {
-        selectedWorkOrderId = widget.workOrderId;
-        _loadWorkOrder(widget.workOrderId!);
-      } else {
-        controller.setWorkOrder(null);
-        controller.toggleEditMode(controller.isCreatingNewScale);
-      }
-    });
-  }
-
-  Future<void> _loadWorkOrder(int id) async {
-    final db = ref.read(databaseProvider);
-    final workOrder = await db.workOrderDao.getWorkOrderById(id);
-    if (workOrder != null) {
-      setState(() {
-        customerId = workOrder.customerId;
-        controller.setWorkOrder(workOrder);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!initialized && widget.workOrderId != null) {
+      final formController = ref.read(serviceReportFormProvider);
+      final workOrderDao = ref.read(workOrderDaoProvider);
+      workOrderDao.getWorkOrderById(widget.workOrderId!).then((wo) {
+        if (wo != null) {
+          formController.setWorkOrder(wo);
+        }
       });
+      initialized = true;
     }
   }
-
-  void _handleWorkOrderSelected(WorkOrder? workOrder) {
-    if (workOrder == null) return;
-    setState(() {
-      selectedWorkOrderId = workOrder.id;
-      customerId = workOrder.customerId;
-      controller.setWorkOrder(workOrder);
-    });
-  }
-
-  void _handleScaleSelected(Scale? scale) {
-    controller.setScale(scale);
-    if (scale != null) {
-      setState(() {
-        configuration = scale.configuration;
-        indicatorMakeController.text = scale.indicatorMake;
-        indicatorModelController.text = scale.indicatorModel;
-        indicatorSerialController.text = scale.indicatorSerial;
-        indicatorApprovalCodeController.text = scale.approvalNumber;
-        indicatorPrefix = scale.approvalPrefix;
-
-        baseMakeController.text = scale.baseMake ?? '';
-        baseModelController.text = scale.baseModel ?? '';
-        baseSerialController.text = scale.baseSerial ?? '';
-        baseApprovalCodeController.text = scale.baseApprovalNumber ?? '';
-        basePrefix = scale.baseApprovalPrefix ?? 'AM';
-
-        capacityController.text = scale.capacity.toString();
-        capacityUnit = scale.capacityUnit;
-        divisionController.text = scale.division.toString();
-        loadCellsController.text = scale.numberOfLoadCells.toString();
-        sectionsController.text = scale.numberOfSections.toString();
-
-        loadCellModelController.text = scale.loadCellModel;
-        loadCellCapacityController.text = scale.loadCellCapacity.toString();
-        loadCellCapacityUnit = scale.loadCellCapacityUnit;
-      });
-    }
-  }
-
-  Future<void> _saveServiceReport() async {
-    if (!_formKey.currentState!.validate()) return;
-    if (customerId == null || selectedWorkOrderId == null) return;
-
-    final isCreating = controller.isCreatingNewScale;
-
-    if (isCreating) {
-      final newScaleId = await controller.createNewScale(
-        customerId: customerId!,
-        configuration: configuration,
-        scaleType: 'Bulk Weigher',
-        indicatorMake: indicatorMakeController.text,
-        indicatorModel: indicatorModelController.text,
-        indicatorSerial: indicatorSerialController.text,
-        approvalPrefix: indicatorPrefix,
-        approvalNumber: indicatorApprovalCodeController.text,
-        baseMake: baseMakeController.text,
-        baseModel: baseModelController.text,
-        baseSerial: baseSerialController.text,
-        baseApprovalPrefix: basePrefix,
-        baseApprovalNumber: baseApprovalCodeController.text,
-        capacity: double.tryParse(capacityController.text) ?? 0,
-        capacityUnit: capacityUnit,
-        division: double.tryParse(divisionController.text) ?? 0,
-        numberOfLoadCells: int.tryParse(loadCellsController.text) ?? 0,
-        numberOfSections: int.tryParse(sectionsController.text) ?? 0,
-        loadCellModel: loadCellModelController.text,
-        loadCellCapacity: double.tryParse(loadCellCapacityController.text) ?? 0,
-        loadCellCapacityUnit: loadCellCapacityUnit,
-      );
-
-      if (newScaleId == null) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to create scale.')),
-        );
-        return;
-      }
-    }
-
-    final success = await controller.save();
-    if (!mounted) return;
-
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Service Report saved.')),
-      );
-      Navigator.pop(context);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please complete all required fields.')),
-      );
-    }
-  }
-
-  Future<void> _showAddFormDialog() async {
-    final success = await controller.save();
-    if (!success || controller.selectedServiceReportId == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please complete and save the Service Report first.')),
-        );
-      }
-      return;
-    }
-
-    if (!mounted) return;
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Form'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.scale),
-              title: const Text('Weight Test'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => CreateWeightTestPage(serviceReportId: controller.selectedServiceReportId!),
-                  ),
-                );
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.visibility),
-              title: const Text('Visual Inspection (Coming Soon)'),
-              onTap: () => Navigator.pop(context),
-            ),
-            ListTile(
-              leading: const Icon(Icons.build),
-              title: const Text('Mechanical Inspection (Coming Soon)'),
-              onTap: () => Navigator.pop(context),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  bool get fieldsEditable => controller.isCreatingNewScale || controller.editMode;
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(serviceReportFormProvider);
+    final controller = ref.watch(serviceReportFormProvider);
+    final formKey = controller.formKey;
+    final editable = controller.editMode || controller.isCreatingNewScale;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Create Service Report')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
-          key: _formKey,
+          key: formKey,
           child: ListView(
             children: [
               WorkOrderDropdown(
-                selected: state.selectedWorkOrder,
-                onSelected: _handleWorkOrderSelected,
+                selected: controller.selectedWorkOrder,
+                onSelected: controller.setWorkOrder,
               ),
               const SizedBox(height: 16),
-              if (customerId != null)
+              if (controller.selectedWorkOrder != null)
                 ScaleDropdown(
-                  customerId: customerId!,
-                  selectedScaleId: state.selectedScale?.id,
-                  onChanged: _handleScaleSelected,
+                  customerId: controller.selectedWorkOrder!.customerId,
+                  selectedScaleId: controller.selectedScale?.id,
+                  onChanged: controller.setScale,
                 ),
               const SizedBox(height: 16),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Switch(
-                    value: controller.editMode,
-                    onChanged: selectedWorkOrderId != null
-                        ? (val) => setState(() => controller.toggleEditMode(val))
-                        : null,
+                  const Text(
+                    'Edit Mode',
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(width: 8),
-                  const Text('Edit Mode'),
+                  Switch(
+                    value: editable,
+                    onChanged: (val) => controller.toggleEditMode(val),
+                  ),
                 ],
               ),
+
               const SizedBox(height: 16),
+              TextFormField(
+                controller: controller.scaleNotesController,
+                maxLines: 2,
+                readOnly: !editable,
+                decoration: InputDecoration(
+                  labelText: 'Scale Description / Location (Optional)',
+                  border: const OutlineInputBorder(),
+                  filled: true,
+                  fillColor: editable ? Colors.teal.shade50 : Colors.grey.shade200,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ScaleTypeSelector(
+                selectedType: controller.selectedScaleType,
+                selectedSubtype: controller.selectedSubtype,
+                enabled: editable,
+                onTypeChanged: (val) {
+                  if (val != null) controller.setScaleType(val);
+                },
+                onSubtypeChanged: controller.setSubtype,
+              ),
               ConfigurationToggle(
-                configuration: configuration,
-                enabled: fieldsEditable,
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() => configuration = value);
+                configuration: controller.configuration,
+                enabled: editable,
+                onChanged: (val) {
+                  if (editable && val != null) {
+                    controller.setConfiguration(val);
                   }
                 },
               ),
@@ -278,85 +118,94 @@ class _CreateServiceReportPageState extends ConsumerState<CreateServiceReportPag
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Opacity(
-                    opacity: fieldsEditable ? 1.0 : 0.5,
-                    child: IgnorePointer(
-                      ignoring: !fieldsEditable,
-                      child: SizedBox(
-                        width: MediaQuery.of(context).size.width / 2 - 24,
-                        child: IndicatorSection(
-                          makeController: indicatorMakeController,
-                          modelController: indicatorModelController,
-                          serialController: indicatorSerialController,
-                          prefixValue: indicatorPrefix,
-                          onPrefixChanged: (v) => setState(() => indicatorPrefix = v ?? 'AM'),
-                          approvalCodeController: indicatorApprovalCodeController,
-                        ),
-                      ),
+                  Expanded(
+                    flex: 1,
+                    child: IndicatorSection(
+                      makeController: controller.indicatorMakeController,
+                      modelController: controller.indicatorModelController,
+                      serialController: controller.indicatorSerialController,
+                      prefixValue: controller.indicatorPrefix,
+                      onPrefixChanged: (val) => controller.indicatorPrefix = val ?? 'AM',
+                      approvalCodeController: controller.indicatorApprovalCodeController,
+                      editable: controller.editable,
                     ),
                   ),
                   const SizedBox(width: 12),
-                  if (configuration)
-                    Opacity(
-                      opacity: fieldsEditable ? 1.0 : 0.5,
-                      child: IgnorePointer(
-                        ignoring: !fieldsEditable,
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width / 2 - 24,
-                          child: BaseSection(
-                            makeController: baseMakeController,
-                            modelController: baseModelController,
-                            serialController: baseSerialController,
-                            prefixValue: basePrefix,
-                            onPrefixChanged: (v) => setState(() => basePrefix = v ?? 'AM'),
-                            approvalCodeController: baseApprovalCodeController,
-                          ),
-                        ),
+                  if (controller.configuration)
+                    Expanded(
+                      flex: 1,
+                      child: BaseSection(
+                        makeController: controller.baseMakeController,
+                        modelController: controller.baseModelController,
+                        serialController: controller.baseSerialController,
+                        prefixValue: controller.basePrefix,
+                        onPrefixChanged: (val) => controller.basePrefix = val ?? 'AM',
+                        approvalCodeController: controller.baseApprovalCodeController,
+                        editable: controller.editable,
                       ),
-                    ),
+                    )
+                  else
+                    const Spacer(flex: 1),
                 ],
               ),
               const SizedBox(height: 20),
-              Opacity(
-                opacity: fieldsEditable ? 1.0 : 0.5,
-                child: IgnorePointer(
-                  ignoring: !fieldsEditable,
-                  child: ScaleCapacitySection(
-                    capacityController: capacityController,
-                    capacityUnit: capacityUnit,
-                    onCapacityUnitChanged: (v) => setState(() => capacityUnit = v ?? 'kg'),
-                    divisionController: divisionController,
-                    divisionUnit: divisionUnit,
-                    onDivisionUnitChanged: (v) => setState(() => divisionUnit = v ?? 'kg'),
-                    loadCellsController: loadCellsController,
-                    sectionsController: sectionsController,
-                  ),
-                ),
+              ScaleCapacitySection(
+                capacityController: controller.capacityController,
+                capacityUnit: controller.capacityUnit,
+                onCapacityUnitChanged: (val) {
+                  if (val != null) controller.setCapacityUnit(val);
+                },
+                divisionController: controller.divisionController,
+                divisionUnit: 'kg',
+                onDivisionUnitChanged: (_) {},
+                loadCellsController: controller.loadCellsController,
+                sectionsController: controller.sectionsController,
+                editable: controller.editable,
               ),
               const SizedBox(height: 20),
-              Opacity(
-                opacity: fieldsEditable ? 1.0 : 0.5,
-                child: IgnorePointer(
-                  ignoring: !fieldsEditable,
-                  child: LoadCellSection(
-                    capacityController: loadCellCapacityController,
-                    capacityUnit: loadCellCapacityUnit,
-                    onCapacityUnitChanged: (v) => setState(() => loadCellCapacityUnit = v ?? 'kg'),
-                    modelController: loadCellModelController,
-                  ),
-                ),
+              LoadCellSection(
+                capacityController: controller.loadCellCapacityController,
+                capacityUnit: controller.loadCellCapacityUnit,
+                onCapacityUnitChanged: (val) {
+                  if (val != null) controller.setLoadCellCapacityUnit(val);
+                },
+                modelController: controller.loadCellModelController,
+                editable: controller.editable,
               ),
+              const SizedBox(height: 20),
+              const LegalStatusSection(),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ElevatedButton.icon(
-                    onPressed: _saveServiceReport,
+                    onPressed: () async {
+                      final saved = await controller.save();
+                      if (context.mounted && saved) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Service Report saved')),
+                        );
+                        Navigator.pop(context);
+                      }
+                    },
                     icon: const Icon(Icons.save),
                     label: const Text('Save and Exit'),
                   ),
                   ElevatedButton.icon(
-                    onPressed: _showAddFormDialog,
+                    onPressed: () async {
+                      final saved = await controller.save();
+                      if (!context.mounted || !saved) return;
+                      if (controller.selectedServiceReportId != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => CreateWeightTestPage(
+                              serviceReportId: controller.selectedServiceReportId!,
+                            ),
+                          ),
+                        );
+                      }
+                    },
                     icon: const Icon(Icons.add_circle_outline),
                     label: const Text('Add Forms'),
                   ),

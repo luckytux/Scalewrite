@@ -13,45 +13,98 @@ class CustomerDropdownSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = ref.watch(workOrderFormProvider);
+    final readOnly = controller.editingWorkOrderId != null;
 
-    final dropdownItems = customers.map((c) {
-      return DropdownMenuItem<int>(
-        value: c.id,
-        child: Text(c.businessName),
-      );
-    }).toList();
+    return Autocomplete<String>(
+      optionsBuilder: (TextEditingValue value) {
+        final input = value.text.trim().toLowerCase();
+        if (input.isEmpty) return const Iterable<String>.empty();
 
-    dropdownItems.insert(
-      0,
-      const DropdownMenuItem<int>(
-        value: null,
-        child: Text('Create New Customer'),
-      ),
-    );
+        final matches = customers
+            .where((c) => c.businessName.toLowerCase().contains(input))
+            .map((c) => c.businessName)
+            .toList();
 
-    return DropdownButtonFormField<int>(
-      decoration: InputDecoration(
-        labelText: 'Customer',
-        filled: true,
-        fillColor: Colors.teal.shade50,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.teal.shade200),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.teal, width: 2),
-          borderRadius: BorderRadius.all(Radius.circular(12)),
-        ),
-      ),
-      value: controller.selectedCustomerId,
-      items: dropdownItems,
-      onChanged: controller.editingWorkOrderId == null
-          ? (value) => controller.selectCustomer(value, customers)
-          : null,
-      validator: (val) => val == null ? 'Please select or create a customer' : null,
+        // If the typed name doesn't match any, add "+ Add New" option
+        if (!matches.any((m) => m.toLowerCase() == input)) {
+          matches.add('+ Add "$input" as New Customer');
+        }
+
+        return matches;
+      },
+      initialValue: controller.selectedCustomerId != null
+          ? TextEditingValue(
+              text: customers
+                  .firstWhere(
+                    (c) => c.id == controller.selectedCustomerId,
+                    orElse: () => Customer(
+                        id: 0,
+                        businessName: '',
+                        siteAddress: '',
+                        siteCity: '',
+                        siteProvince: '',
+                        sitePostalCode: '',
+                        billingAddress: '',
+                        billingCity: '',
+                        billingProvince: '',
+                        billingPostalCode: '',
+                        gpsLocation: '',
+                        notes: '',
+                        deactivate: false,
+                        auditFlag: false,
+                        synced: false,
+                      ))
+                  .businessName,
+            )
+          : TextEditingValue(text: controller.businessNameController.text),
+      onSelected: (String selection) {
+        if (selection.startsWith('+ Add "')) {
+          final match = RegExp(r'\+ Add "(.*)" as New Customer').firstMatch(selection);
+          final newName = match?.group(1) ?? '';
+          controller.setIsCreatingNewCustomer(newName);
+        } else {
+          final selectedCustomer = customers
+              .firstWhere((c) => c.businessName == selection, orElse: () => customers.first);
+          controller.selectCustomer(selectedCustomer.id, customers);
+        }
+      },
+
+      fieldViewBuilder:
+          (context, textController, focusNode, onFieldSubmitted) {
+        return TextFormField(
+          controller: textController,
+          focusNode: focusNode,
+          readOnly: readOnly,
+          decoration: InputDecoration(
+            labelText: 'Customer',
+            filled: true,
+            fillColor: Colors.teal.shade50,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.teal.shade200),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            focusedBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.teal, width: 2),
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+            ),
+          ),
+          validator: (val) {
+            if ((val?.trim().isEmpty ?? true) &&
+                controller.selectedCustomerId == null) {
+              return 'Please select or create a customer';
+            }
+            return null;
+          },
+          onChanged: (text) {
+            // Reset selection if user types
+            controller.selectedCustomerId = null;
+            controller.businessNameController.text = text;
+          },
+        );
+      },
     );
   }
 }
