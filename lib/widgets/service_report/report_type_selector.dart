@@ -5,27 +5,32 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:scalewrite_v2/providers/service_report_form_provider.dart';
 
 class ReportTypeSelector extends ConsumerWidget {
-  const ReportTypeSelector({super.key});
+  final String? selected;
+  final ValueChanged<String?>? onChanged;
+  final bool readOnly;
+
+  const ReportTypeSelector({
+    super.key,
+    required this.selected,
+    required this.onChanged,
+    required this.readOnly,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final controller = ref.watch(serviceReportFormProvider);
-
     return DropdownButtonFormField<String>(
-      value: controller.reportType,
+      value: selected,
       decoration: const InputDecoration(
         labelText: 'Report Type',
         border: OutlineInputBorder(),
       ),
-      onChanged: controller.editable
-          ? (val) => controller.setReportType(val ?? 'Standard')
-          : null,
+      onChanged: readOnly ? null : onChanged,
       items: const [
         'Standard',
         'Follow-Up',
         'Repair',
         'Reverification',
-      ].map((value) => DropdownMenuItem(
+      ].map((value) => DropdownMenuItem<String>(
             value: value,
             child: Text(value),
           ))

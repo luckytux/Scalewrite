@@ -22,8 +22,35 @@ class WorkOrderWithCustomerDao extends DatabaseAccessor<AppDatabase>
     ])
       ..orderBy([
         OrderingTerm(
-          // Skip UID by grabbing substring starting after first dash
-          // This works assuming format like "123-20250512-1430"
+          expression: CustomExpression<String>(
+            "substr(work_orders.work_order_number, instr(work_orders.work_order_number, '-') + 1)"
+          ),
+          mode: OrderingMode.desc,
+        ),
+      ]);
+
+    final rows = await query.get();
+
+    return rows.map((row) {
+      final wo = row.readTable(workOrders);
+      final customer = row.readTable(customers);
+      return WorkOrderWithCustomer(
+        workOrder: wo,
+        customer: customer,
+      );
+    }).toList();
+  }
+
+  Future<List<WorkOrderWithCustomer>> getUnsyncedWorkOrders() async {
+    final query = select(workOrders).join([
+      innerJoin(
+        customers,
+        customers.id.equalsExp(workOrders.customerId),
+      ),
+    ])
+      ..where(workOrders.synced.equals(false))
+      ..orderBy([
+        OrderingTerm(
           expression: CustomExpression<String>(
             "substr(work_orders.work_order_number, instr(work_orders.work_order_number, '-') + 1)"
           ),

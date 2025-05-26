@@ -25,7 +25,6 @@ class CustomerDropdownSection extends ConsumerWidget {
             .map((c) => c.businessName)
             .toList();
 
-        // If the typed name doesn't match any, add "+ Add New" option
         if (!matches.any((m) => m.toLowerCase() == input)) {
           matches.add('+ Add "$input" as New Customer');
         }
@@ -35,43 +34,47 @@ class CustomerDropdownSection extends ConsumerWidget {
       initialValue: controller.selectedCustomerId != null
           ? TextEditingValue(
               text: customers
-                  .firstWhere(
-                    (c) => c.id == controller.selectedCustomerId,
-                    orElse: () => Customer(
-                        id: 0,
-                        businessName: '',
-                        siteAddress: '',
-                        siteCity: '',
-                        siteProvince: '',
-                        sitePostalCode: '',
-                        billingAddress: '',
-                        billingCity: '',
-                        billingProvince: '',
-                        billingPostalCode: '',
-                        gpsLocation: '',
-                        notes: '',
-                        deactivate: false,
-                        auditFlag: false,
-                        synced: false,
-                      ))
-                  .businessName,
+                      .firstWhere(
+                        (c) => c.id == controller.selectedCustomerId,
+                        orElse: () => Customer(
+                          id: 0,
+                          businessName: '',
+                          siteAddress: '',
+                          siteCity: '',
+                          siteProvince: '',
+                          sitePostalCode: '',
+                          billingAddress: '',
+                          billingCity: '',
+                          billingProvince: '',
+                          billingPostalCode: '',
+                          gpsLocation: '',
+                          notes: '',
+                          deactivate: false,
+                          auditFlag: false,
+                          synced: false,
+                        ),
+                      )
+                      .businessName ??
+                  '',
             )
           : TextEditingValue(text: controller.businessNameController.text),
       onSelected: (String selection) {
         if (selection.startsWith('+ Add "')) {
-          final match = RegExp(r'\+ Add "(.*)" as New Customer').firstMatch(selection);
+          final match =
+              RegExp(r'\+ Add "(.*)" as New Customer').firstMatch(selection);
           final newName = match?.group(1) ?? '';
           controller.setIsCreatingNewCustomer(newName);
         } else {
-          final selectedCustomer = customers
-              .firstWhere((c) => c.businessName == selection, orElse: () => customers.first);
+          final selectedCustomer = customers.firstWhere(
+              (c) => c.businessName == selection,
+              orElse: () => customers.first);
           controller.selectCustomer(selectedCustomer.id, customers);
         }
       },
-
       fieldViewBuilder:
           (context, textController, focusNode, onFieldSubmitted) {
         return TextFormField(
+          key: ValueKey(controller.selectedCustomerId),
           controller: textController,
           focusNode: focusNode,
           readOnly: readOnly,
@@ -99,7 +102,6 @@ class CustomerDropdownSection extends ConsumerWidget {
             return null;
           },
           onChanged: (text) {
-            // Reset selection if user types
             controller.selectedCustomerId = null;
             controller.businessNameController.text = text;
           },

@@ -2,22 +2,25 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:scalewrite_v2/providers/service_report_form_provider.dart';
 import '../common/rounded_text_field.dart';
 
-class ReportNotesSection extends ConsumerWidget {
-  const ReportNotesSection({super.key});
+class ReportNotesSection extends StatelessWidget {
+  final TextEditingController controller;
+  final bool readOnly;
+
+  const ReportNotesSection({
+    super.key,
+    required this.controller,
+    required this.readOnly,
+  });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final controller = ref.watch(serviceReportFormProvider);
-
+  Widget build(BuildContext context) {
     return RoundedTextField(
-      controller: controller.scaleNotesController,
+      controller: controller,
       label: 'Report Notes',
       maxLines: 5,
-      readOnly: !controller.editable,
-      onChanged: (val) => controller.setNotes(val),
+      readOnly: readOnly,
     );
   }
 }

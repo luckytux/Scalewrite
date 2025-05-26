@@ -7,10 +7,10 @@ import 'package:scalewrite_v2/pages/create_work_order_page.dart';
 import 'package:scalewrite_v2/pages/create_service_report_page.dart';
 import 'package:scalewrite_v2/pages/create_customer_page.dart';
 import 'package:scalewrite_v2/pages/view_work_orders_page.dart';
-import 'package:scalewrite_v2/pages/view_service_reports_page.dart';
-import 'package:scalewrite_v2/pages/view_weight_tests_page.dart';
+import 'package:scalewrite_v2/pages/admin/admin_page.dart';
 import 'package:scalewrite_v2/providers/test_data_loader_provider.dart';
-import 'package:scalewrite_v2/providers/customer_list_provider.dart'; // 🔵 Add this!
+import 'package:scalewrite_v2/providers/customer_list_provider.dart';
+import 'package:scalewrite_v2/providers/auth_provider.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -22,6 +22,8 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage> {
   @override
   Widget build(BuildContext context) {
+    final isAdmin = ref.watch(authControllerProvider)?.isAdmin ?? false;
+
     return Scaffold(
       appBar: AppBar(title: const Text('ScaleWrite Home')),
       body: Center(
@@ -32,7 +34,6 @@ class _HomePageState extends ConsumerState<HomePage> {
             children: [
               const SizedBox(height: 16),
 
-              // Debug-only button for loading test data
               if (kDebugMode)
                 ElevatedButton.icon(
                   onPressed: () async {
@@ -40,7 +41,6 @@ class _HomePageState extends ConsumerState<HomePage> {
                     final result = await loader.loadTestData();
                     if (!context.mounted) return;
 
-                    // 🔵 Invalidate customer list after loading test data
                     ref.invalidate(customerListProvider);
 
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -115,24 +115,17 @@ class _HomePageState extends ConsumerState<HomePage> {
                       MaterialPageRoute(builder: (_) => const ViewWorkOrdersPage()),
                     ),
                   ),
-                  _buildTileButton(
-                    context,
-                    icon: Icons.article,
-                    label: 'Service Reports',
-                    onPressed: () => Navigator.push(
+
+                  if (isAdmin)
+                    _buildTileButton(
                       context,
-                      MaterialPageRoute(builder: (_) => const ViewServiceReportsPage()),
+                      icon: Icons.admin_panel_settings,
+                      label: 'Admin Panel',
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const AdminPage()),
+                      ),
                     ),
-                  ),
-                  _buildTileButton(
-                    context,
-                    icon: Icons.scale,
-                    label: 'Weight Tests',
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const ViewWeightTestsPage()),
-                    ),
-                  ),
                 ],
               ),
             ],

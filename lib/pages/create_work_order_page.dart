@@ -28,10 +28,38 @@ class _CreateWorkOrderPageState extends ConsumerState<CreateWorkOrderPage> {
 
     Future.microtask(() {
       final controller = ref.read(workOrderFormProvider);
-      if (widget.existingWorkOrder == null) {
-        controller.resetForm();
-      } else {
-        controller.loadExistingWorkOrder(widget.existingWorkOrder!);
+      debugPrint('🔄 Resetting form in CreateWorkOrderPage...');
+      controller.resetForm(); // always clear first
+      if (widget.existingWorkOrder != null) {
+        final wo = widget.existingWorkOrder!;
+        debugPrint('📋 Loading existing Work Order ID: ${wo.id}');
+        debugPrint('📋 Full Work Order Object: $wo');
+        debugPrint('📋 → ID: ${wo.id}');
+        debugPrint('📋 → Customer ID: ${wo.customerId}');
+        debugPrint('📋 → Number: ${wo.workOrderNumber}');
+        debugPrint('📋 → Site Address: ${wo.siteAddress}');
+        debugPrint('📋 → Site City: ${wo.siteCity}');
+        debugPrint('📋 → Site Province: ${wo.siteProvince}');
+        debugPrint('📋 → Site Postal: ${wo.sitePostalCode}');
+        debugPrint('📋 → GPS: ${wo.gpsLocation}');
+        debugPrint('📋 → Billing Address: ${wo.billingAddress}');
+        debugPrint('📋 → Billing City: ${wo.billingCity}');
+        debugPrint('📋 → Billing Province: ${wo.billingProvince}');
+        debugPrint('📋 → Billing Postal: ${wo.billingPostalCode}');
+        debugPrint('📋 → Notes: ${wo.customerNotes}');
+        controller.loadExistingWorkOrder(wo);
+        debugPrint('📋 Controller fields after load:');
+        debugPrint('📋 businessName: ${controller.businessNameController.text}');
+        debugPrint('📋 siteAddress: ${controller.siteAddressController.text}');
+        debugPrint('📋 siteCity: ${controller.siteCityController.text}');
+        debugPrint('📋 siteProvince: ${controller.siteProvinceController.text}');
+        debugPrint('📋 sitePostal: ${controller.sitePostalController.text}');
+        debugPrint('📋 gpsLocation: ${controller.gpsLocationController.text}');
+        debugPrint('📋 billingAddress: ${controller.billingAddressController.text}');
+        debugPrint('📋 billingCity: ${controller.billingCityController.text}');
+        debugPrint('📋 billingProvince: ${controller.billingProvinceController.text}');
+        debugPrint('📋 billingPostal: ${controller.billingPostalController.text}');
+        debugPrint('📋 customerNotes: ${controller.customerNotesController.text}');
       }
     });
   }

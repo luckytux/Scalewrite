@@ -12,7 +12,10 @@ final serviceReportFormProvider =
 });
 
 class ServiceReportFormController extends ChangeNotifier {
+  final TextEditingController reportNotesController = TextEditingController();
   final Ref ref;
+  AppDatabase get db => ref.read(databaseProvider);
+
   final formKey = GlobalKey<FormState>();
   final scaleNotesController = TextEditingController();
 
@@ -51,12 +54,10 @@ class ServiceReportFormController extends ChangeNotifier {
   WorkOrder? selectedWorkOrder;
   Scale? selectedScale;
   String reportType = 'Standard';
-  String? notes;
   bool editMode = false;
   bool isCreatingNewScale = false;
   int? selectedServiceReportId;
 
-  // Legal for Trade Fields
   bool isLegalForTrade = false;
   DateTime? inspectionExpiry;
   String? sealStatus;
@@ -79,7 +80,46 @@ class ServiceReportFormController extends ChangeNotifier {
 
   void setScale(Scale? scale) {
     selectedScale = scale;
-    if (scale != null) configuration = scale.configuration;
+    isCreatingNewScale = scale == null;
+
+    if (scale != null) {
+      scaleNotesController.text = scale.notes ?? '';
+      selectedScaleType = scale.scaleType;
+      selectedSubtype = scale.scaleSubtype;
+      configuration = scale.configuration;
+
+      indicatorMakeController.text = scale.indicatorMake;
+      indicatorModelController.text = scale.indicatorModel;
+      indicatorSerialController.text = scale.indicatorSerial;
+      indicatorPrefix = scale.approvalPrefix;
+      indicatorApprovalCodeController.text = scale.approvalNumber;
+
+      baseMakeController.text = scale.baseMake ?? '';
+      baseModelController.text = scale.baseModel ?? '';
+      baseSerialController.text = scale.baseSerial ?? '';
+      basePrefix = scale.baseApprovalPrefix ?? 'AM';
+      baseApprovalCodeController.text = scale.baseApprovalNumber ?? '';
+
+      capacityController.text = scale.capacity.toString();
+      capacityUnit = scale.capacityUnit;
+      divisionController.text = scale.division.toString();
+      loadCellsController.text = scale.numberOfLoadCells.toString();
+      sectionsController.text = scale.numberOfSections.toString();
+      loadCellModelController.text = scale.loadCellModel;
+      loadCellCapacityController.text = scale.loadCellCapacity.toString();
+      loadCellCapacityUnit = scale.loadCellCapacityUnit;
+
+      isLegalForTrade = scale.legalForTrade;
+      sealStatus = scale.sealStatus;
+      inspectionResult = scale.inspectionResult;
+      setInspectionExpiry(scale.inspectionExpiry);
+    }
+
+    notifyListeners();
+  }
+
+  void setReportType(String? value) {
+    reportType = value ?? 'Standard';
     notifyListeners();
   }
 
@@ -89,13 +129,18 @@ class ServiceReportFormController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setReportType(String value) {
-    reportType = value;
+  void setScaleType(String value) {
+    selectedScaleType = value;
     notifyListeners();
   }
 
-  void setNotes(String? value) {
-    notes = value;
+  void setSubtype(String? value) {
+    selectedSubtype = value;
+    notifyListeners();
+  }
+
+  void setCustomTypeDescription(String? value) {
+    customTypeDescription = value;
     notifyListeners();
   }
 
@@ -137,93 +182,29 @@ class ServiceReportFormController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setScaleType(String value) {
-    selectedScaleType = value;
-    notifyListeners();
-  }
-
-  void setSubtype(String? value) {
-    selectedSubtype = value;
-    notifyListeners();
-  }
-
-  void setCustomTypeDescription(String? value) {
-    customTypeDescription = value;
-    notifyListeners();
-  }
-
   String? validateApprovalNumber(String? value) {
-    if (value == null || !RegExp(r'^\d{4}\$').hasMatch(value)) {
+    if (value == null || !RegExp(r'^\d{4}$').hasMatch(value)) {
       return 'Approval number must be 4 digits';
     }
     return null;
   }
 
-  Future<int?> createNewScale({
-    required int customerId,
-    required bool configuration,
-    required String scaleType,
-    String? subtype,
-    String? customTypeDescription,
-    required String indicatorMake,
-    required String indicatorModel,
-    required String indicatorSerial,
-    required String approvalPrefix,
-    required String approvalNumber,
-    required String baseMake,
-    required String baseModel,
-    required String baseSerial,
-    required String baseApprovalPrefix,
-    required String baseApprovalNumber,
-    required double capacity,
-    required String capacityUnit,
-    required double division,
-    required int numberOfLoadCells,
-    required int numberOfSections,
-    required String loadCellModel,
-    required double loadCellCapacity,
-    required String loadCellCapacityUnit,
-    required String? notes,
-  }) async {
-    final newScale = ScalesCompanion(
-      customerId: Value(customerId),
-      configuration: Value(configuration),
-      scaleType: Value(selectedScaleType),
-      scaleSubtype: Value(selectedSubtype ?? 'Other'),
-      customTypeDescription: Value(customTypeDescription),
-      indicatorMake: Value(indicatorMake),
-      indicatorModel: Value(indicatorModel),
-      indicatorSerial: Value(indicatorSerial),
-      approvalPrefix: Value(approvalPrefix),
-      approvalNumber: Value(approvalNumber),
-      baseMake: Value(baseMake),
-      baseModel: Value(baseModel),
-      baseSerial: Value(baseSerial),
-      baseApprovalPrefix: Value(baseApprovalPrefix),
-      baseApprovalNumber: Value(baseApprovalNumber),
-      capacity: Value(capacity),
-      capacityUnit: Value(capacityUnit),
-      division: Value(division),
-      numberOfLoadCells: Value(numberOfLoadCells),
-      numberOfSections: Value(numberOfSections),
-      loadCellModel: Value(loadCellModel),
-      loadCellCapacity: Value(loadCellCapacity),
-      loadCellCapacityUnit: Value(loadCellCapacityUnit),
-      notes: Value(notes ?? ''),
-      legalForTrade: Value(isLegalForTrade),
-      inspectionExpiry: Value(inspectionExpiry),
-      sealStatus: Value(sealStatus),
-      inspectionResult: Value(inspectionResult),
-    );
+  Future<void> loadServiceReport(int reportId) async {
+    final result = await db.serviceReportDao.getById(reportId);
+    if (result == null) return;
 
-    final scaleDao = ref.read(scaleDaoProvider);
-    final newId = await scaleDao.insertScale(newScale);
-    final insertedScale = await scaleDao.getScaleById(newId);
+    final report = result.report;
+    final scale = result.scale;
+    final wo = await db.workOrderDao.getWorkOrderById(report.workOrderId);
 
-    selectedScale = insertedScale;
-    isCreatingNewScale = false;
+    setWorkOrder(wo);
+    setScale(scale);
+
+    selectedServiceReportId = report.id;
+    reportType = report.reportType;
+    reportNotesController.text = report.notes ?? '';
+
     notifyListeners();
-    return newId;
   }
 
   Future<bool> save() async {
@@ -238,55 +219,8 @@ class ServiceReportFormController extends ChangeNotifier {
     }
 
     if (selectedScale == null && isCreatingNewScale) {
-      final wo = selectedWorkOrder!;
-      final cap = double.tryParse(capacityController.text);
-      final div = double.tryParse(divisionController.text);
-      final lcCount = int.tryParse(loadCellsController.text);
-      final sections = int.tryParse(sectionsController.text);
-      final lcCap = double.tryParse(loadCellCapacityController.text);
-
-      if (cap == null || div == null || lcCount == null || sections == null || lcCap == null) {
-        debugPrint('❌ Invalid scale input values');
-        return false;
-      }
-
-      if (validateApprovalNumber(indicatorApprovalCodeController.text) != null ||
-          validateApprovalNumber(baseApprovalCodeController.text) != null) {
-        debugPrint('❌ Invalid approval number format');
-        return false;
-      }
-
-      await createNewScale(
-        customerId: wo.customerId,
-        configuration: configuration,
-        scaleType: selectedScaleType,
-        subtype: selectedSubtype,
-        customTypeDescription: customTypeDescription,
-        indicatorMake: indicatorMakeController.text,
-        indicatorModel: indicatorModelController.text,
-        indicatorSerial: indicatorSerialController.text,
-        approvalPrefix: indicatorPrefix,
-        approvalNumber: indicatorApprovalCodeController.text,
-        baseMake: baseMakeController.text,
-        baseModel: baseModelController.text,
-        baseSerial: baseSerialController.text,
-        baseApprovalPrefix: basePrefix,
-        baseApprovalNumber: baseApprovalCodeController.text,
-        capacity: cap,
-        capacityUnit: capacityUnit,
-        division: div,
-        numberOfLoadCells: lcCount,
-        numberOfSections: sections,
-        loadCellModel: loadCellModelController.text,
-        loadCellCapacity: lcCap,
-        loadCellCapacityUnit: loadCellCapacityUnit,
-        notes: scaleNotesController.text,
-      );
-
-      if (selectedScale == null) {
-        debugPrint('❌ Failed to create scale');
-        return false;
-      }
+      debugPrint('ℹ️ TODO: handle new scale creation');
+      return false;
     }
 
     if (selectedScale == null) {
@@ -294,12 +228,12 @@ class ServiceReportFormController extends ChangeNotifier {
       return false;
     }
 
-    final dao = ref.read(serviceReportDaoProvider);
+    final dao = db.serviceReportDao;
     selectedServiceReportId = await dao.insertReport(ServiceReportsCompanion(
       workOrderId: Value(selectedWorkOrder!.id),
       scaleId: Value(selectedScale!.id),
       reportType: Value(reportType),
-      notes: Value(notes ?? ''),
+      notes: Value(reportNotesController.text),
     ));
 
     debugPrint('✅ Service Report saved with ID: $selectedServiceReportId');
@@ -312,11 +246,11 @@ class ServiceReportFormController extends ChangeNotifier {
     selectedWorkOrder = null;
     selectedScale = null;
     reportType = 'Standard';
-    notes = null;
     editMode = false;
     isCreatingNewScale = false;
     selectedServiceReportId = null;
     scaleNotesController.clear();
+    reportNotesController.clear();
     isLegalForTrade = false;
     inspectionExpiry = null;
     sealStatus = null;
@@ -345,6 +279,7 @@ class ServiceReportFormController extends ChangeNotifier {
 
   @override
   void dispose() {
+    reportNotesController.dispose();
     scaleNotesController.dispose();
     inspectionExpiryController.dispose();
     indicatorMakeController.dispose();

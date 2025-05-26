@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/work_order_with_customer.dart';
 import '../models/service_report_with_scale.dart';
 import '../providers/drift_providers.dart';
+import 'create_work_order_page.dart';
 import 'create_service_report_page.dart';
+import 'create_weight_test_page.dart';
 
 class ViewWorkOrdersPage extends ConsumerWidget {
   const ViewWorkOrdersPage({super.key});
@@ -39,9 +41,20 @@ class ViewWorkOrdersPage extends ConsumerWidget {
             itemBuilder: (context, index) {
               final wo = workOrders[index];
               return ExpansionTile(
-                title: Text(
-                  '${wo.workOrder.workOrderNumber} - ${wo.customer.businessName} - ${wo.workOrder.siteCity}, ${wo.workOrder.siteProvince}',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                title: GestureDetector(
+                  onTap: () {
+                    debugPrint('📦 Tapped Work Order ID: ${wo.workOrder.id}');
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CreateWorkOrderPage(existingWorkOrder: wo.workOrder),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    '${wo.workOrder.workOrderNumber} - ${wo.customer.businessName} - ${wo.workOrder.siteCity}, ${wo.workOrder.siteProvince}',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
                 subtitle: Text('Last Modified: ${_formatDate(wo.workOrder.lastModified)}'),
                 children: [
@@ -71,21 +84,62 @@ class ViewWorkOrdersPage extends ConsumerWidget {
                       }
 
                       return Column(
-                        children: reports.map((sr) => ListTile(
-                          dense: true,
-                          title: Text('SR#${sr.report.id} — ${sr.scale.indicatorModel} — ${sr.scale.indicatorSerial}'),
-                          subtitle: Text('${sr.scale.baseModel ?? ''} — ${sr.scale.baseSerial ?? ''}'),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => CreateServiceReportPage(
-                                  workOrderId: sr.report.workOrderId,
-                                ),
+                        children: reports.map((sr) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ListTile(
+                                dense: true,
+                                title: Text('SR#${sr.report.id} — ${sr.scale.indicatorModel} — ${sr.scale.indicatorSerial}'),
+                                subtitle: Text('${sr.scale.baseModel ?? ''} — ${sr.scale.baseSerial ?? ''}'),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => CreateServiceReportPage(workOrderId: sr.report.workOrderId),
+                                    ),
+                                  );
+                                },
                               ),
-                            );
-                          },
-                        )).toList(),
+                              FutureBuilder(
+                                future: ref.read(weightTestDaoProvider).getByServiceReportId(sr.report.id),
+                                builder: (context, weightTestSnapshot) {
+                                  if (weightTestSnapshot.connectionState == ConnectionState.waiting) {
+                                    return const Padding(
+                                      padding: EdgeInsets.only(left: 32.0, bottom: 12.0),
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  }
+
+                                  final test = weightTestSnapshot.data;
+
+                                  return Padding(
+                                    padding: const EdgeInsets.only(left: 32.0, bottom: 12.0),
+                                    child: test == null
+                                        ? const Text('• No Weight Test')
+                                        : InkWell(
+                                            onTap: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) => CreateWeightTestPage(
+                                                    serviceReportId: sr.report.id,
+                                                    division: sr.scale.division,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            child: Text(
+                                              '• Weight Test (Max Error: ${test.eccentricityError ?? 'N/A'})',
+                                              style: const TextStyle(color: Colors.blue),
+                                            ),
+                                          ),
+                                  );
+                                },
+                              ),
+                            ],
+                          );
+                        }).toList(),
                       );
                     },
                   ),

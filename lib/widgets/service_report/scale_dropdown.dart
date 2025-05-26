@@ -30,12 +30,12 @@ class ScaleDropdown extends ConsumerWidget {
         final scales = snapshot.data!;
         final dropdownItems = [
           ...scales.map(
-            (s) => DropdownMenuItem<Scale>(
+            (s) => DropdownMenuItem<Scale?>(
               value: s,
               child: Text('${s.scaleType} - ${s.indicatorModel} (${s.indicatorSerial})'),
             ),
           ),
-          const DropdownMenuItem<Scale>(
+          const DropdownMenuItem<Scale?>(
             value: null,
             child: Text('➕ Create New Scale'),
           ),

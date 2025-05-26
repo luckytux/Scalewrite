@@ -13,13 +13,16 @@ import '../widgets/service_report/load_cell_section.dart';
 import '../widgets/service_report/scale_capacity_section.dart';
 import '../widgets/service_report/scale_type_selector.dart';
 import '../widgets/service_report/legal_status_section.dart';
+import '../widgets/service_report/report_notes_section.dart';
+import '../widgets/service_report/report_type_selector.dart';
 import 'create_weight_test_page.dart';
 
 class CreateServiceReportPage extends ConsumerStatefulWidget {
   final int? customerId;
   final int? workOrderId;
+  final int? serviceReportId;
 
-  const CreateServiceReportPage({super.key, this.customerId, this.workOrderId});
+  const CreateServiceReportPage({super.key, this.customerId, this.workOrderId, this.serviceReportId});
 
   @override
   ConsumerState<CreateServiceReportPage> createState() => _CreateServiceReportPageState();
@@ -31,14 +34,17 @@ class _CreateServiceReportPageState extends ConsumerState<CreateServiceReportPag
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!initialized && widget.workOrderId != null) {
-      final formController = ref.read(serviceReportFormProvider);
-      final workOrderDao = ref.read(workOrderDaoProvider);
-      workOrderDao.getWorkOrderById(widget.workOrderId!).then((wo) {
-        if (wo != null) {
-          formController.setWorkOrder(wo);
-        }
-      });
+    final controller = ref.read(serviceReportFormProvider);
+
+    if (!initialized) {
+      if (widget.serviceReportId != null) {
+        controller.loadServiceReport(widget.serviceReportId!);
+      } else if (widget.workOrderId != null) {
+        final workOrderDao = ref.read(workOrderDaoProvider);
+        workOrderDao.getWorkOrderById(widget.workOrderId!).then((wo) {
+          if (wo != null) controller.setWorkOrder(wo);
+        });
+      }
       initialized = true;
     }
   }
@@ -82,7 +88,6 @@ class _CreateServiceReportPageState extends ConsumerState<CreateServiceReportPag
                   ),
                 ],
               ),
-
               const SizedBox(height: 16),
               TextFormField(
                 controller: controller.scaleNotesController,
@@ -173,6 +178,16 @@ class _CreateServiceReportPageState extends ConsumerState<CreateServiceReportPag
                 editable: controller.editable,
               ),
               const SizedBox(height: 20),
+              ReportTypeSelector(
+                selected: controller.reportType,
+                onChanged: controller.editable ? (val) => controller.setReportType(val ?? 'Standard') : null,
+                readOnly: !editable,
+              ),
+
+              ReportNotesSection(
+                controller: controller.reportNotesController,
+                readOnly: !editable,
+              ),
               const LegalStatusSection(),
               const SizedBox(height: 24),
               Row(

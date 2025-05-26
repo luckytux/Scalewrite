@@ -37,4 +37,6 @@ class ScaleDao extends DatabaseAccessor<AppDatabase> with _$ScaleDaoMixin {
   Future<int> deleteScale(int id) {
     return (delete(scales)..where((tbl) => tbl.id.equals(id))).go();
   }
+
+
 }

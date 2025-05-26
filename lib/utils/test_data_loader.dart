@@ -50,13 +50,13 @@ class TestDataLoader extends ChangeNotifier {
       await db.delete(db.contacts).go();
       await db.delete(db.customers).go();
 
-      final Map<int, int> workOrderIdMap = {};
-      final Map<int, int> scaleIdMap = {};
-      final Map<int, int> serviceReportIdMap = {};
+      int scaleIndex = 1;
+      int workOrderIndex = 1;
+      int serviceReportIndex = 1;
 
       final List customers = data['customers'] ?? [];
       for (final c in customers) {
-        await db.customerDao.insertCustomer(CustomersCompanion(
+        final customerId = await db.customerDao.insertCustomer(CustomersCompanion(
           businessName: Value(c['businessName'] ?? c['name'] ?? ''),
           siteAddress: Value(c['siteAddress'] ?? ''),
           siteCity: Value(c['siteCity'] ?? ''),
@@ -72,118 +72,120 @@ class TestDataLoader extends ChangeNotifier {
           auditFlag: const Value(false),
           synced: const Value(false),
         ));
-      }
 
-      final List contacts = data['contacts'] ?? [];
-      for (final ct in contacts) {
-        await db.contactDao.insertContact(ContactsCompanion(
-          customerId: Value(ct['customerId']),
-          name: Value(ct['name']),
-          phone: Value(ct['phone'] ?? ''),
-          email: Value(ct['email'] ?? ''),
-          notes: const Value(''),
-          isMain: Value(ct['isMain'] ?? false),
-          deactivate: const Value(false),
-          auditFlag: const Value(false),
-          synced: const Value(false),
-        ));
-      }
+        final List contacts = c['contacts'] ?? [];
+        for (final ct in contacts) {
+          await db.contactDao.insertContact(ContactsCompanion(
+            customerId: Value(customerId),
+            name: Value(ct['name']),
+            phone: Value(ct['phone']?.toString() ?? ''),
+            email: Value(ct['email'] ?? ''),
+            notes: Value(ct['notes'] ?? ''),
+            isMain: Value(ct['isMain'] ?? false),
+            deactivate: const Value(false),
+            auditFlag: const Value(false),
+            synced: const Value(true),
+          ));
+        }
 
-      final List workOrders = data['work_orders'] ?? [];
-      for (final wo in workOrders) {
-        final id = await db.workOrderDao.insertWorkOrder(WorkOrdersCompanion(
-          customerId: Value(wo['customerId']),
-          workOrderNumber: Value(wo['workOrderNumber']),
-          siteAddress: Value(wo['siteAddress']),
-          siteCity: Value(wo['siteCity']),
-          siteProvince: Value(_abbrev(wo['siteProvince'])),
-          sitePostalCode: Value(wo['sitePostalCode']),
-          billingAddress: Value(wo['billingAddress']),
-          billingCity: Value(wo['billingCity']),
-          billingProvince: Value(_abbrev(wo['billingProvince'])),
-          billingPostalCode: Value(wo['billingPostalCode']),
-          gpsLocation: Value(wo['gpsLocation']),
-          customerNotes: Value(wo['customerNotes']),
-          auditFlag: Value(wo['auditFlag']),
-          synced: Value(wo['synced']),
-          lastModified: Value(DateTime.tryParse(wo['lastModified']) ?? DateTime.now()),
-        ));
-        workOrderIdMap[wo['id']] = id;
-      }
+        final List scales = c['scales'] ?? [];
+        final List<int> insertedScaleIds = [];
+        for (final sc in scales) {
+          final scaleId = await db.scaleDao.insertScale(ScalesCompanion(
+            customerId: Value(customerId),
+            configuration: Value(sc['configuration']),
+            scaleType: Value(sc['scaleType']),
+            scaleSubtype: Value(sc['scaleSubtype']),
+            customTypeDescription: Value(sc['customTypeDescription']),
+            indicatorMake: Value(sc['indicatorMake']),
+            indicatorModel: Value(sc['indicatorModel']),
+            indicatorSerial: Value(sc['indicatorSerial']),
+            approvalPrefix: Value(sc['approvalPrefix']),
+            approvalNumber: Value(sc['approvalNumber']),
+            baseMake: Value(sc['baseMake']),
+            baseModel: Value(sc['baseModel']),
+            baseSerial: Value(sc['baseSerial']),
+            baseApprovalPrefix: Value(sc['baseApprovalPrefix']),
+            baseApprovalNumber: Value(sc['baseApprovalNumber']),
+            capacity: Value((sc['capacity'] as num?)?.toDouble() ?? 0),
+            capacityUnit: Value(sc['capacityUnit']),
+            division: Value((sc['division'] as num?)?.toDouble() ?? 0),
+            numberOfLoadCells: Value(sc['numberOfLoadCells']),
+            numberOfSections: Value(sc['numberOfSections']),
+            loadCellModel: Value(sc['loadCellModel']),
+            loadCellCapacity: Value((sc['loadCellCapacity'] as num?)?.toDouble() ?? 0),
+            loadCellCapacityUnit: Value(sc['loadCellCapacityUnit']),
+            notes: Value(sc['notes'] ?? ''),
+            legalForTrade: Value(sc['legalForTrade'] ?? false),
+            inspectionExpiry: Value(DateTime.tryParse(sc['inspectionExpiry'] ?? '') ?? DateTime.now()),
+            sealStatus: Value(sc['sealStatus']),
+            inspectionResult: Value(sc['inspectionResult']),
+            auditFlag: const Value(false),
+            deactivate: const Value(false),
+            synced: const Value(true),
+          ));
+          insertedScaleIds.add(scaleId);
+          scaleIndex++;
+        }
 
-      final List scales = data['scales'] ?? [];
-      for (final sc in scales) {
-        final id = await db.scaleDao.insertScale(ScalesCompanion(
-          customerId: Value(sc['customerId']),
-          configuration: Value(sc['configuration']),
-          scaleType: Value(sc['scaleType']),
-          scaleSubtype: Value(sc['scaleSubtype']),
-          customTypeDescription: Value(sc['customTypeDescription']),
-          indicatorMake: Value(sc['indicatorMake']),
-          indicatorModel: Value(sc['indicatorModel']),
-          indicatorSerial: Value(sc['indicatorSerial']),
-          approvalPrefix: Value(sc['approvalPrefix']),
-          approvalNumber: Value(sc['approvalNumber']),
-          baseMake: Value(sc['baseMake']),
-          baseModel: Value(sc['baseModel']),
-          baseSerial: Value(sc['baseSerial']),
-          baseApprovalPrefix: Value(sc['baseApprovalPrefix']),
-          baseApprovalNumber: Value(sc['baseApprovalNumber']),
-          capacity: Value((sc['capacity'] ?? 0).toDouble()),
-          capacityUnit: Value(sc['capacityUnit']),
-          division: Value((sc['division'] ?? 0).toDouble()),
-          numberOfLoadCells: Value(sc['numberOfLoadCells']),
-          numberOfSections: Value(sc['numberOfSections']),
-          loadCellModel: Value(sc['loadCellModel']),
-          loadCellCapacity: Value((sc['loadCellCapacity'] ?? 0).toDouble()),
-          loadCellCapacityUnit: Value(sc['loadCellCapacityUnit']),
-          notes: Value(sc['notes'] ?? ''),
-          legalForTrade: Value(sc['legalForTrade'] ?? false),
-          inspectionExpiry: Value(DateTime.tryParse(sc['inspectionExpiry']) ?? DateTime.now()),
-          sealStatus: Value(sc['sealStatus']),
-          inspectionResult: Value(sc['inspectionResult']),
-          auditFlag: const Value(false),
-          deactivate: const Value(false),
-          synced: const Value(false),
-        ));
-        scaleIdMap[sc['id']] = id;
-      }
+        final List workOrders = c['workOrders'] ?? [];
+        for (final wo in workOrders) {
+          final woId = await db.workOrderDao.insertWorkOrder(WorkOrdersCompanion(
+            customerId: Value(customerId),
+            workOrderNumber: Value(wo['workOrderNumber']),
+            siteAddress: Value(wo['siteAddress']),
+            siteCity: Value(wo['siteCity']),
+            siteProvince: Value(_abbrev(wo['siteProvince'])),
+            sitePostalCode: Value(wo['sitePostalCode']),
+            billingAddress: Value(wo['billingAddress']),
+            billingCity: Value(wo['billingCity']),
+            billingProvince: Value(_abbrev(wo['billingProvince'])),
+            billingPostalCode: Value(wo['billingPostalCode']),
+            gpsLocation: Value(wo['gpsLocation']),
+            customerNotes: Value(wo['customerNotes']),
+            auditFlag: const Value(false),
+            synced: const Value(false),
+            lastModified: Value(DateTime.tryParse(wo['lastModified'] ?? '') ?? DateTime.now()),
+          ));
+          workOrderIndex++;
 
-      final List serviceReports = data['service_reports'] ?? [];
-      for (final sr in serviceReports) {
-        final id = await db.serviceReportDao.insertReport(ServiceReportsCompanion(
-          workOrderId: Value(workOrderIdMap[sr['workOrderId']] ?? 0),
-          scaleId: Value(scaleIdMap[sr['scaleId']] ?? 0),
-          reportType: Value(sr['reportType']),
-          notes: Value(sr['notes']),
-          createdAt: Value(DateTime.tryParse(sr['createdAt']) ?? DateTime.now()),
-          complete: Value(sr['complete']),
-          synced: Value(sr['synced']),
-        ));
-        serviceReportIdMap[sr['id']] = id;
-      }
+          final List reports = wo['serviceReports'] ?? [];
+          for (final sr in reports) {
+            final srId = await db.serviceReportDao.insertReport(ServiceReportsCompanion(
+              workOrderId: Value(woId),
+              scaleId: Value(insertedScaleIds.first),
+              reportType: Value(sr['reportType']),
+              notes: Value(sr['notes']),
+              createdAt: Value(DateTime.tryParse(sr['createdAt'] ?? '') ?? DateTime.now()),
+              complete: const Value(false),
+              synced: const Value(false),
+            ));
+            serviceReportIndex++;
 
-      final List weightTests = data['weight_tests'] ?? [];
-      for (final wt in weightTests) {
-        await db.weightTestDao.insertWeightTest(WeightTestsCompanion(
-          serviceReportId: Value(serviceReportIdMap[wt['serviceReportId']] ?? 0),
-          eccentricityType: Value(wt['eccentricityType']),
-          eccentricityPoints: Value(wt['eccentricityPoints']),
-          eccentricityDirections: Value(wt['eccentricityDirections']),
-          eccentricity1: Value((wt['eccentricity1'] ?? 0).toDouble()),
-          eccentricity2: Value((wt['eccentricity2'] ?? 0).toDouble()),
-          eccentricity3: Value((wt['eccentricity3'] ?? 0).toDouble()),
-          eccentricity4: Value((wt['eccentricity4'] ?? 0).toDouble()),
-          eccentricityError: Value(wt['eccentricityError']),
-          asFoundTest1: Value((wt['asFoundTest1'] ?? 0).toDouble()),
-          asFoundRead1: Value((wt['asFoundRead1'] ?? 0).toDouble()),
-          asFoundDiff1: Value((wt['asFoundDiff1'] ?? 0).toDouble()),
-          asLeftTest1: Value((wt['asLeftTest1'] ?? 0).toDouble()),
-          asLeftRead1: Value((wt['asLeftRead1'] ?? 0).toDouble()),
-          asLeftDiff1: Value((wt['asLeftDiff1'] ?? 0).toDouble()),
-          weightTestUnit: Value(wt['weightTestUnit']),
-          timestamp: Value(DateTime.tryParse(wt['timestamp']) ?? DateTime.now()),
-        ));
+            final List weightTests = sr['weightTests'] ?? [];
+            for (final wt in weightTests) {
+              await db.weightTestDao.insertWeightTest(WeightTestsCompanion(
+                serviceReportId: Value(srId),
+                eccentricityType: Value(wt['eccentricityType']),
+                eccentricityPoints: Value(wt['eccentricityPoints']),
+                eccentricityDirections: Value(wt['eccentricityDirections']),
+                eccentricity1: Value((wt['eccentricity1'] as num?)?.toDouble() ?? 0),
+                eccentricity2: Value((wt['eccentricity2'] as num?)?.toDouble() ?? 0),
+                eccentricity3: Value((wt['eccentricity3'] as num?)?.toDouble() ?? 0),
+                eccentricity4: Value((wt['eccentricity4'] as num?)?.toDouble() ?? 0),
+                eccentricityError: Value(wt['eccentricityError']),
+                asFoundTest1: Value((wt['asFoundTest1'] as num?)?.toDouble() ?? 0),
+                asFoundRead1: Value((wt['asFoundRead1'] as num?)?.toDouble() ?? 0),
+                asFoundDiff1: Value((wt['asFoundDiff1'] as num?)?.toDouble() ?? 0),
+                asLeftTest1: Value((wt['asLeftTest1'] as num?)?.toDouble() ?? 0),
+                asLeftRead1: Value((wt['asLeftRead1'] as num?)?.toDouble() ?? 0),
+                asLeftDiff1: Value((wt['asLeftDiff1'] as num?)?.toDouble() ?? 0),
+                weightTestUnit: Value(wt['weightTestUnit']),
+                timestamp: Value(DateTime.tryParse(wt['timestamp'] ?? '') ?? DateTime.now()),
+              ));
+            }
+          }
+        }
       }
 
       debugPrint('✅ Test data loaded successfully');
@@ -191,8 +193,8 @@ class TestDataLoader extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e, stack) {
-      debugPrint('❌ Error loading test data: $e');
-      debugPrint('$stack');
+      debugPrint('❌ Error loading test data: \$e');
+      debugPrint(stack.toString());
       loading = false;
       notifyListeners();
       return false;

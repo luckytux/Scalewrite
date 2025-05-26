@@ -1,5 +1,3 @@
-// File: lib/widgets/common/rounded_dropdown_field.dart
-
 import 'package:flutter/material.dart';
 
 class RoundedDropdownField<T> extends StatelessWidget {
@@ -8,8 +6,6 @@ class RoundedDropdownField<T> extends StatelessWidget {
   final List<DropdownMenuItem<T>> items;
   final ValueChanged<T?>? onChanged;
   final bool enabled;
-
-  /// Optional override for background fill color
   final Color? fillColor;
 
   const RoundedDropdownField({
@@ -28,7 +24,17 @@ class RoundedDropdownField<T> extends StatelessWidget {
 
     return DropdownButtonFormField<T>(
       value: value,
-      items: items,
+      items: items
+          .map(
+            (item) => DropdownMenuItem<T>(
+              value: item.value,
+              child: DefaultTextStyle.merge(
+                style: const TextStyle(color: Colors.black),
+                child: item.child,
+              ),
+            ),
+          )
+          .toList(),
       onChanged: enabled ? onChanged : null,
       decoration: InputDecoration(
         labelText: label,
@@ -53,7 +59,7 @@ class RoundedDropdownField<T> extends StatelessWidget {
           borderSide: const BorderSide(color: Colors.teal, width: 2),
         ),
       ),
-      style: const TextStyle(fontSize: 16),
+      style: const TextStyle(fontSize: 16, color: Colors.black), // 👈 ensures selected item is black
       isExpanded: true,
     );
   }

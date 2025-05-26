@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' as drift;
 import '../data/database.dart';
-import '../providers/drift_providers.dart';
+import '../providers/drift_providers.dart' as drift;
+import '../providers/auth_provider.dart' as auth;
 
 final workOrderFormProvider = ChangeNotifierProvider<WorkOrderFormController>((ref) {
   return WorkOrderFormController(ref);
@@ -40,6 +41,7 @@ class WorkOrderFormController extends ChangeNotifier {
   bool contactValidationError = false;
 
   bool get contactsReadOnly => selectedCustomerId != null && !customerFieldsEnabled;
+  bool get isEditingExisting => editingWorkOrderId != null;
 
   Contact? get mainContact {
     try {
@@ -51,10 +53,10 @@ class WorkOrderFormController extends ChangeNotifier {
 
   WorkOrderFormController(this.ref);
 
-  void resetForm() {
+  Future<void> resetForm() async {
     selectedCustomerId = null;
     editingWorkOrderId = null;
-    workOrderNumber = generateWorkOrderNumber(101);
+    await generateWorkOrderNumberForCurrentUser();
     customerFieldsEnabled = true;
     showBilling = false;
     contactValidationError = false;
@@ -82,95 +84,17 @@ class WorkOrderFormController extends ChangeNotifier {
     'Newfoundland and Labrador', 'Yukon', 'Northwest Territories', 'Nunavut',
   ];
 
+  Future<void> generateWorkOrderNumberForCurrentUser() async {
+    final user = ref.read(auth.authControllerProvider);
+    final uid = user?.uidNumber ?? 999;
+    workOrderNumber = generateWorkOrderNumber(uid);
+  }
+
   String generateWorkOrderNumber(int uid) {
     final now = DateTime.now();
     final date = '${now.year}${_twoDigits(now.month)}${_twoDigits(now.day)}';
     final time = '${_twoDigits(now.hour)}${_twoDigits(now.minute)}';
     return '$uid-$date-$time';
-  }
-
-  void loadExistingWorkOrder(WorkOrder wo) async {
-    editingWorkOrderId = wo.id;
-    selectedCustomerId = wo.customerId;
-    workOrderNumber = wo.workOrderNumber;
-
-    siteAddressController.text = wo.siteAddress;
-    siteCityController.text = wo.siteCity;
-    siteProvinceController.text = wo.siteProvince;
-    sitePostalController.text = wo.sitePostalCode;
-    gpsLocationController.text = wo.gpsLocation;
-
-    billingAddressController.text = wo.billingAddress ?? '';
-    billingCityController.text = wo.billingCity ?? '';
-    billingProvinceController.text = wo.billingProvince ?? '';
-    billingPostalController.text = wo.billingPostalCode ?? '';
-
-    showBilling = wo.billingAddress != null;
-
-    final customerDao = ref.read(customerDaoProvider);
-    final customer = await customerDao.getCustomerById(wo.customerId);
-
-    if (customer != null) {
-      businessNameController.text = customer.businessName;
-    } else {
-      businessNameController.text = '[Missing Customer]';
-    }
-
-    notifyListeners();
-  }
-
-  Future<void> selectCustomer(int? customerId, List<Customer> customers) async {
-    selectedCustomerId = customerId;
-
-    if (customerId == null) {
-      _clearFields();
-      customerFieldsEnabled = true;
-    } else {
-      final customer = customers.firstWhere((c) => c.id == customerId);
-
-      businessNameController.text = customer.businessName;
-      siteAddressController.text = customer.siteAddress ?? '';
-      siteCityController.text = customer.siteCity ?? '';
-      siteProvinceController.text = (customer.siteProvince?.isNotEmpty ?? false) ? customer.siteProvince! : 'Alberta';
-      sitePostalController.text = customer.sitePostalCode ?? '';
-      gpsLocationController.text = customer.gpsLocation ?? '';
-
-      billingAddressController.text = customer.billingAddress ?? '';
-      billingCityController.text = customer.billingCity ?? '';
-      billingProvinceController.text = (customer.billingProvince?.isNotEmpty ?? false) ? customer.billingProvince! : 'Alberta';
-      billingPostalController.text = customer.billingPostalCode ?? '';
-
-      customerFieldsEnabled = false;
-
-      final contactDao = ref.read(contactDaoProvider);
-      final customerContacts = await contactDao.getContactsForCustomer(customerId);
-      _contacts = customerContacts;
-    }
-
-    notifyListeners();
-  }
-
-  void setIsCreatingNewCustomer(String name) {
-    selectedCustomerId = null;
-    customerFieldsEnabled = true;
-    businessNameController.text = name;
-    _contacts.clear();
-    addNewContact();
-    notifyListeners();
-  }
-
-  void _clearFields() {
-    businessNameController.clear();
-    siteAddressController.clear();
-    siteCityController.clear();
-    siteProvinceController.text = 'Alberta';
-    sitePostalController.clear();
-    gpsLocationController.clear();
-    billingAddressController.clear();
-    billingCityController.clear();
-    billingProvinceController.text = 'Alberta';
-    billingPostalController.clear();
-    _contacts.clear();
   }
 
   String _twoDigits(int n) => n.toString().padLeft(2, '0');
@@ -237,13 +161,96 @@ class WorkOrderFormController extends ChangeNotifier {
     }
   }
 
+  void setIsCreatingNewCustomer(String name) {
+    selectedCustomerId = null;
+    customerFieldsEnabled = true;
+    businessNameController.text = name;
+    _contacts.clear();
+    addNewContact();
+    notifyListeners();
+  }
+
+  Future<void> selectCustomer(int? customerId, List<Customer> customers) async {
+    selectedCustomerId = customerId;
+
+    if (customerId == null) {
+      _clearFields();
+      customerFieldsEnabled = true;
+    } else {
+      final customer = customers.firstWhere((c) => c.id == customerId);
+
+      businessNameController.text = customer.businessName;
+      siteAddressController.text = customer.siteAddress ?? '';
+      siteCityController.text = customer.siteCity ?? '';
+      siteProvinceController.text = (customer.siteProvince?.isNotEmpty ?? false) ? customer.siteProvince! : 'Alberta';
+      sitePostalController.text = customer.sitePostalCode ?? '';
+      gpsLocationController.text = customer.gpsLocation ?? '';
+
+      billingAddressController.text = customer.billingAddress ?? '';
+      billingCityController.text = customer.billingCity ?? '';
+      billingProvinceController.text = (customer.billingProvince?.isNotEmpty ?? false) ? customer.billingProvince! : 'Alberta';
+      billingPostalController.text = customer.billingPostalCode ?? '';
+
+      customerFieldsEnabled = false;
+
+      final contactDao = ref.read(drift.contactDaoProvider);
+      final customerContacts = await contactDao.getContactsForCustomer(customerId);
+      _contacts = customerContacts;
+    }
+
+    notifyListeners();
+  }
+
+  void _clearFields() {
+    businessNameController.clear();
+    siteAddressController.clear();
+    siteCityController.clear();
+    siteProvinceController.text = 'Alberta';
+    sitePostalController.clear();
+    gpsLocationController.clear();
+    billingAddressController.clear();
+    billingCityController.clear();
+    billingProvinceController.text = 'Alberta';
+    billingPostalController.clear();
+    _contacts.clear();
+  }
+
+  Future<void> loadExistingWorkOrder(WorkOrder wo) async {
+    editingWorkOrderId = wo.id;
+    selectedCustomerId = wo.customerId;
+    workOrderNumber = wo.workOrderNumber;
+
+    siteAddressController.text = wo.siteAddress;
+    siteCityController.text = wo.siteCity;
+    siteProvinceController.text = wo.siteProvince;
+    sitePostalController.text = wo.sitePostalCode;
+    gpsLocationController.text = wo.gpsLocation;
+
+    billingAddressController.text = wo.billingAddress ?? '';
+    billingCityController.text = wo.billingCity ?? '';
+    billingProvinceController.text = wo.billingProvince ?? '';
+    billingPostalController.text = wo.billingPostalCode ?? '';
+
+    customerNotesController.text = wo.customerNotes ?? '';
+    showBilling = wo.billingAddress != null;
+
+    final customerDao = ref.read(drift.customerDaoProvider);
+    final customer = await customerDao.getCustomerById(wo.customerId);
+
+    if (customer != null) {
+      await selectCustomer(customer.id, [customer]); // ensure customer fields get populated
+    } else {
+      businessNameController.text = '[Missing Customer]';
+    }    notifyListeners();
+  }
+
   Future<bool> save() async {
     if (!formKey.currentState!.validate()) {
       return false;
     }
 
     final hasValidContact = _contacts.any((c) {
-      final hasName = c.name.trim().isNotEmpty ?? false;
+      final hasName = c.name.trim().isNotEmpty;
       final hasPhoneOrEmail = (c.phone?.trim().isNotEmpty ?? false) || (c.email?.trim().isNotEmpty ?? false);
       return hasName && hasPhoneOrEmail;
     });
@@ -254,8 +261,8 @@ class WorkOrderFormController extends ChangeNotifier {
       return false;
     }
 
-    final db = ref.read(databaseProvider);
-    final contactDao = ref.read(contactDaoProvider);
+    final db = ref.read(drift.databaseProvider);
+    final contactDao = ref.read(drift.contactDaoProvider);
 
     int? customerId = selectedCustomerId;
 
@@ -307,7 +314,7 @@ class WorkOrderFormController extends ChangeNotifier {
     for (final c in _contacts) {
       final contactEntry = ContactsCompanion(
         customerId: drift.Value(customerId),
-        name: drift.Value(c.name ?? ''),
+        name: drift.Value((c.name ?? '').trim()),
         phone: drift.Value(c.phone ?? ''),
         email: drift.Value(c.email ?? ''),
         notes: drift.Value(c.notes ?? ''),

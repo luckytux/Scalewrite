@@ -3,55 +3,83 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class RoundedTextField extends StatelessWidget {
+class RoundedTextField extends StatefulWidget {
   final TextEditingController controller;
   final String label;
   final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
   final int maxLines;
   final bool readOnly;
+  final bool obscureText;
   final String? Function(String?)? validator;
   final VoidCallback? onEditingComplete;
   final ValueChanged<String>? onChanged;
-  final VoidCallback? onTap; // ✅ NEW
-  final Widget? suffixIcon;
+  final VoidCallback? onTap;
   final Color? fillColor;
   final List<TextInputFormatter>? inputFormatters;
+  final Widget? suffixIcon;
+  final Widget? prefixIcon; // ✅ Added prefixIcon
 
   const RoundedTextField({
     super.key,
     required this.controller,
     required this.label,
     this.keyboardType,
+    this.textInputAction,
     this.maxLines = 1,
     this.readOnly = false,
+    this.obscureText = false,
     this.validator,
     this.onEditingComplete,
     this.onChanged,
-    this.onTap, // ✅ NEW
-    this.suffixIcon,
+    this.onTap,
     this.fillColor,
     this.inputFormatters,
+    this.suffixIcon,
+    this.prefixIcon, // ✅ Added prefixIcon
   });
 
   @override
+  State<RoundedTextField> createState() => _RoundedTextFieldState();
+}
+
+class _RoundedTextFieldState extends State<RoundedTextField> {
+  late bool _obscure;
+
+  @override
+  void initState() {
+    super.initState();
+    _obscure = widget.obscureText;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final defaultFill = readOnly ? Colors.grey.shade200 : Colors.teal.shade50;
+    final defaultFill = widget.readOnly ? Colors.grey.shade200 : Colors.teal.shade50;
 
     return TextFormField(
-      controller: controller,
-      readOnly: readOnly,
-      keyboardType: keyboardType,
-      maxLines: maxLines,
-      validator: validator,
-      onEditingComplete: onEditingComplete,
-      onChanged: onChanged,
-      onTap: onTap, // ✅ Hook it in
-      inputFormatters: inputFormatters,
+      controller: widget.controller,
+      readOnly: widget.readOnly,
+      obscureText: _obscure,
+      keyboardType: widget.keyboardType,
+      textInputAction: widget.textInputAction,
+      maxLines: widget.maxLines,
+      validator: widget.validator,
+      onEditingComplete: widget.onEditingComplete,
+      onChanged: widget.onChanged,
+      onTap: widget.onTap,
+      inputFormatters: widget.inputFormatters,
       decoration: InputDecoration(
-        labelText: label,
-        suffixIcon: suffixIcon,
+        labelText: widget.label,
+        prefixIcon: widget.prefixIcon, // ✅ Added prefixIcon
+        suffixIcon: widget.suffixIcon ??
+            (widget.obscureText
+                ? IconButton(
+                    icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
+                    onPressed: () => setState(() => _obscure = !_obscure),
+                  )
+                : null),
         filled: true,
-        fillColor: fillColor ?? defaultFill,
+        fillColor: widget.fillColor ?? defaultFill,
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),

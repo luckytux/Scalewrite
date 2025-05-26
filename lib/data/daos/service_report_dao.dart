@@ -55,4 +55,18 @@ class ServiceReportDao extends DatabaseAccessor<AppDatabase>
   Future<void> deleteReport(int id) {
     return (delete(serviceReports)..where((tbl) => tbl.id.equals(id))).go();
   }
+
+  Future<ServiceReportWithScale?> getById(int id) async {
+    final query = select(serviceReports).join([
+      innerJoin(scales, scales.id.equalsExp(serviceReports.scaleId)),
+    ])..where(serviceReports.id.equals(id));
+
+    final row = await query.getSingleOrNull();
+    if (row == null) return null;
+
+    return ServiceReportWithScale(
+      report: row.readTable(serviceReports),
+      scale: row.readTable(scales),
+    );
+  }
 }
