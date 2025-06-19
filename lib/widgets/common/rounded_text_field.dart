@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class RoundedTextField extends StatefulWidget {
-  final TextEditingController controller;
+  final TextEditingController? controller;
   final String label;
+  final String? initialValue;
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
   final int maxLines;
@@ -18,12 +19,13 @@ class RoundedTextField extends StatefulWidget {
   final Color? fillColor;
   final List<TextInputFormatter>? inputFormatters;
   final Widget? suffixIcon;
-  final Widget? prefixIcon; // ✅ Added prefixIcon
+  final Widget? prefixIcon;
 
   const RoundedTextField({
     super.key,
-    required this.controller,
+    this.controller,
     required this.label,
+    this.initialValue,
     this.keyboardType,
     this.textInputAction,
     this.maxLines = 1,
@@ -36,7 +38,7 @@ class RoundedTextField extends StatefulWidget {
     this.fillColor,
     this.inputFormatters,
     this.suffixIcon,
-    this.prefixIcon, // ✅ Added prefixIcon
+    this.prefixIcon,
   });
 
   @override
@@ -54,10 +56,13 @@ class _RoundedTextFieldState extends State<RoundedTextField> {
 
   @override
   Widget build(BuildContext context) {
-    final defaultFill = widget.readOnly ? Colors.grey.shade200 : Colors.teal.shade50;
+    final Color defaultFill = widget.readOnly
+        ? Colors.grey.shade200
+        : widget.fillColor ?? Colors.teal.shade50;
 
     return TextFormField(
       controller: widget.controller,
+      initialValue: widget.controller == null ? widget.initialValue : null,
       readOnly: widget.readOnly,
       obscureText: _obscure,
       keyboardType: widget.keyboardType,
@@ -70,17 +75,20 @@ class _RoundedTextFieldState extends State<RoundedTextField> {
       inputFormatters: widget.inputFormatters,
       decoration: InputDecoration(
         labelText: widget.label,
-        prefixIcon: widget.prefixIcon, // ✅ Added prefixIcon
+        prefixIcon: widget.prefixIcon,
         suffixIcon: widget.suffixIcon ??
             (widget.obscureText
                 ? IconButton(
-                    icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
-                    onPressed: () => setState(() => _obscure = !_obscure),
+                    icon: Icon(
+                        _obscure ? Icons.visibility_off : Icons.visibility),
+                    onPressed: () =>
+                        setState(() => _obscure = !_obscure),
                   )
                 : null),
         filled: true,
-        fillColor: widget.fillColor ?? defaultFill,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        fillColor: defaultFill,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
         ),

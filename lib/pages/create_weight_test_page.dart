@@ -1,18 +1,22 @@
-// File: lib/pages/create_weight_test_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/weight_test_form_provider.dart';
 import '../widgets/weight_test/section_diagram.dart';
+import '../widgets/common/rounded_text_field.dart';
 
 class CreateWeightTestPage extends ConsumerStatefulWidget {
   final int serviceReportId;
   final double division;
 
-  const CreateWeightTestPage({super.key, required this.serviceReportId, this.division = 10});
+  const CreateWeightTestPage({
+    super.key,
+    required this.serviceReportId,
+    this.division = 10,
+  });
 
   @override
-  ConsumerState<CreateWeightTestPage> createState() => _CreateWeightTestPageState();
+  ConsumerState<CreateWeightTestPage> createState() =>
+      _CreateWeightTestPageState();
 }
 
 class _CreateWeightTestPageState extends ConsumerState<CreateWeightTestPage> {
@@ -21,9 +25,11 @@ class _CreateWeightTestPageState extends ConsumerState<CreateWeightTestPage> {
   @override
   void initState() {
     super.initState();
-    controller = ref.read(weightTestFormProvider.notifier);
-    controller.setServiceReportId(widget.serviceReportId);
-    controller.setDivision(widget.division);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller = ref.read(weightTestFormProvider.notifier);
+      controller.setServiceReportId(widget.serviceReportId);
+      controller.setDivision(widget.division);
+    });
   }
 
   @override
@@ -35,118 +41,100 @@ class _CreateWeightTestPageState extends ConsumerState<CreateWeightTestPage> {
       body: Padding(
         padding: const EdgeInsets.all(12),
         child: Form(
-          key: controller.formKey,
+          key: state.formKey,
           child: ListView(
             children: [
-              // --- Type & Direction Toggle ---
               Row(
                 children: [
                   const Text('Type:'),
                   const SizedBox(width: 8),
                   DropdownButton<String>(
                     value: state.eccentricityType,
-                    items: ['Section', 'Directional'].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-                    onChanged: (val) => controller.setEccentricityType(val ?? 'Section'),
+                    items: ['Section', 'Directional']
+                        .map((e) =>
+                            DropdownMenuItem(value: e, child: Text(e)))
+                        .toList(),
+                    onChanged: (val) => ref
+                        .read(weightTestFormProvider.notifier)
+                        .setEccentricityType(val ?? 'Section'),
                   ),
                   const Spacer(),
-                  if (state.eccentricityType == 'Directional')
+                  DropdownButton<String>(
+                    value: state.weightTestUnit,
+                    items: ['kg', 'lb']
+                        .map((e) =>
+                            DropdownMenuItem(value: e, child: Text(e)))
+                        .toList(),
+                    onChanged: (val) => ref
+                        .read(weightTestFormProvider.notifier)
+                        .setWeightTestUnit(val ?? 'kg'),
+                  ),
+                  const SizedBox(width: 8),
+                  if (state.isDirectional)
                     DropdownButton<String>(
                       value: state.eccentricityDirections,
                       hint: const Text('Direction'),
-                      items: ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
-                          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                      items: state.directionOptions
+                          .map((e) =>
+                              DropdownMenuItem(value: e, child: Text(e)))
                           .toList(),
-                      onChanged: (val) => controller.setEccentricityDirections(val),
+                      onChanged: (val) => ref
+                          .read(weightTestFormProvider.notifier)
+                          .setEccentricityDirections(val),
                     ),
                 ],
               ),
-              const SizedBox(height: 12),
-
-              // --- Section Diagram + ECC Fields ---
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Column(
-                      children: [
-                        for (int i = 0; i < state.eccentricityPoints; i++)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            child: TextFormField(
-                              initialValue: state.eccentricityValues[i]?.toString() ?? '',
-                              decoration: InputDecoration(
-                                labelText: 'Pt ${i + 1}',
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                              ),
-                              onChanged: (val) => controller.setEccentricityValue(i, double.tryParse(val)),
-                              keyboardType: TextInputType.number,
-                            ),
-                          ),
-
-                        if (state.eccentricityType == 'Directional')
-                          const SizedBox(height: 16),
-
-                        if (state.eccentricityType == 'Directional')
-                          for (int i = 0; i < state.eccentricityPoints; i++)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 4),
-                              child: TextFormField(
-                                initialValue: state.eccentricityValues[i + 10]?.toString() ?? '',
-                                decoration: InputDecoration(
-                                  labelText: 'Ret ${state.eccentricityPoints - i}',
-                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                                ),
-                                onChanged: (val) => controller.setEccentricityValue(i + 10, double.tryParse(val)),
-                                keyboardType: TextInputType.number,
-                              ),
-                            ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(flex: 1, child: SectionDiagram(sections: state.eccentricityPoints)),
-                ],
-              ),
-
+              const SizedBox(height: 16),
+              _buildSection(context, state, asLeft: false),
               const Divider(height: 32),
-
-              // --- As Found: ECC + INC ---
-              const Text('As Found: Eccentricity + Increasing Load Test', style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              _buildIncTestList(asLeft: false),
-
-              const Divider(height: 32),
-
-              // --- As Left Toggle ---
               Row(
                 children: [
                   Switch(
                     value: state.showAsLeft,
-                    onChanged: (val) => controller.toggleShowAsLeft(val),
+                    onChanged: (val) => ref
+                        .read(weightTestFormProvider.notifier)
+                        .toggleShowAsLeft(val),
                   ),
                   const Text('Show As Left Section')
                 ],
               ),
-
               if (state.showAsLeft) ...[
-                const SizedBox(height: 8),
-                const Text('As Left: Eccentricity + Increasing Load Test', style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                _buildIncTestList(asLeft: true),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0, top: 4),
+                  child: Row(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => ref
+                            .read(weightTestFormProvider.notifier)
+                            .copyEccentricityValues(),
+                        child: const Text('Copy Eccentricity'),
+                      ),
+                      const SizedBox(width: 12),
+                      ElevatedButton(
+                        onPressed: () => ref
+                            .read(weightTestFormProvider.notifier)
+                            .copyIncreasingValues(),
+                        child: const Text('Copy Increasing'),
+                      ),
+                    ],
+                  ),
+                ),
+                _buildSection(context, state, asLeft: true),
               ],
-
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 onPressed: () async {
                   final nav = Navigator.of(context);
-                  final ok = await controller.save();
+                  final ok = await ref
+                      .read(weightTestFormProvider.notifier)
+                      .save();
                   if (!mounted) return;
 
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(ok ? 'Weight Test Saved' : 'Error Saving')),
+                    SnackBar(
+                        content: Text(ok
+                            ? 'Weight Test Saved'
+                            : 'Error Saving Weight Test')),
                   );
                   if (ok) nav.pop();
                 },
@@ -160,45 +148,214 @@ class _CreateWeightTestPageState extends ConsumerState<CreateWeightTestPage> {
     );
   }
 
-  Widget _buildIncTestList({required bool asLeft}) {
-    final state = ref.watch(weightTestFormProvider);
+  Widget _buildSection(BuildContext context, WeightTestFormController state,
+      {required bool asLeft}) {
+    final eccLabel = asLeft ? 'As Left Section' : 'As Found Section';
 
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(eccLabel,
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, color: Colors.black87)),
+        const SizedBox(height: 8),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 2,
+              child: _buildEccentricityInputs(context, state, asLeft: asLeft),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              flex: 1,
+              child: SectionDiagram(
+                sections: state.eccentricityPoints,
+                isDirectional: state.isDirectional,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              flex: 2,
+              child: _buildIncTestList(state, asLeft: asLeft),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEccentricityInputs(BuildContext context,
+      WeightTestFormController state, {required bool asLeft}) {
+    final isDirectional = state.isDirectional;
+    final points = state.eccentricityPoints;
+    final controller = ref.read(weightTestFormProvider.notifier);
+
+    if (isDirectional) {
+      return Column(
+        children: List.generate(
+          points,
+          (i) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Row(
+              children: [
+                Expanded(
+                  child: RoundedTextField(
+                    label: 'E${i + 1}',
+                    initialValue: asLeft
+                        ? state.getAsLeftEccentricityValue(i)?.toString()
+                        : state.getEccentricityValue(i)?.toString(),
+                    onChanged: (val) {
+                      final parsed = double.tryParse(val);
+                      if (asLeft) {
+                        controller.setAsLeftEccentricityValue(i, parsed);
+                      } else {
+                        controller.setEccentricityValue(i, parsed);
+                      }
+                    },
+                    fillColor: Colors.green.shade50,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: RoundedTextField(
+                    label: 'E${i + 11}',
+                    initialValue: asLeft
+                        ? state.getAsLeftEccentricityValue(i + 10)?.toString()
+                        : state.getEccentricityValue(i + 10)?.toString(),
+                    onChanged: (val) {
+                      final parsed = double.tryParse(val);
+                      if (asLeft) {
+                        controller.setAsLeftEccentricityValue(i + 10, parsed);
+                      } else {
+                        controller.setEccentricityValue(i + 10, parsed);
+                      }
+                    },
+                    fillColor: Colors.green.shade50,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    } else {
+      final rows = (points / 2).ceil();
+      return Column(
+        children: List.generate(rows, (i) {
+          final leftIndex = i * 2;
+          final rightIndex = i * 2 + 1;
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Row(
+              children: [
+                Expanded(
+                  child: RoundedTextField(
+                    label: 'E${leftIndex + 1}',
+                    initialValue: asLeft
+                        ? state.getAsLeftEccentricityValue(leftIndex)
+                            ?.toString()
+                        : state.getEccentricityValue(leftIndex)?.toString(),
+                    onChanged: (val) {
+                      final parsed = double.tryParse(val);
+                      if (asLeft) {
+                        controller.setAsLeftEccentricityValue(
+                            leftIndex, parsed);
+                      } else {
+                        controller.setEccentricityValue(leftIndex, parsed);
+                      }
+                    },
+                    fillColor: Colors.green.shade50,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: rightIndex < points
+                      ? RoundedTextField(
+                          label: 'E${rightIndex + 1}',
+                          initialValue: asLeft
+                              ? state
+                                  .getAsLeftEccentricityValue(rightIndex)
+                                  ?.toString()
+                              : state
+                                  .getEccentricityValue(rightIndex)
+                                  ?.toString(),
+                          onChanged: (val) {
+                            final parsed = double.tryParse(val);
+                            if (asLeft) {
+                              controller.setAsLeftEccentricityValue(
+                                  rightIndex, parsed);
+                            } else {
+                              controller.setEccentricityValue(
+                                  rightIndex, parsed);
+                            }
+                          },
+                          fillColor: Colors.green.shade50,
+                        )
+                      : const SizedBox(),
+                ),
+              ],
+            ),
+          );
+        }),
+      );
+    }
+  }
+
+  Widget _buildIncTestList(WeightTestFormController state,
+      {required bool asLeft}) {
     final tests = asLeft ? state.asLeftTests : state.asFoundTests;
     final reads = asLeft ? state.asLeftReads : state.asFoundReads;
+    final diffs = asLeft ? state.asLeftDiffs : state.asFoundDiffs;
+    final controller = ref.read(weightTestFormProvider.notifier);
 
     return Column(
       children: List.generate(6, (i) {
+        final diff = diffs[i];
+        final isZero = diff != null && diff == 0.0;
+
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
+          padding: const EdgeInsets.symmetric(vertical: 3),
           child: Row(
             children: [
               Expanded(
-                child: TextFormField(
+                flex: 2,
+                child: RoundedTextField(
+                  label: 'Test ${i + 1}',
                   initialValue: tests[i]?.toString() ?? '',
-                  decoration: InputDecoration(
-                    labelText: 'Test ${i + 1}',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  ),
-                  keyboardType: TextInputType.number,
-                  onChanged: (val) => asLeft
-                      ? controller.setAsLeftTest(i, double.tryParse(val))
-                      : controller.setAsFoundTest(i, double.tryParse(val)),
+                  onChanged: (val) {
+                    final parsed = double.tryParse(val);
+                    asLeft
+                        ? controller.setAsLeftTest(i, parsed)
+                        : controller.setAsFoundTest(i, parsed);
+                  },
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: TextFormField(
+                flex: 2,
+                child: RoundedTextField(
+                  label: 'Read ${i + 1}',
                   initialValue: reads[i]?.toString() ?? '',
-                  decoration: InputDecoration(
-                    labelText: 'Read ${i + 1}',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  onChanged: (val) {
+                    final parsed = double.tryParse(val);
+                    asLeft
+                        ? controller.setAsLeftRead(i, parsed)
+                        : controller.setAsFoundRead(i, parsed);
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                flex: 2,
+                child: Text(
+                  diff != null ? state.formatDiff(diff, state.division) : '',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: isZero ? Colors.black : Colors.red,
                   ),
-                  keyboardType: TextInputType.number,
-                  onChanged: (val) => asLeft
-                      ? controller.setAsLeftRead(i, double.tryParse(val))
-                      : controller.setAsFoundRead(i, double.tryParse(val)),
                 ),
               ),
             ],

@@ -17,6 +17,9 @@ final userActionsProvider = Provider<UserActions>((ref) {
   return UserActions(dao);
 });
 
+/// ✅ Provide the current user (mock or real login session)
+final currentUserProvider = StateProvider<AppUser?>((ref) => null); // Replace with actual login logic
+
 class UserActions {
   final UserDao dao;
   UserActions(this.dao);

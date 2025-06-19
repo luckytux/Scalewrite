@@ -7,6 +7,7 @@ import 'package:drift/drift.dart' show Value;
 import '../../providers/inventory_provider.dart';
 import '../../widgets/common/rounded_text_field.dart';
 import '../../widgets/common/rounded_dropdown_field.dart';
+import '../../widgets/inventory/add_inventory_dialog.dart';
 import '../../data/database.dart';
 
 class ManageInventoryPage extends ConsumerStatefulWidget {
@@ -17,224 +18,196 @@ class ManageInventoryPage extends ConsumerStatefulWidget {
 }
 
 class _ManageInventoryPageState extends ConsumerState<ManageInventoryPage> {
-  final _searchController = TextEditingController();
-  String _typeFilter = '';
+  String _filterType = '';
+  final TextEditingController _searchController = TextEditingController();
+
+  int? _sortColumnIndex;
+  bool _sortAscending = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(inventoryProvider).loadInventory();
+    });
+  }
+
+  void _openAddInventoryDialog({bool isDuplicate = false, InventoryItem? lastItem}) {
+    showDialog(
+      context: context,
+      builder: (_) => AddInventoryDialog(
+        isDuplicate: isDuplicate,
+        lastItem: lastItem,
+      ),
+    );
+  }
+
+  void _sort<T>(
+    List<InventoryItem> items,
+    Comparable<T> Function(InventoryItem d) getField,
+    int columnIndex,
+    bool ascending,
+  ) {
+    items.sort((a, b) {
+      final aValue = getField(a);
+      final bValue = getField(b);
+      return ascending
+          ? Comparable.compare(aValue, bValue)
+          : Comparable.compare(bValue, aValue);
+    });
+
+    setState(() {
+      _sortColumnIndex = columnIndex;
+      _sortAscending = ascending;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final controller = ref.watch(inventoryProvider);
+    final items = [...controller.filteredItems]; // clone for sort safety
 
     return Scaffold(
       appBar: AppBar(title: const Text('Manage Inventory')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildTopBar(controller),
-            const SizedBox(height: 12),
-            RoundedTextField(
-              controller: _searchController,
-              label: 'Search',
-              onChanged: (value) => controller.search(value),
-            ),
-            const SizedBox(height: 12),
-            RoundedDropdownField<String>(
-              label: 'Filter by Type',
-              value: _typeFilter,
-              items: const [
-                DropdownMenuItem(value: '', child: Text('All')),
-                DropdownMenuItem(value: 'Equipment', child: Text('Equipment')),
-                DropdownMenuItem(value: 'Loadcell', child: Text('Loadcell')),
-                DropdownMenuItem(value: 'Indicator', child: Text('Indicator')),
-                DropdownMenuItem(value: 'Remote', child: Text('Remote')),
-                DropdownMenuItem(value: 'Printer', child: Text('Printer')),
-                DropdownMenuItem(value: 'Program', child: Text('Program')),
-                DropdownMenuItem(value: 'Test Weight', child: Text('Test Weight')),
-                DropdownMenuItem(value: 'Weighbar', child: Text('Weighbar')),
-                DropdownMenuItem(value: 'Part', child: Text('Part')),
-                DropdownMenuItem(value: 'Other', child: Text('Other')),
+            Row(
+              children: [
+                Expanded(
+                  child: RoundedTextField(
+                    controller: _searchController,
+                    label: 'Search',
+                    onChanged: (value) => controller.search(value),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: RoundedDropdownField<String>(
+                    label: 'Type',
+                    value: _filterType,
+                    onChanged: (value) {
+                      setState(() => _filterType = value ?? '');
+                      controller.filterByType(value);
+                    },
+                    items: const [
+                      DropdownMenuItem(value: '', child: Text('All')),
+                      DropdownMenuItem(value: 'Equipment', child: Text('Equipment')),
+                      DropdownMenuItem(value: 'Loadcell', child: Text('Loadcell')),
+                      DropdownMenuItem(value: 'Indicator', child: Text('Indicator')),
+                      DropdownMenuItem(value: 'Remote', child: Text('Remote')),
+                      DropdownMenuItem(value: 'Printer', child: Text('Printer')),
+                      DropdownMenuItem(value: 'Program', child: Text('Program')),
+                      DropdownMenuItem(value: 'Test Weight', child: Text('Test Weight')),
+                      DropdownMenuItem(value: 'Weighbar', child: Text('Weighbar')),
+                      DropdownMenuItem(value: 'Part', child: Text('Part')),
+                      DropdownMenuItem(value: 'Other', child: Text('Other')),
+                    ],
+                  ),
+                ),
               ],
-              onChanged: (value) {
-                setState(() => _typeFilter = value ?? '');
-                controller.filterByType(value);
-              },
             ),
-            const SizedBox(height: 12),
-            Expanded(child: _buildItemList(controller)),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add'),
+                  onPressed: () => _openAddInventoryDialog(),
+                ),
+                const SizedBox(width: 12),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.compare_arrows),
+                  label: const Text('Transfer'),
+                  onPressed: () {
+                    // Transfer dialog logic
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: items.isEmpty
+                  ? const Center(child: Text('No items found.'))
+                  : SingleChildScrollView(
+                      child: PaginatedDataTable(
+                        header: const Text('Inventory Items'),
+                        sortColumnIndex: _sortColumnIndex,
+                        sortAscending: _sortAscending,
+                        rowsPerPage: 10,
+                        showCheckboxColumn: false,
+                        columns: [
+                          DataColumn(
+                            label: const Text('Part#'),
+                            onSort: (index, ascending) =>
+                                _sort(items, (d) => d.partNumber, index, ascending),
+                          ),
+                          DataColumn(
+                            label: const Text('Description'),
+                            onSort: (index, ascending) =>
+                                _sort(items, (d) => d.description, index, ascending),
+                          ),
+                          DataColumn(
+                            label: const Text('Type'),
+                            onSort: (index, ascending) =>
+                                _sort(items, (d) => d.type ?? '', index, ascending),
+                          ),
+                          const DataColumn(label: Text('Make')),
+                          const DataColumn(label: Text('Model')),
+                          const DataColumn(label: Text('Serial')),
+                          const DataColumn(label: Text('Qty')),
+                          const DataColumn(label: Text('Location')),
+                          DataColumn(
+                            label: const Text('Price'),
+                            numeric: true,
+                            onSort: (index, ascending) =>
+                                _sort(items, (d) => d.price ?? 0, index, ascending),
+                          ),
+                        ],
+                        source: InventoryDataSource(items),
+                      ),
+                    ),
+            ),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildTopBar(InventoryProvider controller) {
-    return Row(
-      children: [
-        ElevatedButton.icon(
-          onPressed: () => _showAddItemDialog(context, controller),
-          icon: const Icon(Icons.add),
-          label: const Text('Add Item'),
-        ),
-        const SizedBox(width: 8),
-        ElevatedButton.icon(
-          onPressed: () {
-            // TODO: Implement transfer logic (Calgary <-> Lethbridge)
-          },
-          icon: const Icon(Icons.swap_horiz),
-          label: const Text('Transfer'),
-        ),
-        const SizedBox(width: 8),
-        ElevatedButton.icon(
-          onPressed: () async {
-            final csv = await controller.exportInventoryToCsv();
-            debugPrint(csv);
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Inventory exported. Check console for CSV.')),
-            );
-          },
-          icon: const Icon(Icons.download),
-          label: const Text('Export'),
-        ),
+class InventoryDataSource extends DataTableSource {
+  final List<InventoryItem> items;
+
+  InventoryDataSource(this.items);
+
+  @override
+  DataRow? getRow(int index) {
+    if (index >= items.length) return null;
+    final item = items[index];
+
+    return DataRow.byIndex(
+      index: index,
+      cells: [
+        DataCell(Text(item.partNumber)),
+        DataCell(Text(item.description)),
+        DataCell(Text(item.type ?? '')),
+        DataCell(Text(item.make ?? '')),
+        DataCell(Text(item.model ?? '')),
+        DataCell(Text(item.serial ?? '')),
+        DataCell(Text(item.quantity.toString())),
+        DataCell(Text(item.location ?? '')),
+        DataCell(Text('\$${item.price?.toStringAsFixed(2) ?? '0.00'}')),
       ],
     );
   }
 
-  Widget _buildItemList(InventoryProvider controller) {
-    return controller.filteredItems.isEmpty
-        ? const Center(child: Text('No items found.'))
-        : ListView.separated(
-            itemCount: controller.filteredItems.length,
-            separatorBuilder: (_, __) => const Divider(),
-            itemBuilder: (context, index) {
-              final item = controller.filteredItems[index];
-              return ListTile(
-                title: Text(item.description),
-                subtitle: Text(
-                  'Part #: ${item.partNumber} | Type: ${item.type ?? 'N/A'} | Make: ${item.make ?? 'N/A'} | '
-                  'Qty: ${item.quantity} | Price: \$${item.price?.toStringAsFixed(2) ?? '0.00'}',
-                ),
-                trailing: Text(item.location ?? 'N/A'),
-              );
-            },
-          );
-  }
+  @override
+  bool get isRowCountApproximate => false;
 
-  Future<void> _showAddItemDialog(BuildContext context, InventoryProvider controller) async {
-    final partNumberController = TextEditingController();
-    final descriptionController = TextEditingController();
-    final typeController = TextEditingController();
-    final priceController = TextEditingController();
-    final makeController = TextEditingController();
-    final modelController = TextEditingController();
-    final serialController = TextEditingController();
-    final locationController = TextEditingController(text: 'Calgary');
+  @override
+  int get rowCount => items.length;
 
-    void autofillFields() {
-      final partNumber = partNumberController.text.trim().toUpperCase();
-
-      String? detectedType;
-      String? detectedMake;
-
-      if (partNumber.startsWith('LC')) {
-        detectedType = 'Loadcell';
-      } else if (partNumber.startsWith('EQ')) {
-        detectedType = 'Equipment';
-      } else if (partNumber.startsWith('IND')) {
-        detectedType = 'Indicator';
-      } else if (partNumber.startsWith('RE')) {
-        detectedType = 'Remote';
-      } else if (partNumber.startsWith('PR')) {
-        detectedType = 'Printer';
-      } else if (partNumber.startsWith('PRO') || partNumber.startsWith('PROG')) {
-        detectedType = 'Program';
-      } else if (partNumber.startsWith('TW')) {
-        detectedType = 'Test Weight';
-      } else if (partNumber.startsWith('WB') || partNumber.startsWith('WE')) {
-        detectedType = 'Weighbar';
-      } else {
-        detectedType = 'Other';
-      }
-
-      final makeMap = {
-        'RWS': 'Rice Lake',
-        'RLWS': 'Rice Lake',
-        'CAR': 'Cardinal',
-        'ANY': 'Anyload',
-        'EPS': 'Epson',
-        'MET': 'Mettler',
-        'SUP': 'Superior',
-        'ZEB': 'Zebra',
-        'AWT': 'Avery',
-        'MAS': 'Massload',
-        'KIL': 'Kilotech',
-        'OHA': 'Ohaus',
-        'DIG': 'Digistar',
-      };
-
-      detectedMake = makeMap.entries
-          .firstWhere(
-            (e) => partNumber.startsWith(e.key),
-            orElse: () => const MapEntry('', ''),
-          )
-          .value;
-
-      typeController.text = detectedType ?? '';
-      makeController.text = (detectedMake?.isNotEmpty ?? false) ? detectedMake! : 'N/A';
-    }
-
-    await showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Add Inventory Item'),
-        content: SingleChildScrollView(
-          child: Column(
-            children: [
-              RoundedTextField(controller: partNumberController, label: 'Part Number', onChanged: (_) => autofillFields()),
-              const SizedBox(height: 8),
-              RoundedTextField(controller: descriptionController, label: 'Description'),
-              const SizedBox(height: 8),
-              RoundedTextField(controller: typeController, label: 'Type'),
-              const SizedBox(height: 8),
-              RoundedTextField(controller: makeController, label: 'Make'),
-              const SizedBox(height: 8),
-              RoundedTextField(controller: modelController, label: 'Model'),
-              const SizedBox(height: 8),
-              RoundedTextField(controller: serialController, label: 'Serial'),
-              const SizedBox(height: 8),
-              RoundedTextField(controller: locationController, label: 'Location'),
-              const SizedBox(height: 8),
-              RoundedTextField(controller: priceController, label: 'Price', keyboardType: TextInputType.number),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () {
-              final price = double.tryParse(priceController.text) ?? 0.0;
-
-              controller.addInventory(
-                InventoryItemsCompanion(
-                  partNumber: Value(partNumberController.text.trim()),
-                  description: Value(descriptionController.text.trim()),
-                  type: Value(typeController.text.trim()),
-                  price: Value(price),
-                  make: Value(makeController.text.trim()),
-                  model: Value(modelController.text.trim()),
-                  serial: Value(serialController.text.trim()),
-                  location: Value(locationController.text.trim()),
-                  quantity: const Value(0),
-                  isSold: const Value(false),
-                ),
-              );
-
-              Navigator.of(context).pop();
-            },
-            child: const Text('Add'),
-          ),
-        ],
-      ),
-    );
-  }
+  @override
+  int get selectedRowCount => 0;
 }

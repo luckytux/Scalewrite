@@ -219,8 +219,38 @@ class ServiceReportFormController extends ChangeNotifier {
     }
 
     if (selectedScale == null && isCreatingNewScale) {
-      debugPrint('ℹ️ TODO: handle new scale creation');
-      return false;
+      final newScale = ScalesCompanion(
+        customerId: Value(selectedWorkOrder!.customerId),
+        notes: Value(scaleNotesController.text),
+        scaleType: Value(selectedScaleType),
+        scaleSubtype: Value(selectedSubtype ?? ''),
+        configuration: Value(configuration),
+        indicatorMake: Value(indicatorMakeController.text),
+        indicatorModel: Value(indicatorModelController.text),
+        indicatorSerial: Value(indicatorSerialController.text),
+        approvalPrefix: Value(indicatorPrefix),
+        approvalNumber: Value(indicatorApprovalCodeController.text),
+        baseMake: Value(baseMakeController.text),
+        baseModel: Value(baseModelController.text),
+        baseSerial: Value(baseSerialController.text),
+        baseApprovalPrefix: Value(basePrefix),
+        baseApprovalNumber: Value(baseApprovalCodeController.text),
+        capacity: Value(double.tryParse(capacityController.text) ?? 0),
+        capacityUnit: Value(capacityUnit),
+        division: Value(double.tryParse(divisionController.text) ?? 0),
+        numberOfLoadCells: Value(int.tryParse(loadCellsController.text) ?? 0),
+        numberOfSections: Value(int.tryParse(sectionsController.text) ?? 0),
+        loadCellModel: Value(loadCellModelController.text),
+        loadCellCapacity: Value(double.tryParse(loadCellCapacityController.text) ?? 0),
+        loadCellCapacityUnit: Value(loadCellCapacityUnit),
+        legalForTrade: Value(isLegalForTrade),
+        sealStatus: Value(sealStatus),
+        inspectionResult: Value(inspectionResult),
+        inspectionExpiry: Value(inspectionExpiry),
+      );
+
+      final scaleId = await db.scaleDao.insertScale(newScale);
+      selectedScale = await db.scaleDao.getScaleById(scaleId);
     }
 
     if (selectedScale == null) {

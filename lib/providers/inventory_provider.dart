@@ -15,7 +15,6 @@ final inventoryDaoProvider = Provider<InventoryDao>((ref) {
   return db.inventoryDao;
 });
 
-// ✅ InventoryProvider handles inventory operations and state
 class InventoryProvider extends ChangeNotifier {
   final InventoryDao dao;
 
@@ -27,6 +26,11 @@ class InventoryProvider extends ChangeNotifier {
   List<InventoryItem> _filtered = [];
   List<InventoryItem> get filteredItems => _filtered;
 
+  String _searchQuery = '';
+  String _filterType = '';
+  String _filterLocation = '';
+  bool? _filterSold;
+
   bool isLoading = false;
 
   Future<void> loadInventory() async {
@@ -34,7 +38,13 @@ class InventoryProvider extends ChangeNotifier {
     notifyListeners();
 
     _items = await dao.getAllInventory();
-    _filtered = List.from(_items);
+
+    print('📦 Loaded ${_items.length} inventory items:');
+    for (final item in _items) {
+      print('  - ${item.id}: ${item.partNumber}, ${item.type}, ${item.location}, sold=${item.isSold}');
+    }
+
+    _applyFilters();
 
     isLoading = false;
     notifyListeners();
@@ -55,56 +65,82 @@ class InventoryProvider extends ChangeNotifier {
     await loadInventory();
   }
 
-  /// ✅ Mark item as sold — now includes userId for tracking who performed the transaction
   Future<void> markItemAsSold({
     required int itemId,
     required int customerId,
     required int workOrderId,
-    required int userId, // 🆕 Added required userId
+    required int userId,
     String? note,
   }) async {
     await dao.markAsSold(
       itemId: itemId,
       customerId: customerId,
       workOrderId: workOrderId,
-      userId: userId, // 🆕 Pass the userId to the DAO method
+      userId: userId,
       note: note,
     );
     await loadInventory();
   }
 
   void search(String query) {
-    final q = query.toLowerCase();
-    _filtered = _items.where((item) {
-      return item.partNumber.toLowerCase().contains(q) ||
-          item.description.toLowerCase().contains(q) ||
-          (item.type?.toLowerCase().contains(q) ?? false) ||
-          (item.barcode?.toLowerCase().contains(q) ?? false);
-    }).toList();
-    notifyListeners();
+    _searchQuery = query.toLowerCase();
+    _applyFilters();
   }
 
   void filterByType(String? type) {
-    if (type == null || type.isEmpty) {
-      _filtered = List.from(_items);
-    } else {
-      _filtered = _items
-          .where((item) => item.type?.toLowerCase() == type.toLowerCase())
-          .toList();
-    }
-    notifyListeners();
+    _filterType = type ?? '';
+    _applyFilters();
   }
 
-  void filterByStockStatus({bool? sold, bool lowStock = false}) {
+  void filterByLocation(String? location) {
+    _filterLocation = location ?? '';
+    _applyFilters();
+  }
+
+  void filterBySoldStatus(bool? sold) {
+    _filterSold = sold;
+    _applyFilters();
+  }
+
+  void _applyFilters() {
+    print('🔍 Applying Filters:');
+    print('- Search Query: "$_searchQuery"');
+    print('- Type Filter: "$_filterType"');
+    print('- Location Filter: "$_filterLocation"');
+    print('- Sold Filter: $_filterSold');
+    print('- Total Items Before Filter: ${_items.length}');
+
     _filtered = _items.where((item) {
-      final matchSold = sold == null || item.isSold == sold;
-      final matchLow = !lowStock || item.quantity <= 5;
-      return matchSold && matchLow;
+      final matchesSearch =
+          _searchQuery.isEmpty ||
+          item.partNumber.toLowerCase().contains(_searchQuery) ||
+          item.description.toLowerCase().contains(_searchQuery) ||
+          (item.type ?? '').toLowerCase().contains(_searchQuery) ||
+          (item.barcode ?? '').toLowerCase().contains(_searchQuery) ||
+          (item.make ?? '').toLowerCase().contains(_searchQuery) ||
+          (item.model ?? '').toLowerCase().contains(_searchQuery);
+
+      final matchesType = _filterType.isEmpty ||
+          (item.type?.toLowerCase() == _filterType.toLowerCase());
+
+      final matchesLocation = _filterLocation.isEmpty ||
+          (item.location?.toLowerCase() == _filterLocation.toLowerCase());
+
+      final matchesSold = _filterSold == null || item.isSold == _filterSold;
+
+      final result = matchesSearch && matchesType && matchesLocation && matchesSold;
+
+      print('🔎 [${item.partNumber}] => '
+            'search: $matchesSearch, type: $matchesType, '
+            'location: $matchesLocation, sold: $matchesSold => result: $result');
+
+      return result;
     }).toList();
+
+    print('- Filtered Count After: ${_filtered.length}');
     notifyListeners();
   }
 
-  /// Export inventory as CSV string
   Future<String> exportInventoryToCsv({bool includeSold = true}) async {
     final itemsToExport =
         includeSold ? _items : _items.where((item) => !item.isSold).toList();

@@ -73,7 +73,13 @@ class WeightTests extends Table {
 
   // Notes and weight test unit
   TextColumn get notes => text().nullable()();
-  TextColumn get weightTestUnit => text().withLength(min: 1, max: 10).nullable()(); // <-- added here
+  TextColumn get weightTestUnit => text().withLength(min: 1, max: 10).nullable()();
 
   DateTimeColumn get timestamp => dateTime().withDefault(currentDateAndTime)();
+
+  // ✅ Enforce 1:1 mapping with ServiceReports
+  @override
+  List<Set<Column>>? get uniqueKeys => [
+    {serviceReportId},
+  ];
 }

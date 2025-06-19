@@ -4725,6 +4725,10 @@ class $WeightTestsTable extends WeightTests
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+        {serviceReportId},
+      ];
+  @override
   WeightTest map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return WeightTest(
@@ -6952,6 +6956,12 @@ class $InventoryItemsTable extends InventoryItems
   late final GeneratedColumn<String> serial = GeneratedColumn<String>(
       'serial', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _capacityMeta =
+      const VerificationMeta('capacity');
+  @override
+  late final GeneratedColumn<String> capacity = GeneratedColumn<String>(
+      'capacity', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _quantityMeta =
       const VerificationMeta('quantity');
   @override
@@ -7004,6 +7014,11 @@ class $InventoryItemsTable extends InventoryItems
       requiredDuringInsert: false,
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('REFERENCES work_orders (id)'));
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+      'uid', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _lastModifiedMeta =
       const VerificationMeta('lastModified');
   @override
@@ -7030,6 +7045,7 @@ class $InventoryItemsTable extends InventoryItems
         make,
         model,
         serial,
+        capacity,
         quantity,
         price,
         location,
@@ -7037,6 +7053,7 @@ class $InventoryItemsTable extends InventoryItems
         isSold,
         customerId,
         workOrderId,
+        uid,
         lastModified,
         synced
       ];
@@ -7085,6 +7102,10 @@ class $InventoryItemsTable extends InventoryItems
       context.handle(_serialMeta,
           serial.isAcceptableOrUnknown(data['serial']!, _serialMeta));
     }
+    if (data.containsKey('capacity')) {
+      context.handle(_capacityMeta,
+          capacity.isAcceptableOrUnknown(data['capacity']!, _capacityMeta));
+    }
     if (data.containsKey('quantity')) {
       context.handle(_quantityMeta,
           quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta));
@@ -7116,6 +7137,10 @@ class $InventoryItemsTable extends InventoryItems
           _workOrderIdMeta,
           workOrderId.isAcceptableOrUnknown(
               data['work_order_id']!, _workOrderIdMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+          _uidMeta, uid.isAcceptableOrUnknown(data['uid']!, _uidMeta));
     }
     if (data.containsKey('last_modified')) {
       context.handle(
@@ -7150,6 +7175,8 @@ class $InventoryItemsTable extends InventoryItems
           .read(DriftSqlType.string, data['${effectivePrefix}model']),
       serial: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}serial']),
+      capacity: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}capacity']),
       quantity: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}quantity'])!,
       price: attachedDatabase.typeMapping
@@ -7164,6 +7191,8 @@ class $InventoryItemsTable extends InventoryItems
           .read(DriftSqlType.int, data['${effectivePrefix}customer_id']),
       workOrderId: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}work_order_id']),
+      uid: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}uid']),
       lastModified: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime, data['${effectivePrefix}last_modified'])!,
       synced: attachedDatabase.typeMapping
@@ -7185,6 +7214,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
   final String? make;
   final String? model;
   final String? serial;
+  final String? capacity;
   final int quantity;
   final double? price;
   final String? location;
@@ -7192,6 +7222,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
   final bool isSold;
   final int? customerId;
   final int? workOrderId;
+  final String? uid;
   final DateTime lastModified;
   final bool synced;
   const InventoryItem(
@@ -7202,6 +7233,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       this.make,
       this.model,
       this.serial,
+      this.capacity,
       required this.quantity,
       this.price,
       this.location,
@@ -7209,6 +7241,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       required this.isSold,
       this.customerId,
       this.workOrderId,
+      this.uid,
       required this.lastModified,
       required this.synced});
   @override
@@ -7229,6 +7262,9 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     if (!nullToAbsent || serial != null) {
       map['serial'] = Variable<String>(serial);
     }
+    if (!nullToAbsent || capacity != null) {
+      map['capacity'] = Variable<String>(capacity);
+    }
     map['quantity'] = Variable<int>(quantity);
     if (!nullToAbsent || price != null) {
       map['price'] = Variable<double>(price);
@@ -7246,6 +7282,9 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     if (!nullToAbsent || workOrderId != null) {
       map['work_order_id'] = Variable<int>(workOrderId);
     }
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['last_modified'] = Variable<DateTime>(lastModified);
     map['synced'] = Variable<bool>(synced);
     return map;
@@ -7262,6 +7301,9 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           model == null && nullToAbsent ? const Value.absent() : Value(model),
       serial:
           serial == null && nullToAbsent ? const Value.absent() : Value(serial),
+      capacity: capacity == null && nullToAbsent
+          ? const Value.absent()
+          : Value(capacity),
       quantity: Value(quantity),
       price:
           price == null && nullToAbsent ? const Value.absent() : Value(price),
@@ -7278,6 +7320,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       workOrderId: workOrderId == null && nullToAbsent
           ? const Value.absent()
           : Value(workOrderId),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       lastModified: Value(lastModified),
       synced: Value(synced),
     );
@@ -7294,6 +7337,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       make: serializer.fromJson<String?>(json['make']),
       model: serializer.fromJson<String?>(json['model']),
       serial: serializer.fromJson<String?>(json['serial']),
+      capacity: serializer.fromJson<String?>(json['capacity']),
       quantity: serializer.fromJson<int>(json['quantity']),
       price: serializer.fromJson<double?>(json['price']),
       location: serializer.fromJson<String?>(json['location']),
@@ -7301,6 +7345,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       isSold: serializer.fromJson<bool>(json['isSold']),
       customerId: serializer.fromJson<int?>(json['customerId']),
       workOrderId: serializer.fromJson<int?>(json['workOrderId']),
+      uid: serializer.fromJson<String?>(json['uid']),
       lastModified: serializer.fromJson<DateTime>(json['lastModified']),
       synced: serializer.fromJson<bool>(json['synced']),
     );
@@ -7316,6 +7361,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       'make': serializer.toJson<String?>(make),
       'model': serializer.toJson<String?>(model),
       'serial': serializer.toJson<String?>(serial),
+      'capacity': serializer.toJson<String?>(capacity),
       'quantity': serializer.toJson<int>(quantity),
       'price': serializer.toJson<double?>(price),
       'location': serializer.toJson<String?>(location),
@@ -7323,6 +7369,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       'isSold': serializer.toJson<bool>(isSold),
       'customerId': serializer.toJson<int?>(customerId),
       'workOrderId': serializer.toJson<int?>(workOrderId),
+      'uid': serializer.toJson<String?>(uid),
       'lastModified': serializer.toJson<DateTime>(lastModified),
       'synced': serializer.toJson<bool>(synced),
     };
@@ -7336,6 +7383,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           Value<String?> make = const Value.absent(),
           Value<String?> model = const Value.absent(),
           Value<String?> serial = const Value.absent(),
+          Value<String?> capacity = const Value.absent(),
           int? quantity,
           Value<double?> price = const Value.absent(),
           Value<String?> location = const Value.absent(),
@@ -7343,6 +7391,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           bool? isSold,
           Value<int?> customerId = const Value.absent(),
           Value<int?> workOrderId = const Value.absent(),
+          Value<String?> uid = const Value.absent(),
           DateTime? lastModified,
           bool? synced}) =>
       InventoryItem(
@@ -7353,6 +7402,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
         make: make.present ? make.value : this.make,
         model: model.present ? model.value : this.model,
         serial: serial.present ? serial.value : this.serial,
+        capacity: capacity.present ? capacity.value : this.capacity,
         quantity: quantity ?? this.quantity,
         price: price.present ? price.value : this.price,
         location: location.present ? location.value : this.location,
@@ -7360,6 +7410,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
         isSold: isSold ?? this.isSold,
         customerId: customerId.present ? customerId.value : this.customerId,
         workOrderId: workOrderId.present ? workOrderId.value : this.workOrderId,
+        uid: uid.present ? uid.value : this.uid,
         lastModified: lastModified ?? this.lastModified,
         synced: synced ?? this.synced,
       );
@@ -7374,6 +7425,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       make: data.make.present ? data.make.value : this.make,
       model: data.model.present ? data.model.value : this.model,
       serial: data.serial.present ? data.serial.value : this.serial,
+      capacity: data.capacity.present ? data.capacity.value : this.capacity,
       quantity: data.quantity.present ? data.quantity.value : this.quantity,
       price: data.price.present ? data.price.value : this.price,
       location: data.location.present ? data.location.value : this.location,
@@ -7383,6 +7435,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           data.customerId.present ? data.customerId.value : this.customerId,
       workOrderId:
           data.workOrderId.present ? data.workOrderId.value : this.workOrderId,
+      uid: data.uid.present ? data.uid.value : this.uid,
       lastModified: data.lastModified.present
           ? data.lastModified.value
           : this.lastModified,
@@ -7400,6 +7453,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           ..write('make: $make, ')
           ..write('model: $model, ')
           ..write('serial: $serial, ')
+          ..write('capacity: $capacity, ')
           ..write('quantity: $quantity, ')
           ..write('price: $price, ')
           ..write('location: $location, ')
@@ -7407,6 +7461,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           ..write('isSold: $isSold, ')
           ..write('customerId: $customerId, ')
           ..write('workOrderId: $workOrderId, ')
+          ..write('uid: $uid, ')
           ..write('lastModified: $lastModified, ')
           ..write('synced: $synced')
           ..write(')'))
@@ -7422,6 +7477,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       make,
       model,
       serial,
+      capacity,
       quantity,
       price,
       location,
@@ -7429,6 +7485,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       isSold,
       customerId,
       workOrderId,
+      uid,
       lastModified,
       synced);
   @override
@@ -7442,6 +7499,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           other.make == this.make &&
           other.model == this.model &&
           other.serial == this.serial &&
+          other.capacity == this.capacity &&
           other.quantity == this.quantity &&
           other.price == this.price &&
           other.location == this.location &&
@@ -7449,6 +7507,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           other.isSold == this.isSold &&
           other.customerId == this.customerId &&
           other.workOrderId == this.workOrderId &&
+          other.uid == this.uid &&
           other.lastModified == this.lastModified &&
           other.synced == this.synced);
 }
@@ -7461,6 +7520,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
   final Value<String?> make;
   final Value<String?> model;
   final Value<String?> serial;
+  final Value<String?> capacity;
   final Value<int> quantity;
   final Value<double?> price;
   final Value<String?> location;
@@ -7468,6 +7528,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
   final Value<bool> isSold;
   final Value<int?> customerId;
   final Value<int?> workOrderId;
+  final Value<String?> uid;
   final Value<DateTime> lastModified;
   final Value<bool> synced;
   const InventoryItemsCompanion({
@@ -7478,6 +7539,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     this.make = const Value.absent(),
     this.model = const Value.absent(),
     this.serial = const Value.absent(),
+    this.capacity = const Value.absent(),
     this.quantity = const Value.absent(),
     this.price = const Value.absent(),
     this.location = const Value.absent(),
@@ -7485,6 +7547,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     this.isSold = const Value.absent(),
     this.customerId = const Value.absent(),
     this.workOrderId = const Value.absent(),
+    this.uid = const Value.absent(),
     this.lastModified = const Value.absent(),
     this.synced = const Value.absent(),
   });
@@ -7496,6 +7559,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     this.make = const Value.absent(),
     this.model = const Value.absent(),
     this.serial = const Value.absent(),
+    this.capacity = const Value.absent(),
     this.quantity = const Value.absent(),
     this.price = const Value.absent(),
     this.location = const Value.absent(),
@@ -7503,6 +7567,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     this.isSold = const Value.absent(),
     this.customerId = const Value.absent(),
     this.workOrderId = const Value.absent(),
+    this.uid = const Value.absent(),
     this.lastModified = const Value.absent(),
     this.synced = const Value.absent(),
   })  : partNumber = Value(partNumber),
@@ -7515,6 +7580,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     Expression<String>? make,
     Expression<String>? model,
     Expression<String>? serial,
+    Expression<String>? capacity,
     Expression<int>? quantity,
     Expression<double>? price,
     Expression<String>? location,
@@ -7522,6 +7588,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     Expression<bool>? isSold,
     Expression<int>? customerId,
     Expression<int>? workOrderId,
+    Expression<String>? uid,
     Expression<DateTime>? lastModified,
     Expression<bool>? synced,
   }) {
@@ -7533,6 +7600,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
       if (make != null) 'make': make,
       if (model != null) 'model': model,
       if (serial != null) 'serial': serial,
+      if (capacity != null) 'capacity': capacity,
       if (quantity != null) 'quantity': quantity,
       if (price != null) 'price': price,
       if (location != null) 'location': location,
@@ -7540,6 +7608,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
       if (isSold != null) 'is_sold': isSold,
       if (customerId != null) 'customer_id': customerId,
       if (workOrderId != null) 'work_order_id': workOrderId,
+      if (uid != null) 'uid': uid,
       if (lastModified != null) 'last_modified': lastModified,
       if (synced != null) 'synced': synced,
     });
@@ -7553,6 +7622,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
       Value<String?>? make,
       Value<String?>? model,
       Value<String?>? serial,
+      Value<String?>? capacity,
       Value<int>? quantity,
       Value<double?>? price,
       Value<String?>? location,
@@ -7560,6 +7630,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
       Value<bool>? isSold,
       Value<int?>? customerId,
       Value<int?>? workOrderId,
+      Value<String?>? uid,
       Value<DateTime>? lastModified,
       Value<bool>? synced}) {
     return InventoryItemsCompanion(
@@ -7570,6 +7641,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
       make: make ?? this.make,
       model: model ?? this.model,
       serial: serial ?? this.serial,
+      capacity: capacity ?? this.capacity,
       quantity: quantity ?? this.quantity,
       price: price ?? this.price,
       location: location ?? this.location,
@@ -7577,6 +7649,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
       isSold: isSold ?? this.isSold,
       customerId: customerId ?? this.customerId,
       workOrderId: workOrderId ?? this.workOrderId,
+      uid: uid ?? this.uid,
       lastModified: lastModified ?? this.lastModified,
       synced: synced ?? this.synced,
     );
@@ -7606,6 +7679,9 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     if (serial.present) {
       map['serial'] = Variable<String>(serial.value);
     }
+    if (capacity.present) {
+      map['capacity'] = Variable<String>(capacity.value);
+    }
     if (quantity.present) {
       map['quantity'] = Variable<int>(quantity.value);
     }
@@ -7627,6 +7703,9 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     if (workOrderId.present) {
       map['work_order_id'] = Variable<int>(workOrderId.value);
     }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
+    }
     if (lastModified.present) {
       map['last_modified'] = Variable<DateTime>(lastModified.value);
     }
@@ -7646,6 +7725,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
           ..write('make: $make, ')
           ..write('model: $model, ')
           ..write('serial: $serial, ')
+          ..write('capacity: $capacity, ')
           ..write('quantity: $quantity, ')
           ..write('price: $price, ')
           ..write('location: $location, ')
@@ -7653,6 +7733,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
           ..write('isSold: $isSold, ')
           ..write('customerId: $customerId, ')
           ..write('workOrderId: $workOrderId, ')
+          ..write('uid: $uid, ')
           ..write('lastModified: $lastModified, ')
           ..write('synced: $synced')
           ..write(')'))
@@ -12476,6 +12557,7 @@ typedef $$InventoryItemsTableCreateCompanionBuilder = InventoryItemsCompanion
   Value<String?> make,
   Value<String?> model,
   Value<String?> serial,
+  Value<String?> capacity,
   Value<int> quantity,
   Value<double?> price,
   Value<String?> location,
@@ -12483,6 +12565,7 @@ typedef $$InventoryItemsTableCreateCompanionBuilder = InventoryItemsCompanion
   Value<bool> isSold,
   Value<int?> customerId,
   Value<int?> workOrderId,
+  Value<String?> uid,
   Value<DateTime> lastModified,
   Value<bool> synced,
 });
@@ -12495,6 +12578,7 @@ typedef $$InventoryItemsTableUpdateCompanionBuilder = InventoryItemsCompanion
   Value<String?> make,
   Value<String?> model,
   Value<String?> serial,
+  Value<String?> capacity,
   Value<int> quantity,
   Value<double?> price,
   Value<String?> location,
@@ -12502,6 +12586,7 @@ typedef $$InventoryItemsTableUpdateCompanionBuilder = InventoryItemsCompanion
   Value<bool> isSold,
   Value<int?> customerId,
   Value<int?> workOrderId,
+  Value<String?> uid,
   Value<DateTime> lastModified,
   Value<bool> synced,
 });
@@ -12592,6 +12677,9 @@ class $$InventoryItemsTableFilterComposer
   ColumnFilters<String> get serial => $composableBuilder(
       column: $table.serial, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<String> get capacity => $composableBuilder(
+      column: $table.capacity, builder: (column) => ColumnFilters(column));
+
   ColumnFilters<int> get quantity => $composableBuilder(
       column: $table.quantity, builder: (column) => ColumnFilters(column));
 
@@ -12606,6 +12694,9 @@ class $$InventoryItemsTableFilterComposer
 
   ColumnFilters<bool> get isSold => $composableBuilder(
       column: $table.isSold, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get uid => $composableBuilder(
+      column: $table.uid, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get lastModified => $composableBuilder(
       column: $table.lastModified, builder: (column) => ColumnFilters(column));
@@ -12707,6 +12798,9 @@ class $$InventoryItemsTableOrderingComposer
   ColumnOrderings<String> get serial => $composableBuilder(
       column: $table.serial, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get capacity => $composableBuilder(
+      column: $table.capacity, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<int> get quantity => $composableBuilder(
       column: $table.quantity, builder: (column) => ColumnOrderings(column));
 
@@ -12721,6 +12815,9 @@ class $$InventoryItemsTableOrderingComposer
 
   ColumnOrderings<bool> get isSold => $composableBuilder(
       column: $table.isSold, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get uid => $composableBuilder(
+      column: $table.uid, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<DateTime> get lastModified => $composableBuilder(
       column: $table.lastModified,
@@ -12800,6 +12897,9 @@ class $$InventoryItemsTableAnnotationComposer
   GeneratedColumn<String> get serial =>
       $composableBuilder(column: $table.serial, builder: (column) => column);
 
+  GeneratedColumn<String> get capacity =>
+      $composableBuilder(column: $table.capacity, builder: (column) => column);
+
   GeneratedColumn<int> get quantity =>
       $composableBuilder(column: $table.quantity, builder: (column) => column);
 
@@ -12814,6 +12914,9 @@ class $$InventoryItemsTableAnnotationComposer
 
   GeneratedColumn<bool> get isSold =>
       $composableBuilder(column: $table.isSold, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<DateTime> get lastModified => $composableBuilder(
       column: $table.lastModified, builder: (column) => column);
@@ -12917,6 +13020,7 @@ class $$InventoryItemsTableTableManager extends RootTableManager<
             Value<String?> make = const Value.absent(),
             Value<String?> model = const Value.absent(),
             Value<String?> serial = const Value.absent(),
+            Value<String?> capacity = const Value.absent(),
             Value<int> quantity = const Value.absent(),
             Value<double?> price = const Value.absent(),
             Value<String?> location = const Value.absent(),
@@ -12924,6 +13028,7 @@ class $$InventoryItemsTableTableManager extends RootTableManager<
             Value<bool> isSold = const Value.absent(),
             Value<int?> customerId = const Value.absent(),
             Value<int?> workOrderId = const Value.absent(),
+            Value<String?> uid = const Value.absent(),
             Value<DateTime> lastModified = const Value.absent(),
             Value<bool> synced = const Value.absent(),
           }) =>
@@ -12935,6 +13040,7 @@ class $$InventoryItemsTableTableManager extends RootTableManager<
             make: make,
             model: model,
             serial: serial,
+            capacity: capacity,
             quantity: quantity,
             price: price,
             location: location,
@@ -12942,6 +13048,7 @@ class $$InventoryItemsTableTableManager extends RootTableManager<
             isSold: isSold,
             customerId: customerId,
             workOrderId: workOrderId,
+            uid: uid,
             lastModified: lastModified,
             synced: synced,
           ),
@@ -12953,6 +13060,7 @@ class $$InventoryItemsTableTableManager extends RootTableManager<
             Value<String?> make = const Value.absent(),
             Value<String?> model = const Value.absent(),
             Value<String?> serial = const Value.absent(),
+            Value<String?> capacity = const Value.absent(),
             Value<int> quantity = const Value.absent(),
             Value<double?> price = const Value.absent(),
             Value<String?> location = const Value.absent(),
@@ -12960,6 +13068,7 @@ class $$InventoryItemsTableTableManager extends RootTableManager<
             Value<bool> isSold = const Value.absent(),
             Value<int?> customerId = const Value.absent(),
             Value<int?> workOrderId = const Value.absent(),
+            Value<String?> uid = const Value.absent(),
             Value<DateTime> lastModified = const Value.absent(),
             Value<bool> synced = const Value.absent(),
           }) =>
@@ -12971,6 +13080,7 @@ class $$InventoryItemsTableTableManager extends RootTableManager<
             make: make,
             model: model,
             serial: serial,
+            capacity: capacity,
             quantity: quantity,
             price: price,
             location: location,
@@ -12978,6 +13088,7 @@ class $$InventoryItemsTableTableManager extends RootTableManager<
             isSold: isSold,
             customerId: customerId,
             workOrderId: workOrderId,
+            uid: uid,
             lastModified: lastModified,
             synced: synced,
           ),

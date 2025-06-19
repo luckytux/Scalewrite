@@ -4,32 +4,32 @@ import 'package:drift/drift.dart';
 import 'inventory_items.dart';
 import 'customers.dart';
 import 'work_orders.dart';
-import 'users.dart'; // ✅ Add Users reference
+import 'users.dart'; // ✅ Reference for user ID
 
 class InventoryTransactions extends Table {
   IntColumn get id => integer().autoIncrement()();
 
-  // Item involved in transaction
+  // Link to the inventory item involved in the transaction
   IntColumn get inventoryItemId => integer().references(InventoryItems, #id)();
 
-  // Quantity involved
+  // Quantity moved
   IntColumn get quantity => integer().withDefault(const Constant(1))();
 
-  // Transaction Type: e.g., sold, restocked, transfer, adjustment
+  // Transaction type (sold, restocked, transfer, adjustment, etc.)
   TextColumn get type => text().withDefault(const Constant('sold'))();
 
-  // For sales or related work orders
+  // Optional customer and work order references
   IntColumn get customerId => integer().nullable().references(Customers, #id)();
   IntColumn get workOrderId => integer().nullable().references(WorkOrders, #id)();
 
-  // Source/Target Locations (e.g., Calgary or Lethbridge)
+  // Location metadata for transfer or origin
   TextColumn get sourceLocation => text().nullable()();
   TextColumn get targetLocation => text().nullable()();
 
-  // Who performed the transaction (UID)
+  // ✅ Track who performed the transaction (linked to Users)
   IntColumn get userId => integer().references(Users, #id)();
 
-  // Notes, timestamp, and sync status
+  // Optional note, timestamp, and sync tracking
   TextColumn get note => text().nullable()();
   DateTimeColumn get timestamp => dateTime().withDefault(currentDateAndTime)();
   BoolColumn get synced => boolean().withDefault(const Constant(false))();

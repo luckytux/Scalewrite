@@ -14,41 +14,57 @@ class WeightTestFormController extends ChangeNotifier {
   final Ref ref;
   final formKey = GlobalKey<FormState>();
 
-  int? serviceReportId; // Always required
+  int? serviceReportId;
 
-  // 🔵 ADD: Division field
   double division = 10;
-
-  // Eccentricity test fields
-  String eccentricityType = 'Section'; // 'Section' or 'Directional'
+  String eccentricityType = 'Section';
   int eccentricityPoints = 4;
-  String? eccentricityDirections; // Only if Directional
-  List<double?> eccentricityValues = List.filled(20, null); // Up to 20 for directional
+  String? eccentricityDirections;
+
+  List<double?> eccentricityValues = List.filled(20, null);
+  List<double?> asLeftEccentricityValues = List.filled(20, null);
   String? eccentricityError;
 
-  // Increasing Load Test - As Found
+  List<String> sectionLabels = ['1', '2', '3', '4'];
+
   List<double?> asFoundTests = List.filled(6, null);
   List<double?> asFoundReads = List.filled(6, null);
   List<double?> asFoundDiffs = List.filled(6, null);
 
-  // Increasing Load Test - As Left
   List<double?> asLeftTests = List.filled(6, null);
   List<double?> asLeftReads = List.filled(6, null);
   List<double?> asLeftDiffs = List.filled(6, null);
 
-  bool showAsLeft = false; // Toggle As Left tests
+  bool showAsLeft = false;
 
   String? notes;
-  String weightTestUnit = 'kg'; // NEW
+  String weightTestUnit = 'kg';
+
+  // Controllers
+  final List<TextEditingController> asLeftEccControllers = List.generate(20, (_) => TextEditingController());
+  final List<TextEditingController> asLeftTestControllers = List.generate(6, (_) => TextEditingController());
+  final List<TextEditingController> asLeftReadControllers = List.generate(6, (_) => TextEditingController());
 
   WeightTestFormController(this.ref);
 
-  void setServiceReportId(int id) {
+  bool get isDirectional => eccentricityType.toLowerCase() == 'directional';
+
+  Future<void> setServiceReportId(int id) async {
     serviceReportId = id;
+    final db = ref.read(databaseProvider);
+    final srWithScale = await db.serviceReportsDao.getById(id);
+
+    if (srWithScale != null) {
+      final sectionCount = srWithScale.scale.numberOfSections;
+      final labels = List.generate(sectionCount, (i) => (i + 1).toString());
+      setSectionLabels(labels);
+    } else {
+      setSectionLabels(['1', '2', '3', '4']);
+    }
+
     notifyListeners();
   }
 
-  // 🔵 ADD: Division setter
   void setDivision(double value) {
     division = value;
     notifyListeners();
@@ -60,7 +76,13 @@ class WeightTestFormController extends ChangeNotifier {
   }
 
   void setEccentricityPoints(int points) {
-    eccentricityPoints = points.clamp(1, 10);
+    eccentricityPoints = points.clamp(1, 20);
+    notifyListeners();
+  }
+
+  void setSectionLabels(List<String> labels) {
+    sectionLabels = labels;
+    eccentricityPoints = labels.length;
     notifyListeners();
   }
 
@@ -76,10 +98,24 @@ class WeightTestFormController extends ChangeNotifier {
     }
   }
 
-  // 🔵 ADD: Eccentricity value getter
   double? getEccentricityValue(int index) {
     if (index >= 0 && index < eccentricityValues.length) {
       return eccentricityValues[index];
+    }
+    return null;
+  }
+
+  void setAsLeftEccentricityValue(int index, double? value) {
+    if (index >= 0 && index < asLeftEccentricityValues.length) {
+      asLeftEccentricityValues[index] = value;
+      asLeftEccControllers[index].text = value?.toString() ?? '';
+      notifyListeners();
+    }
+  }
+
+  double? getAsLeftEccentricityValue(int index) {
+    if (index >= 0 && index < asLeftEccentricityValues.length) {
+      return asLeftEccentricityValues[index];
     }
     return null;
   }
@@ -89,7 +125,6 @@ class WeightTestFormController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // 🔵 ADD: Directions options getter
   List<String> get directionOptions => [
     'North', 'East', 'South', 'West', 'NE', 'SE', 'SW', 'NW'
   ];
@@ -114,13 +149,16 @@ class WeightTestFormController extends ChangeNotifier {
     final test = asFoundTests[index];
     final read = asFoundReads[index];
     if (test != null && read != null) {
-      asFoundDiffs[index] = read - test;
+      final roundedTest = (test / division).round() * division;
+      final diff = read - roundedTest;
+      asFoundDiffs[index] = diff;
     }
   }
 
   void setAsLeftTest(int index, double? value) {
     if (index >= 0 && index < asLeftTests.length) {
       asLeftTests[index] = value;
+      asLeftTestControllers[index].text = value?.toString() ?? '';
       _updateAsLeftDiff(index);
       notifyListeners();
     }
@@ -129,6 +167,7 @@ class WeightTestFormController extends ChangeNotifier {
   void setAsLeftRead(int index, double? value) {
     if (index >= 0 && index < asLeftReads.length) {
       asLeftReads[index] = value;
+      asLeftReadControllers[index].text = value?.toString() ?? '';
       _updateAsLeftDiff(index);
       notifyListeners();
     }
@@ -138,7 +177,9 @@ class WeightTestFormController extends ChangeNotifier {
     final test = asLeftTests[index];
     final read = asLeftReads[index];
     if (test != null && read != null) {
-      asLeftDiffs[index] = read - test;
+      final roundedTest = (test / division).round() * division;
+      final diff = read - roundedTest;
+      asLeftDiffs[index] = diff;
     }
   }
 
@@ -158,12 +199,69 @@ class WeightTestFormController extends ChangeNotifier {
   }
 
   String formatDiff(double diff, double division) {
-    final eValue = (diff / division).abs();
-    final formattedDiff = diff.toStringAsFixed(
+    final rounded = diff.abs() < 0.0001 ? 0.0 : diff;
+    final eValue = (rounded / division).abs();
+    final formattedDiff = rounded.toStringAsFixed(
       division >= 10 ? 0 : (division >= 1 ? 1 : (division >= 0.1 ? 2 : 3)),
     );
-    final formattedE = eValue.toStringAsFixed(0); // Always whole number
+    final formattedE = eValue.toStringAsFixed(0);
     return '$formattedDiff (e=$formattedE)';
+  }
+
+  void copyEccentricityValues() {
+    for (int i = 0; i < eccentricityValues.length; i++) {
+      final value = eccentricityValues[i];
+      asLeftEccentricityValues[i] = value;
+      asLeftEccControllers[i].text = value?.toString() ?? '';
+    }
+    notifyListeners();
+  }
+
+  void copyIncreasingValues() {
+    for (int i = 0; i < asFoundTests.length; i++) {
+      final test = asFoundTests[i];
+      final read = asFoundReads[i];
+
+      asLeftTests[i] = test;
+      asLeftReads[i] = read;
+
+      asLeftTestControllers[i].text = test?.toString() ?? '';
+      asLeftReadControllers[i].text = read?.toString() ?? '';
+
+      _updateAsLeftDiff(i);
+    }
+    notifyListeners();
+  }
+
+  void resetForm() {
+    division = 10;
+    eccentricityType = 'Section';
+    eccentricityPoints = 4;
+    eccentricityDirections = null;
+    eccentricityValues = List.filled(20, null);
+    asLeftEccentricityValues = List.filled(20, null);
+    eccentricityError = null;
+    asFoundTests = List.filled(6, null);
+    asFoundReads = List.filled(6, null);
+    asFoundDiffs = List.filled(6, null);
+    asLeftTests = List.filled(6, null);
+    asLeftReads = List.filled(6, null);
+    asLeftDiffs = List.filled(6, null);
+    showAsLeft = false;
+    notes = null;
+    weightTestUnit = 'kg';
+
+    for (final c in asLeftEccControllers) {
+      c.clear();
+    }
+    for (final c in asLeftTestControllers) {
+      c.clear();
+    }
+    for (final c in asLeftReadControllers) {
+      c.clear();
+    }
+
+    notifyListeners();
   }
 
   Future<bool> save() async {

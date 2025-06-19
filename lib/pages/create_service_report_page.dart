@@ -15,35 +15,46 @@ import '../widgets/service_report/scale_type_selector.dart';
 import '../widgets/service_report/legal_status_section.dart';
 import '../widgets/service_report/report_notes_section.dart';
 import '../widgets/service_report/report_type_selector.dart';
-import 'create_weight_test_page.dart';
+import '../widgets/forms/add_forms_popup.dart'; // Add Forms dialog
+import '../data/static/ipo_checklists.dart'; // ipoChecklists map
+import '../pages/checklists/ipo_checklist_page.dart'; // IPOChecklistPage
+import '../pages/create_weight_test_page.dart'; // Weight test page
+import '../models/ipo_checklist.dart'; // IPOSection model
 
 class CreateServiceReportPage extends ConsumerStatefulWidget {
   final int? customerId;
   final int? workOrderId;
   final int? serviceReportId;
 
-  const CreateServiceReportPage({super.key, this.customerId, this.workOrderId, this.serviceReportId});
+  const CreateServiceReportPage({
+    super.key,
+    this.customerId,
+    this.workOrderId,
+    this.serviceReportId,
+  });
 
   @override
-  ConsumerState<CreateServiceReportPage> createState() => _CreateServiceReportPageState();
+  ConsumerState<CreateServiceReportPage> createState() =>
+      _CreateServiceReportPageState();
 }
 
-class _CreateServiceReportPageState extends ConsumerState<CreateServiceReportPage> {
+class _CreateServiceReportPageState
+    extends ConsumerState<CreateServiceReportPage> {
   bool initialized = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final controller = ref.read(serviceReportFormProvider);
-
     if (!initialized) {
       if (widget.serviceReportId != null) {
         controller.loadServiceReport(widget.serviceReportId!);
       } else if (widget.workOrderId != null) {
-        final workOrderDao = ref.read(workOrderDaoProvider);
-        workOrderDao.getWorkOrderById(widget.workOrderId!).then((wo) {
-          if (wo != null) controller.setWorkOrder(wo);
-        });
+        ref.read(workOrderDaoProvider)
+          .getWorkOrderById(widget.workOrderId!)
+          .then((wo) {
+            if (wo != null) controller.setWorkOrder(wo);
+          });
       }
       initialized = true;
     }
@@ -76,12 +87,10 @@ class _CreateServiceReportPageState extends ConsumerState<CreateServiceReportPag
                 ),
               const SizedBox(height: 16),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Edit Mode',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
+                  const Text('Edit Mode',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Spacer(),
                   Switch(
                     value: editable,
                     onChanged: (val) => controller.toggleEditMode(val),
@@ -97,7 +106,8 @@ class _CreateServiceReportPageState extends ConsumerState<CreateServiceReportPag
                   labelText: 'Scale Description / Location (Optional)',
                   border: const OutlineInputBorder(),
                   filled: true,
-                  fillColor: editable ? Colors.teal.shade50 : Colors.grey.shade200,
+                  fillColor:
+                      editable ? Colors.teal.shade50 : Colors.grey.shade200,
                 ),
               ),
               const SizedBox(height: 12),
@@ -105,11 +115,11 @@ class _CreateServiceReportPageState extends ConsumerState<CreateServiceReportPag
                 selectedType: controller.selectedScaleType,
                 selectedSubtype: controller.selectedSubtype,
                 enabled: editable,
-                onTypeChanged: (val) {
-                  if (val != null) controller.setScaleType(val);
-                },
+                onTypeChanged: (val) =>
+                    val != null ? controller.setScaleType(val) : null,
                 onSubtypeChanged: controller.setSubtype,
               ),
+              const SizedBox(height: 12),
               ConfigurationToggle(
                 configuration: controller.configuration,
                 enabled: editable,
@@ -124,42 +134,43 @@ class _CreateServiceReportPageState extends ConsumerState<CreateServiceReportPag
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    flex: 1,
                     child: IndicatorSection(
                       makeController: controller.indicatorMakeController,
                       modelController: controller.indicatorModelController,
                       serialController: controller.indicatorSerialController,
                       prefixValue: controller.indicatorPrefix,
-                      onPrefixChanged: (val) => controller.indicatorPrefix = val ?? 'AM',
-                      approvalCodeController: controller.indicatorApprovalCodeController,
+                      onPrefixChanged: (val) =>
+                          controller.indicatorPrefix = val ?? 'AM',
+                      approvalCodeController:
+                          controller.indicatorApprovalCodeController,
                       editable: controller.editable,
                     ),
                   ),
                   const SizedBox(width: 12),
                   if (controller.configuration)
                     Expanded(
-                      flex: 1,
                       child: BaseSection(
                         makeController: controller.baseMakeController,
                         modelController: controller.baseModelController,
                         serialController: controller.baseSerialController,
                         prefixValue: controller.basePrefix,
-                        onPrefixChanged: (val) => controller.basePrefix = val ?? 'AM',
-                        approvalCodeController: controller.baseApprovalCodeController,
+                        onPrefixChanged: (val) =>
+                            controller.basePrefix = val ?? 'AM',
+                        approvalCodeController:
+                            controller.baseApprovalCodeController,
                         editable: controller.editable,
                       ),
                     )
                   else
-                    const Spacer(flex: 1),
+                    const Spacer(),
                 ],
               ),
               const SizedBox(height: 20),
               ScaleCapacitySection(
                 capacityController: controller.capacityController,
                 capacityUnit: controller.capacityUnit,
-                onCapacityUnitChanged: (val) {
-                  if (val != null) controller.setCapacityUnit(val);
-                },
+                onCapacityUnitChanged: (val) =>
+                    val != null ? controller.setCapacityUnit(val) : null,
                 divisionController: controller.divisionController,
                 divisionUnit: 'kg',
                 onDivisionUnitChanged: (_) {},
@@ -171,19 +182,20 @@ class _CreateServiceReportPageState extends ConsumerState<CreateServiceReportPag
               LoadCellSection(
                 capacityController: controller.loadCellCapacityController,
                 capacityUnit: controller.loadCellCapacityUnit,
-                onCapacityUnitChanged: (val) {
-                  if (val != null) controller.setLoadCellCapacityUnit(val);
-                },
+                onCapacityUnitChanged: (val) => val != null
+                    ? controller.setLoadCellCapacityUnit(val)
+                    : null,
                 modelController: controller.loadCellModelController,
                 editable: controller.editable,
               ),
               const SizedBox(height: 20),
               ReportTypeSelector(
                 selected: controller.reportType,
-                onChanged: controller.editable ? (val) => controller.setReportType(val ?? 'Standard') : null,
+                onChanged: controller.editable
+                    ? (val) => controller.setReportType(val ?? 'Standard')
+                    : null,
                 readOnly: !editable,
               ),
-
               ReportNotesSection(
                 controller: controller.reportNotesController,
                 readOnly: !editable,
@@ -194,35 +206,63 @@ class _CreateServiceReportPageState extends ConsumerState<CreateServiceReportPag
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ElevatedButton.icon(
+                    icon: const Icon(Icons.save),
+                    label: const Text('Save and Exit'),
                     onPressed: () async {
                       final saved = await controller.save();
                       if (context.mounted && saved) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Service Report saved')),
+                          const SnackBar(
+                            content: Text('Service Report saved'),
+                          ),
                         );
                         Navigator.pop(context);
                       }
                     },
-                    icon: const Icon(Icons.save),
-                    label: const Text('Save and Exit'),
                   ),
                   ElevatedButton.icon(
+                    icon: const Icon(Icons.add_circle_outline),
+                    label: const Text('Add Forms'),
                     onPressed: () async {
                       final saved = await controller.save();
                       if (!context.mounted || !saved) return;
-                      if (controller.selectedServiceReportId != null) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => CreateWeightTestPage(
-                              serviceReportId: controller.selectedServiceReportId!,
-                            ),
-                          ),
-                        );
-                      }
+
+                      showDialog(
+                        context: context,
+                        builder: (_) => AddFormsPopup(
+                          onFormSelected: (formType, {ipoType}) {
+                            if (formType == 'Weight Test' &&
+                                controller.selectedServiceReportId != null) {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => CreateWeightTestPage(
+                                    serviceReportId:
+                                        controller.selectedServiceReportId!,
+                                    division: double.tryParse(
+                                            controller.divisionController.text) ??
+                                        10,
+                                  ),
+                                ),
+                              );
+                            } else if (formType == 'Inspection Procedure' &&
+                                ipoType != null) {
+                              final ipo = ipoChecklists[ipoType]!;
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => IPOChecklistPage(
+                                    ipoTitle: '$ipoType – ${ipo.title}',
+                                    sections: ipo.sections
+                                        .map((sec) => IPOSection(
+                                            title: sec, items: []))
+                                        .toList(),
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      );
                     },
-                    icon: const Icon(Icons.add_circle_outline),
-                    label: const Text('Add Forms'),
                   ),
                 ],
               ),
