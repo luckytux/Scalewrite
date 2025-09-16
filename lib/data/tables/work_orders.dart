@@ -23,7 +23,7 @@ class WorkOrders extends Table {
 
   // General
   TextColumn get gpsLocation => text()();
-  TextColumn get customerNotes => text().withDefault(const Constant(''))();
+  TextColumn get customerNotes => text().nullable()();
 
   // Status flags
   BoolColumn get auditFlag => boolean().withDefault(const Constant(true))();

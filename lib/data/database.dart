@@ -43,7 +43,7 @@ part 'database.g.dart';
     Users,
     InventoryItems,
     InventoryTransactions,
-    Prices, // ✅ NEW
+    Prices, // ✅
   ],
   daos: [
     CustomerDao,
@@ -55,27 +55,27 @@ part 'database.g.dart';
     WorkOrderWithCustomerDao,
     UserDao,
     InventoryDao,
-    PriceDao, // ✅ NEW
+    PriceDao, // ✅
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase({String? overridePath}) : super(_openConnection(overridePath));
 
-  // Schema version
+  // 🔢 Schema version
   @override
-  int get schemaVersion => 4; // ⬆️ bumped for Prices table
+  int get schemaVersion => 5; // ⬆️ bumped for Prices table
 
-  // Manual DAO access
+  // 🔌 Manual DAO accessors (explicit names used across the app)
   late final customerDao = CustomerDao(this);
   late final contactDao = ContactDao(this);
   late final workOrderDao = WorkOrderDao(this);
   late final scaleDao = ScaleDao(this);
-  late final serviceReportsDao = ServiceReportDao(this); // ✅ Correct
+  late final serviceReportDao = ServiceReportDao(this); // ✅ singular & consistent
   late final weightTestDao = WeightTestDao(this);
   late final workOrderWithCustomerDao = WorkOrderWithCustomerDao(this);
   late final userDao = UserDao(this);
   late final inventoryDao = InventoryDao(this);
-  late final priceDao = PriceDao(this); // ✅ NEW
+  late final priceDao = PriceDao(this); // ✅
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -83,20 +83,24 @@ class AppDatabase extends _$AppDatabase {
           await m.createAll();
         },
         onUpgrade: (Migrator m, int from, int to) async {
-          // Previous inventory fix
+          // v3: inventory table fix
           if (from < 3) {
             await m.deleteTable('inventory_items'); // Drop bad constraint
             await m.createTable(inventoryItems);
             await m.createTable(inventoryTransactions);
           }
-          // ➕ Create Prices table when upgrading to v4
+
+          // v4: introduce Prices table
           if (from < 4) {
             await m.createTable(prices);
           }
+
+          // v5: (reserved for future changes)
+          // if (from < 5) { ... }
         },
         beforeOpen: (details) async {
-          // Ensure default price rows exist (safe to call repeatedly)
-          // You can remove this if you prefer a separate seeding step.
+          // Seed default price rows (safe to call repeatedly).
+          // Runs after onCreate/onUpgrade, so tables exist.
           await priceDao.ensureDefaultPrices();
         },
       );

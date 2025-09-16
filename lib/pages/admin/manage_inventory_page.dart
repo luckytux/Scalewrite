@@ -2,13 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:drift/drift.dart' show Value;
 
-import '../../providers/inventory_provider.dart';
-import '../../widgets/common/rounded_text_field.dart';
-import '../../widgets/common/rounded_dropdown_field.dart';
-import '../../widgets/inventory/add_inventory_dialog.dart';
 import '../../data/database.dart';
+import '../../providers/inventory_provider.dart';
+import '../../widgets/common/rounded_dropdown_field.dart';
+import '../../widgets/common/rounded_text_field.dart';
+import '../../widgets/inventory/add_inventory_dialog.dart';
 
 class ManageInventoryPage extends ConsumerStatefulWidget {
   const ManageInventoryPage({super.key});

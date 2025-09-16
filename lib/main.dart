@@ -1,25 +1,22 @@
 // File: lib/main.dart
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// Pages
-import 'pages/login_page.dart';
-import 'pages/home_page.dart';
-import 'pages/admin/admin_page.dart';
-import 'pages/admin/manage_users_page.dart';
-import 'pages/admin/view_unsynced_work_orders_page.dart';
-import 'pages/admin/manage_inventory_page.dart';
-
-// Providers & DB
-import 'providers/drift_providers.dart';
 import 'data/database.dart';
-
-// Seeders (update if in /dev/ or /seed/)
-import 'dev/seed_users.dart';
 import 'dev/seed_inventory.dart';
 import 'dev/seed_test_data.dart';
+// Seeders (update if in /dev/ or /seed/)
+import 'dev/seed_users.dart';
+import 'pages/admin/admin_page.dart';
+import 'pages/admin/manage_inventory_page.dart';
+import 'pages/admin/manage_users_page.dart';
+import 'pages/admin/view_unsynced_work_orders_page.dart';
+import 'pages/home_page.dart';
+// Pages
+import 'pages/login_page.dart';
+// Providers & DB
+import 'providers/drift_providers.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

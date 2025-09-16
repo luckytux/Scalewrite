@@ -1,12 +1,10 @@
 // File: lib/providers/inventory_provider.dart
 
 import 'package:flutter/material.dart';
-import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/database.dart';
 import '../data/daos/inventory_dao.dart';
-import '../data/tables/inventory_items.dart';
+import '../data/database.dart';
 import 'drift_providers.dart';
 
 // ✅ DAO Provider (used by the ChangeNotifierProvider)

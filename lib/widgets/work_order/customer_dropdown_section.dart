@@ -15,6 +15,16 @@ class CustomerDropdownSection extends ConsumerWidget {
     final controller = ref.watch(workOrderFormProvider);
     final readOnly = controller.editingWorkOrderId != null;
 
+    // Compute the initial text for the field without dummy Customer objects.
+    String initialText() {
+      final id = controller.selectedCustomerId;
+      if (id == null) return controller.businessNameController.text;
+      for (final c in customers) {
+        if (c.id == id) return c.businessName; // non-nullable
+      }
+      return controller.businessNameController.text; // fallback if not found
+    }
+
     return Autocomplete<String>(
       optionsBuilder: (TextEditingValue value) {
         final input = value.text.trim().toLowerCase();
@@ -31,33 +41,7 @@ class CustomerDropdownSection extends ConsumerWidget {
 
         return matches;
       },
-      initialValue: controller.selectedCustomerId != null
-          ? TextEditingValue(
-              text: customers
-                      .firstWhere(
-                        (c) => c.id == controller.selectedCustomerId,
-                        orElse: () => Customer(
-                          id: 0,
-                          businessName: '',
-                          siteAddress: '',
-                          siteCity: '',
-                          siteProvince: '',
-                          sitePostalCode: '',
-                          billingAddress: '',
-                          billingCity: '',
-                          billingProvince: '',
-                          billingPostalCode: '',
-                          gpsLocation: '',
-                          notes: '',
-                          deactivate: false,
-                          auditFlag: false,
-                          synced: false,
-                        ),
-                      )
-                      .businessName ??
-                  '',
-            )
-          : TextEditingValue(text: controller.businessNameController.text),
+      initialValue: TextEditingValue(text: initialText()),
       onSelected: (String selection) {
         if (selection.startsWith('+ Add "')) {
           final match =
@@ -66,8 +50,9 @@ class CustomerDropdownSection extends ConsumerWidget {
           controller.setIsCreatingNewCustomer(newName);
         } else {
           final selectedCustomer = customers.firstWhere(
-              (c) => c.businessName == selection,
-              orElse: () => customers.first);
+            (c) => c.businessName == selection,
+            orElse: () => customers.first,
+          );
           controller.selectCustomer(selectedCustomer.id, customers);
         }
       },
@@ -102,6 +87,7 @@ class CustomerDropdownSection extends ConsumerWidget {
             return null;
           },
           onChanged: (text) {
+            // User is typing; treat as free-text customer until they pick one.
             controller.selectedCustomerId = null;
             controller.businessNameController.text = text;
           },

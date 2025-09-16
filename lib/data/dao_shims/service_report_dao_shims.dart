@@ -1,6 +1,5 @@
 // File: lib/data/dao_shims/service_report_dao_shims.dart
 
-import 'package:drift/drift.dart';
 import 'package:scalewrite_v2/data/daos/service_report_dao.dart';
 import 'package:scalewrite_v2/data/database.dart';
 

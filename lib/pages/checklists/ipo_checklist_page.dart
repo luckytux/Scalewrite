@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../models/ipo_section.dart';
 import '../../providers/drift_providers.dart';
-import '../../data/database.dart';
 
 class IPOChecklistPage extends ConsumerStatefulWidget {
   final String ipoType;

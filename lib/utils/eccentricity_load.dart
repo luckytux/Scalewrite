@@ -1,6 +1,5 @@
 // File: lib/utils/eccentricity_load.dart
 
-import 'dart:math' as math;
 import 'scale_precision.dart';
 
 /// Suggest a single eccentricity load (~30% of capacity),

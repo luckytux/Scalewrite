@@ -1,7 +1,7 @@
 // File: lib/widgets/service_report/report_notes_section.dart
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../common/rounded_text_field.dart';
 
 class ReportNotesSection extends StatelessWidget {

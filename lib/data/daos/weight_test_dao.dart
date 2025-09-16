@@ -46,9 +46,11 @@ class WeightTestDao extends DatabaseAccessor<AppDatabase>
 
   /// Insert or update based on the UNIQUE(service_report_id) constraint.
   Future<void> upsertByServiceReportId(WeightTestsCompanion entry) async {
+    // `Value<T>.value` is non-nullable; use `.present` to verify it was provided.
+    if (!entry.serviceReportId.present) {
+      throw ArgumentError('serviceReportId must be provided for upsert');
+    }
     final srId = entry.serviceReportId.value;
-    // Ensure srId is present
-    assert(srId != null, 'serviceReportId must be provided for upsert');
 
     final existing = await getByServiceReportId(srId);
     if (existing == null) {

@@ -777,8 +777,8 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
       'customer_id', aliasedName, false,
       type: DriftSqlType.int,
       requiredDuringInsert: true,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('REFERENCES customers (id)'));
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES customers (id) ON DELETE CASCADE'));
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
@@ -837,6 +837,22 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('CHECK ("audit_flag" IN (0, 1))'),
       defaultValue: const Constant(false));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -848,7 +864,9 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
         isMain,
         deactivate,
         synced,
-        auditFlag
+        auditFlag,
+        createdAt,
+        updatedAt
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -907,11 +925,23 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
       context.handle(_auditFlagMeta,
           auditFlag.isAcceptableOrUnknown(data['audit_flag']!, _auditFlagMeta));
     }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    }
     return context;
   }
 
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+        {customerId, email},
+      ];
   @override
   Contact map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
@@ -936,6 +966,10 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
           .read(DriftSqlType.bool, data['${effectivePrefix}synced'])!,
       auditFlag: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}audit_flag'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
     );
   }
 
@@ -956,6 +990,8 @@ class Contact extends DataClass implements Insertable<Contact> {
   final bool deactivate;
   final bool synced;
   final bool auditFlag;
+  final DateTime createdAt;
+  final DateTime updatedAt;
   const Contact(
       {required this.id,
       required this.customerId,
@@ -966,7 +1002,9 @@ class Contact extends DataClass implements Insertable<Contact> {
       required this.isMain,
       required this.deactivate,
       required this.synced,
-      required this.auditFlag});
+      required this.auditFlag,
+      required this.createdAt,
+      required this.updatedAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -986,6 +1024,8 @@ class Contact extends DataClass implements Insertable<Contact> {
     map['deactivate'] = Variable<bool>(deactivate);
     map['synced'] = Variable<bool>(synced);
     map['audit_flag'] = Variable<bool>(auditFlag);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
   }
 
@@ -1004,6 +1044,8 @@ class Contact extends DataClass implements Insertable<Contact> {
       deactivate: Value(deactivate),
       synced: Value(synced),
       auditFlag: Value(auditFlag),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
     );
   }
 
@@ -1021,6 +1063,8 @@ class Contact extends DataClass implements Insertable<Contact> {
       deactivate: serializer.fromJson<bool>(json['deactivate']),
       synced: serializer.fromJson<bool>(json['synced']),
       auditFlag: serializer.fromJson<bool>(json['auditFlag']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
   }
   @override
@@ -1037,6 +1081,8 @@ class Contact extends DataClass implements Insertable<Contact> {
       'deactivate': serializer.toJson<bool>(deactivate),
       'synced': serializer.toJson<bool>(synced),
       'auditFlag': serializer.toJson<bool>(auditFlag),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
   }
 
@@ -1050,7 +1096,9 @@ class Contact extends DataClass implements Insertable<Contact> {
           bool? isMain,
           bool? deactivate,
           bool? synced,
-          bool? auditFlag}) =>
+          bool? auditFlag,
+          DateTime? createdAt,
+          DateTime? updatedAt}) =>
       Contact(
         id: id ?? this.id,
         customerId: customerId ?? this.customerId,
@@ -1062,6 +1110,8 @@ class Contact extends DataClass implements Insertable<Contact> {
         deactivate: deactivate ?? this.deactivate,
         synced: synced ?? this.synced,
         auditFlag: auditFlag ?? this.auditFlag,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
       );
   Contact copyWithCompanion(ContactsCompanion data) {
     return Contact(
@@ -1077,6 +1127,8 @@ class Contact extends DataClass implements Insertable<Contact> {
           data.deactivate.present ? data.deactivate.value : this.deactivate,
       synced: data.synced.present ? data.synced.value : this.synced,
       auditFlag: data.auditFlag.present ? data.auditFlag.value : this.auditFlag,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
   }
 
@@ -1092,14 +1144,16 @@ class Contact extends DataClass implements Insertable<Contact> {
           ..write('isMain: $isMain, ')
           ..write('deactivate: $deactivate, ')
           ..write('synced: $synced, ')
-          ..write('auditFlag: $auditFlag')
+          ..write('auditFlag: $auditFlag, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(id, customerId, name, phone, email, notes,
-      isMain, deactivate, synced, auditFlag);
+      isMain, deactivate, synced, auditFlag, createdAt, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1113,7 +1167,9 @@ class Contact extends DataClass implements Insertable<Contact> {
           other.isMain == this.isMain &&
           other.deactivate == this.deactivate &&
           other.synced == this.synced &&
-          other.auditFlag == this.auditFlag);
+          other.auditFlag == this.auditFlag &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
 }
 
 class ContactsCompanion extends UpdateCompanion<Contact> {
@@ -1127,6 +1183,8 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
   final Value<bool> deactivate;
   final Value<bool> synced;
   final Value<bool> auditFlag;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
   const ContactsCompanion({
     this.id = const Value.absent(),
     this.customerId = const Value.absent(),
@@ -1138,6 +1196,8 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     this.deactivate = const Value.absent(),
     this.synced = const Value.absent(),
     this.auditFlag = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
   });
   ContactsCompanion.insert({
     this.id = const Value.absent(),
@@ -1150,6 +1210,8 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     this.deactivate = const Value.absent(),
     this.synced = const Value.absent(),
     this.auditFlag = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
   })  : customerId = Value(customerId),
         name = Value(name);
   static Insertable<Contact> custom({
@@ -1163,6 +1225,8 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     Expression<bool>? deactivate,
     Expression<bool>? synced,
     Expression<bool>? auditFlag,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1175,6 +1239,8 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
       if (deactivate != null) 'deactivate': deactivate,
       if (synced != null) 'synced': synced,
       if (auditFlag != null) 'audit_flag': auditFlag,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
     });
   }
 
@@ -1188,7 +1254,9 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
       Value<bool>? isMain,
       Value<bool>? deactivate,
       Value<bool>? synced,
-      Value<bool>? auditFlag}) {
+      Value<bool>? auditFlag,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt}) {
     return ContactsCompanion(
       id: id ?? this.id,
       customerId: customerId ?? this.customerId,
@@ -1200,6 +1268,8 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
       deactivate: deactivate ?? this.deactivate,
       synced: synced ?? this.synced,
       auditFlag: auditFlag ?? this.auditFlag,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 
@@ -1236,6 +1306,12 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     if (auditFlag.present) {
       map['audit_flag'] = Variable<bool>(auditFlag.value);
     }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
     return map;
   }
 
@@ -1251,7 +1327,9 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
           ..write('isMain: $isMain, ')
           ..write('deactivate: $deactivate, ')
           ..write('synced: $synced, ')
-          ..write('auditFlag: $auditFlag')
+          ..write('auditFlag: $auditFlag, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
   }
@@ -1345,10 +1423,8 @@ class $WorkOrdersTable extends WorkOrders
       const VerificationMeta('customerNotes');
   @override
   late final GeneratedColumn<String> customerNotes = GeneratedColumn<String>(
-      'customer_notes', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(''));
+      'customer_notes', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _auditFlagMeta =
       const VerificationMeta('auditFlag');
   @override
@@ -1540,7 +1616,7 @@ class $WorkOrdersTable extends WorkOrders
       gpsLocation: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}gps_location'])!,
       customerNotes: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}customer_notes'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}customer_notes']),
       auditFlag: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}audit_flag'])!,
       synced: attachedDatabase.typeMapping
@@ -1569,7 +1645,7 @@ class WorkOrder extends DataClass implements Insertable<WorkOrder> {
   final String? billingProvince;
   final String? billingPostalCode;
   final String gpsLocation;
-  final String customerNotes;
+  final String? customerNotes;
   final bool auditFlag;
   final bool synced;
   final DateTime lastModified;
@@ -1586,7 +1662,7 @@ class WorkOrder extends DataClass implements Insertable<WorkOrder> {
       this.billingProvince,
       this.billingPostalCode,
       required this.gpsLocation,
-      required this.customerNotes,
+      this.customerNotes,
       required this.auditFlag,
       required this.synced,
       required this.lastModified});
@@ -1613,7 +1689,9 @@ class WorkOrder extends DataClass implements Insertable<WorkOrder> {
       map['billing_postal_code'] = Variable<String>(billingPostalCode);
     }
     map['gps_location'] = Variable<String>(gpsLocation);
-    map['customer_notes'] = Variable<String>(customerNotes);
+    if (!nullToAbsent || customerNotes != null) {
+      map['customer_notes'] = Variable<String>(customerNotes);
+    }
     map['audit_flag'] = Variable<bool>(auditFlag);
     map['synced'] = Variable<bool>(synced);
     map['last_modified'] = Variable<DateTime>(lastModified);
@@ -1642,7 +1720,9 @@ class WorkOrder extends DataClass implements Insertable<WorkOrder> {
           ? const Value.absent()
           : Value(billingPostalCode),
       gpsLocation: Value(gpsLocation),
-      customerNotes: Value(customerNotes),
+      customerNotes: customerNotes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(customerNotes),
       auditFlag: Value(auditFlag),
       synced: Value(synced),
       lastModified: Value(lastModified),
@@ -1666,7 +1746,7 @@ class WorkOrder extends DataClass implements Insertable<WorkOrder> {
       billingPostalCode:
           serializer.fromJson<String?>(json['billingPostalCode']),
       gpsLocation: serializer.fromJson<String>(json['gpsLocation']),
-      customerNotes: serializer.fromJson<String>(json['customerNotes']),
+      customerNotes: serializer.fromJson<String?>(json['customerNotes']),
       auditFlag: serializer.fromJson<bool>(json['auditFlag']),
       synced: serializer.fromJson<bool>(json['synced']),
       lastModified: serializer.fromJson<DateTime>(json['lastModified']),
@@ -1688,7 +1768,7 @@ class WorkOrder extends DataClass implements Insertable<WorkOrder> {
       'billingProvince': serializer.toJson<String?>(billingProvince),
       'billingPostalCode': serializer.toJson<String?>(billingPostalCode),
       'gpsLocation': serializer.toJson<String>(gpsLocation),
-      'customerNotes': serializer.toJson<String>(customerNotes),
+      'customerNotes': serializer.toJson<String?>(customerNotes),
       'auditFlag': serializer.toJson<bool>(auditFlag),
       'synced': serializer.toJson<bool>(synced),
       'lastModified': serializer.toJson<DateTime>(lastModified),
@@ -1708,7 +1788,7 @@ class WorkOrder extends DataClass implements Insertable<WorkOrder> {
           Value<String?> billingProvince = const Value.absent(),
           Value<String?> billingPostalCode = const Value.absent(),
           String? gpsLocation,
-          String? customerNotes,
+          Value<String?> customerNotes = const Value.absent(),
           bool? auditFlag,
           bool? synced,
           DateTime? lastModified}) =>
@@ -1730,7 +1810,8 @@ class WorkOrder extends DataClass implements Insertable<WorkOrder> {
             ? billingPostalCode.value
             : this.billingPostalCode,
         gpsLocation: gpsLocation ?? this.gpsLocation,
-        customerNotes: customerNotes ?? this.customerNotes,
+        customerNotes:
+            customerNotes.present ? customerNotes.value : this.customerNotes,
         auditFlag: auditFlag ?? this.auditFlag,
         synced: synced ?? this.synced,
         lastModified: lastModified ?? this.lastModified,
@@ -1852,7 +1933,7 @@ class WorkOrdersCompanion extends UpdateCompanion<WorkOrder> {
   final Value<String?> billingProvince;
   final Value<String?> billingPostalCode;
   final Value<String> gpsLocation;
-  final Value<String> customerNotes;
+  final Value<String?> customerNotes;
   final Value<bool> auditFlag;
   final Value<bool> synced;
   final Value<DateTime> lastModified;
@@ -1949,7 +2030,7 @@ class WorkOrdersCompanion extends UpdateCompanion<WorkOrder> {
       Value<String?>? billingProvince,
       Value<String?>? billingPostalCode,
       Value<String>? gpsLocation,
-      Value<String>? customerNotes,
+      Value<String?>? customerNotes,
       Value<bool>? auditFlag,
       Value<bool>? synced,
       Value<DateTime>? lastModified}) {
@@ -10458,6 +10539,18 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         inventoryTransactions,
         prices
       ];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
+        [
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('customers',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('contacts', kind: UpdateKind.delete),
+            ],
+          ),
+        ],
+      );
 }
 
 typedef $$CustomersTableCreateCompanionBuilder = CustomersCompanion Function({
@@ -11112,6 +11205,8 @@ typedef $$ContactsTableCreateCompanionBuilder = ContactsCompanion Function({
   Value<bool> deactivate,
   Value<bool> synced,
   Value<bool> auditFlag,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
 });
 typedef $$ContactsTableUpdateCompanionBuilder = ContactsCompanion Function({
   Value<int> id,
@@ -11124,6 +11219,8 @@ typedef $$ContactsTableUpdateCompanionBuilder = ContactsCompanion Function({
   Value<bool> deactivate,
   Value<bool> synced,
   Value<bool> auditFlag,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
 });
 
 final class $$ContactsTableReferences
@@ -11182,6 +11279,12 @@ class $$ContactsTableFilterComposer
   ColumnFilters<bool> get auditFlag => $composableBuilder(
       column: $table.auditFlag, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
   $$CustomersTableFilterComposer get customerId {
     final $$CustomersTableFilterComposer composer = $composerBuilder(
         composer: this,
@@ -11238,6 +11341,12 @@ class $$ContactsTableOrderingComposer
 
   ColumnOrderings<bool> get auditFlag => $composableBuilder(
       column: $table.auditFlag, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
 
   $$CustomersTableOrderingComposer get customerId {
     final $$CustomersTableOrderingComposer composer = $composerBuilder(
@@ -11296,6 +11405,12 @@ class $$ContactsTableAnnotationComposer
   GeneratedColumn<bool> get auditFlag =>
       $composableBuilder(column: $table.auditFlag, builder: (column) => column);
 
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
   $$CustomersTableAnnotationComposer get customerId {
     final $$CustomersTableAnnotationComposer composer = $composerBuilder(
         composer: this,
@@ -11350,6 +11465,8 @@ class $$ContactsTableTableManager extends RootTableManager<
             Value<bool> deactivate = const Value.absent(),
             Value<bool> synced = const Value.absent(),
             Value<bool> auditFlag = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
           }) =>
               ContactsCompanion(
             id: id,
@@ -11362,6 +11479,8 @@ class $$ContactsTableTableManager extends RootTableManager<
             deactivate: deactivate,
             synced: synced,
             auditFlag: auditFlag,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
@@ -11374,6 +11493,8 @@ class $$ContactsTableTableManager extends RootTableManager<
             Value<bool> deactivate = const Value.absent(),
             Value<bool> synced = const Value.absent(),
             Value<bool> auditFlag = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
           }) =>
               ContactsCompanion.insert(
             id: id,
@@ -11386,6 +11507,8 @@ class $$ContactsTableTableManager extends RootTableManager<
             deactivate: deactivate,
             synced: synced,
             auditFlag: auditFlag,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) =>
@@ -11454,7 +11577,7 @@ typedef $$WorkOrdersTableCreateCompanionBuilder = WorkOrdersCompanion Function({
   Value<String?> billingProvince,
   Value<String?> billingPostalCode,
   required String gpsLocation,
-  Value<String> customerNotes,
+  Value<String?> customerNotes,
   Value<bool> auditFlag,
   Value<bool> synced,
   Value<DateTime> lastModified,
@@ -11472,7 +11595,7 @@ typedef $$WorkOrdersTableUpdateCompanionBuilder = WorkOrdersCompanion Function({
   Value<String?> billingProvince,
   Value<String?> billingPostalCode,
   Value<String> gpsLocation,
-  Value<String> customerNotes,
+  Value<String?> customerNotes,
   Value<bool> auditFlag,
   Value<bool> synced,
   Value<DateTime> lastModified,
@@ -11887,7 +12010,7 @@ class $$WorkOrdersTableTableManager extends RootTableManager<
             Value<String?> billingProvince = const Value.absent(),
             Value<String?> billingPostalCode = const Value.absent(),
             Value<String> gpsLocation = const Value.absent(),
-            Value<String> customerNotes = const Value.absent(),
+            Value<String?> customerNotes = const Value.absent(),
             Value<bool> auditFlag = const Value.absent(),
             Value<bool> synced = const Value.absent(),
             Value<DateTime> lastModified = const Value.absent(),
@@ -11923,7 +12046,7 @@ class $$WorkOrdersTableTableManager extends RootTableManager<
             Value<String?> billingProvince = const Value.absent(),
             Value<String?> billingPostalCode = const Value.absent(),
             required String gpsLocation,
-            Value<String> customerNotes = const Value.absent(),
+            Value<String?> customerNotes = const Value.absent(),
             Value<bool> auditFlag = const Value.absent(),
             Value<bool> synced = const Value.absent(),
             Value<DateTime> lastModified = const Value.absent(),

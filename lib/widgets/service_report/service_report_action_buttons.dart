@@ -2,11 +2,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:scalewrite_v2/providers/service_report_form_provider.dart';
 import 'package:scalewrite_v2/pages/create_weight_test_page.dart';
 import 'package:scalewrite_v2/pages/home_page.dart';
-import 'package:scalewrite_v2/providers/drift_providers.dart'; // for database/DAOs
-import 'package:scalewrite_v2/data/dao_shims/service_report_dao_shims.dart'; // ✅ analyzer-visible shim
+
+import 'package:scalewrite_v2/providers/drift_providers.dart'; // databaseProvider, daos
+import 'package:scalewrite_v2/data/dao_shims/service_report_dao_shims.dart'; // getServiceReportById shim
 
 class ServiceReportActionButtons extends ConsumerWidget {
   const ServiceReportActionButtons({super.key});
@@ -76,8 +78,9 @@ class ServiceReportActionButtons extends ConsumerWidget {
               }
 
               try {
-                // Use shimmed helper (or your real DAO method if present)
-                final serviceReport = await db.serviceReportDao.getServiceReportById(srId);
+                // Load the persisted SR (via shim or your DAO)
+                final serviceReport =
+                    await db.serviceReportDao.getServiceReportById(srId);
                 if (serviceReport == null) {
                   if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -86,22 +89,33 @@ class ServiceReportActionButtons extends ConsumerWidget {
                   return;
                 }
 
-                final scaleId = serviceReport.scaleId;
-                if (scaleId == null) {
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('No scale is linked to this Service Report.')),
-                  );
-                  return;
-                }
+                // Seed division/sections/capacity from the *form* first (works even with no saved Scale)
+                double division =
+                    double.tryParse(controller.divisionController.text) ??
+                        (controller.selectedScale?.division ?? 10);
+                int sections =
+                    int.tryParse(controller.sectionsController.text) ??
+                        (controller.selectedScale?.numberOfSections ?? 4);
+                double? capacity =
+                    double.tryParse(controller.capacityController.text) ??
+                        controller.selectedScale?.capacity;
 
-                final scale = await db.scaleDao.getScaleById(scaleId);
-                if (scale == null) {
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Scale not found for this Service Report.')),
-                  );
-                  return;
+                // If the SR is linked to a Scale, prefer the saved Scale values
+                final int? scaleId = serviceReport.scaleId;
+                if (scaleId != null) {
+                  final scale = await db.scaleDao.getScaleById(scaleId);
+                  if (scale == null) {
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content:
+                              Text('Scale not found for this Service Report.')),
+                    );
+                    return;
+                  }
+                  division = scale.division;
+                  sections = scale.numberOfSections;
+                  capacity = scale.capacity;
                 }
 
                 if (!context.mounted) return;
@@ -110,8 +124,10 @@ class ServiceReportActionButtons extends ConsumerWidget {
                   MaterialPageRoute(
                     builder: (_) => CreateWeightTestPage(
                       serviceReportId: srId,
-                      division: scale.division,
-                      numberOfSections: scale.numberOfSections,
+                      division: division,
+                      numberOfSections: sections,
+                      maxCapacity: capacity,
+                      // scaleClass: optional; can infer in page if needed
                     ),
                   ),
                 );
