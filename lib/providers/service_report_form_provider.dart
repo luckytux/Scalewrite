@@ -258,15 +258,25 @@ class ServiceReportFormController extends ChangeNotifier {
       return false;
     }
 
-    final dao = db.serviceReportDao;
-    selectedServiceReportId = await dao.insertReport(ServiceReportsCompanion(
+    final companion = ServiceReportsCompanion(
       workOrderId: Value(selectedWorkOrder!.id),
       scaleId: Value(selectedScale!.id),
       reportType: Value(reportType),
       notes: Value(reportNotesController.text),
-    ));
+    );
 
-    debugPrint('✅ Service Report saved with ID: $selectedServiceReportId');
+    if (selectedServiceReportId != null) {
+      final updated = await db.update(db.serviceReports).replace(
+        companion.copyWith(id: Value(selectedServiceReportId!)),
+      );
+      debugPrint(updated
+          ? '✅ Service Report updated: ID $selectedServiceReportId'
+          : '❌ Failed to update Service Report');
+    } else {
+      selectedServiceReportId =
+          await db.serviceReportDao.insertReport(companion);
+      debugPrint('✅ Service Report inserted: ID $selectedServiceReportId');
+    }
 
     notifyListeners();
     return true;

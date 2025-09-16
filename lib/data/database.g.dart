@@ -3615,6 +3615,13 @@ class $ServiceReportsTable extends ServiceReports
           GeneratedColumn.constraintIsAlways('CHECK ("synced" IN (0, 1))'),
       defaultValue: const Constant(false));
   @override
+  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
+      ipoStateJson = GeneratedColumn<String>(
+              'ipo_state_json', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<Map<String, dynamic>?>(
+              $ServiceReportsTable.$converteripoStateJsonn);
+  @override
   List<GeneratedColumn> get $columns => [
         id,
         workOrderId,
@@ -3623,7 +3630,8 @@ class $ServiceReportsTable extends ServiceReports
         notes,
         createdAt,
         complete,
-        synced
+        synced,
+        ipoStateJson
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3701,6 +3709,9 @@ class $ServiceReportsTable extends ServiceReports
           .read(DriftSqlType.bool, data['${effectivePrefix}complete'])!,
       synced: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}synced'])!,
+      ipoStateJson: $ServiceReportsTable.$converteripoStateJsonn.fromSql(
+          attachedDatabase.typeMapping.read(
+              DriftSqlType.string, data['${effectivePrefix}ipo_state_json'])),
     );
   }
 
@@ -3708,6 +3719,11 @@ class $ServiceReportsTable extends ServiceReports
   $ServiceReportsTable createAlias(String alias) {
     return $ServiceReportsTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<Map<String, dynamic>, String> $converteripoStateJson =
+      const JsonConverter();
+  static TypeConverter<Map<String, dynamic>?, String?> $converteripoStateJsonn =
+      NullAwareTypeConverter.wrap($converteripoStateJson);
 }
 
 class ServiceReport extends DataClass implements Insertable<ServiceReport> {
@@ -3719,6 +3735,7 @@ class ServiceReport extends DataClass implements Insertable<ServiceReport> {
   final DateTime createdAt;
   final bool complete;
   final bool synced;
+  final Map<String, dynamic>? ipoStateJson;
   const ServiceReport(
       {required this.id,
       required this.workOrderId,
@@ -3727,7 +3744,8 @@ class ServiceReport extends DataClass implements Insertable<ServiceReport> {
       this.notes,
       required this.createdAt,
       required this.complete,
-      required this.synced});
+      required this.synced,
+      this.ipoStateJson});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -3741,6 +3759,10 @@ class ServiceReport extends DataClass implements Insertable<ServiceReport> {
     map['created_at'] = Variable<DateTime>(createdAt);
     map['complete'] = Variable<bool>(complete);
     map['synced'] = Variable<bool>(synced);
+    if (!nullToAbsent || ipoStateJson != null) {
+      map['ipo_state_json'] = Variable<String>(
+          $ServiceReportsTable.$converteripoStateJsonn.toSql(ipoStateJson));
+    }
     return map;
   }
 
@@ -3755,6 +3777,9 @@ class ServiceReport extends DataClass implements Insertable<ServiceReport> {
       createdAt: Value(createdAt),
       complete: Value(complete),
       synced: Value(synced),
+      ipoStateJson: ipoStateJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ipoStateJson),
     );
   }
 
@@ -3770,6 +3795,8 @@ class ServiceReport extends DataClass implements Insertable<ServiceReport> {
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       complete: serializer.fromJson<bool>(json['complete']),
       synced: serializer.fromJson<bool>(json['synced']),
+      ipoStateJson:
+          serializer.fromJson<Map<String, dynamic>?>(json['ipoStateJson']),
     );
   }
   @override
@@ -3784,6 +3811,7 @@ class ServiceReport extends DataClass implements Insertable<ServiceReport> {
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'complete': serializer.toJson<bool>(complete),
       'synced': serializer.toJson<bool>(synced),
+      'ipoStateJson': serializer.toJson<Map<String, dynamic>?>(ipoStateJson),
     };
   }
 
@@ -3795,7 +3823,8 @@ class ServiceReport extends DataClass implements Insertable<ServiceReport> {
           Value<String?> notes = const Value.absent(),
           DateTime? createdAt,
           bool? complete,
-          bool? synced}) =>
+          bool? synced,
+          Value<Map<String, dynamic>?> ipoStateJson = const Value.absent()}) =>
       ServiceReport(
         id: id ?? this.id,
         workOrderId: workOrderId ?? this.workOrderId,
@@ -3805,6 +3834,8 @@ class ServiceReport extends DataClass implements Insertable<ServiceReport> {
         createdAt: createdAt ?? this.createdAt,
         complete: complete ?? this.complete,
         synced: synced ?? this.synced,
+        ipoStateJson:
+            ipoStateJson.present ? ipoStateJson.value : this.ipoStateJson,
       );
   ServiceReport copyWithCompanion(ServiceReportsCompanion data) {
     return ServiceReport(
@@ -3818,6 +3849,9 @@ class ServiceReport extends DataClass implements Insertable<ServiceReport> {
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       complete: data.complete.present ? data.complete.value : this.complete,
       synced: data.synced.present ? data.synced.value : this.synced,
+      ipoStateJson: data.ipoStateJson.present
+          ? data.ipoStateJson.value
+          : this.ipoStateJson,
     );
   }
 
@@ -3831,14 +3865,15 @@ class ServiceReport extends DataClass implements Insertable<ServiceReport> {
           ..write('notes: $notes, ')
           ..write('createdAt: $createdAt, ')
           ..write('complete: $complete, ')
-          ..write('synced: $synced')
+          ..write('synced: $synced, ')
+          ..write('ipoStateJson: $ipoStateJson')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, workOrderId, scaleId, reportType, notes, createdAt, complete, synced);
+  int get hashCode => Object.hash(id, workOrderId, scaleId, reportType, notes,
+      createdAt, complete, synced, ipoStateJson);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3850,7 +3885,8 @@ class ServiceReport extends DataClass implements Insertable<ServiceReport> {
           other.notes == this.notes &&
           other.createdAt == this.createdAt &&
           other.complete == this.complete &&
-          other.synced == this.synced);
+          other.synced == this.synced &&
+          other.ipoStateJson == this.ipoStateJson);
 }
 
 class ServiceReportsCompanion extends UpdateCompanion<ServiceReport> {
@@ -3862,6 +3898,7 @@ class ServiceReportsCompanion extends UpdateCompanion<ServiceReport> {
   final Value<DateTime> createdAt;
   final Value<bool> complete;
   final Value<bool> synced;
+  final Value<Map<String, dynamic>?> ipoStateJson;
   const ServiceReportsCompanion({
     this.id = const Value.absent(),
     this.workOrderId = const Value.absent(),
@@ -3871,6 +3908,7 @@ class ServiceReportsCompanion extends UpdateCompanion<ServiceReport> {
     this.createdAt = const Value.absent(),
     this.complete = const Value.absent(),
     this.synced = const Value.absent(),
+    this.ipoStateJson = const Value.absent(),
   });
   ServiceReportsCompanion.insert({
     this.id = const Value.absent(),
@@ -3881,6 +3919,7 @@ class ServiceReportsCompanion extends UpdateCompanion<ServiceReport> {
     this.createdAt = const Value.absent(),
     this.complete = const Value.absent(),
     this.synced = const Value.absent(),
+    this.ipoStateJson = const Value.absent(),
   })  : workOrderId = Value(workOrderId),
         scaleId = Value(scaleId),
         reportType = Value(reportType);
@@ -3893,6 +3932,7 @@ class ServiceReportsCompanion extends UpdateCompanion<ServiceReport> {
     Expression<DateTime>? createdAt,
     Expression<bool>? complete,
     Expression<bool>? synced,
+    Expression<String>? ipoStateJson,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -3903,6 +3943,7 @@ class ServiceReportsCompanion extends UpdateCompanion<ServiceReport> {
       if (createdAt != null) 'created_at': createdAt,
       if (complete != null) 'complete': complete,
       if (synced != null) 'synced': synced,
+      if (ipoStateJson != null) 'ipo_state_json': ipoStateJson,
     });
   }
 
@@ -3914,7 +3955,8 @@ class ServiceReportsCompanion extends UpdateCompanion<ServiceReport> {
       Value<String?>? notes,
       Value<DateTime>? createdAt,
       Value<bool>? complete,
-      Value<bool>? synced}) {
+      Value<bool>? synced,
+      Value<Map<String, dynamic>?>? ipoStateJson}) {
     return ServiceReportsCompanion(
       id: id ?? this.id,
       workOrderId: workOrderId ?? this.workOrderId,
@@ -3924,6 +3966,7 @@ class ServiceReportsCompanion extends UpdateCompanion<ServiceReport> {
       createdAt: createdAt ?? this.createdAt,
       complete: complete ?? this.complete,
       synced: synced ?? this.synced,
+      ipoStateJson: ipoStateJson ?? this.ipoStateJson,
     );
   }
 
@@ -3954,6 +3997,11 @@ class ServiceReportsCompanion extends UpdateCompanion<ServiceReport> {
     if (synced.present) {
       map['synced'] = Variable<bool>(synced.value);
     }
+    if (ipoStateJson.present) {
+      map['ipo_state_json'] = Variable<String>($ServiceReportsTable
+          .$converteripoStateJsonn
+          .toSql(ipoStateJson.value));
+    }
     return map;
   }
 
@@ -3967,7 +4015,8 @@ class ServiceReportsCompanion extends UpdateCompanion<ServiceReport> {
           ..write('notes: $notes, ')
           ..write('createdAt: $createdAt, ')
           ..write('complete: $complete, ')
-          ..write('synced: $synced')
+          ..write('synced: $synced, ')
+          ..write('ipoStateJson: $ipoStateJson')
           ..write(')'))
         .toString();
   }
@@ -4080,11 +4129,197 @@ class $WeightTestsTable extends WeightTests
   late final GeneratedColumn<double> eccentricity10 = GeneratedColumn<double>(
       'eccentricity10', aliasedName, true,
       type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _eccentricity11Meta =
+      const VerificationMeta('eccentricity11');
+  @override
+  late final GeneratedColumn<double> eccentricity11 = GeneratedColumn<double>(
+      'eccentricity11', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _eccentricity12Meta =
+      const VerificationMeta('eccentricity12');
+  @override
+  late final GeneratedColumn<double> eccentricity12 = GeneratedColumn<double>(
+      'eccentricity12', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _eccentricity13Meta =
+      const VerificationMeta('eccentricity13');
+  @override
+  late final GeneratedColumn<double> eccentricity13 = GeneratedColumn<double>(
+      'eccentricity13', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _eccentricity14Meta =
+      const VerificationMeta('eccentricity14');
+  @override
+  late final GeneratedColumn<double> eccentricity14 = GeneratedColumn<double>(
+      'eccentricity14', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _eccentricity15Meta =
+      const VerificationMeta('eccentricity15');
+  @override
+  late final GeneratedColumn<double> eccentricity15 = GeneratedColumn<double>(
+      'eccentricity15', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _eccentricity16Meta =
+      const VerificationMeta('eccentricity16');
+  @override
+  late final GeneratedColumn<double> eccentricity16 = GeneratedColumn<double>(
+      'eccentricity16', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _eccentricity17Meta =
+      const VerificationMeta('eccentricity17');
+  @override
+  late final GeneratedColumn<double> eccentricity17 = GeneratedColumn<double>(
+      'eccentricity17', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _eccentricity18Meta =
+      const VerificationMeta('eccentricity18');
+  @override
+  late final GeneratedColumn<double> eccentricity18 = GeneratedColumn<double>(
+      'eccentricity18', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _eccentricity19Meta =
+      const VerificationMeta('eccentricity19');
+  @override
+  late final GeneratedColumn<double> eccentricity19 = GeneratedColumn<double>(
+      'eccentricity19', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _eccentricity20Meta =
+      const VerificationMeta('eccentricity20');
+  @override
+  late final GeneratedColumn<double> eccentricity20 = GeneratedColumn<double>(
+      'eccentricity20', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftEccentricity1Meta =
+      const VerificationMeta('asLeftEccentricity1');
+  @override
+  late final GeneratedColumn<double> asLeftEccentricity1 =
+      GeneratedColumn<double>('as_left_eccentricity1', aliasedName, true,
+          type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftEccentricity2Meta =
+      const VerificationMeta('asLeftEccentricity2');
+  @override
+  late final GeneratedColumn<double> asLeftEccentricity2 =
+      GeneratedColumn<double>('as_left_eccentricity2', aliasedName, true,
+          type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftEccentricity3Meta =
+      const VerificationMeta('asLeftEccentricity3');
+  @override
+  late final GeneratedColumn<double> asLeftEccentricity3 =
+      GeneratedColumn<double>('as_left_eccentricity3', aliasedName, true,
+          type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftEccentricity4Meta =
+      const VerificationMeta('asLeftEccentricity4');
+  @override
+  late final GeneratedColumn<double> asLeftEccentricity4 =
+      GeneratedColumn<double>('as_left_eccentricity4', aliasedName, true,
+          type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftEccentricity5Meta =
+      const VerificationMeta('asLeftEccentricity5');
+  @override
+  late final GeneratedColumn<double> asLeftEccentricity5 =
+      GeneratedColumn<double>('as_left_eccentricity5', aliasedName, true,
+          type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftEccentricity6Meta =
+      const VerificationMeta('asLeftEccentricity6');
+  @override
+  late final GeneratedColumn<double> asLeftEccentricity6 =
+      GeneratedColumn<double>('as_left_eccentricity6', aliasedName, true,
+          type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftEccentricity7Meta =
+      const VerificationMeta('asLeftEccentricity7');
+  @override
+  late final GeneratedColumn<double> asLeftEccentricity7 =
+      GeneratedColumn<double>('as_left_eccentricity7', aliasedName, true,
+          type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftEccentricity8Meta =
+      const VerificationMeta('asLeftEccentricity8');
+  @override
+  late final GeneratedColumn<double> asLeftEccentricity8 =
+      GeneratedColumn<double>('as_left_eccentricity8', aliasedName, true,
+          type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftEccentricity9Meta =
+      const VerificationMeta('asLeftEccentricity9');
+  @override
+  late final GeneratedColumn<double> asLeftEccentricity9 =
+      GeneratedColumn<double>('as_left_eccentricity9', aliasedName, true,
+          type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftEccentricity10Meta =
+      const VerificationMeta('asLeftEccentricity10');
+  @override
+  late final GeneratedColumn<double> asLeftEccentricity10 =
+      GeneratedColumn<double>('as_left_eccentricity10', aliasedName, true,
+          type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftEccentricity11Meta =
+      const VerificationMeta('asLeftEccentricity11');
+  @override
+  late final GeneratedColumn<double> asLeftEccentricity11 =
+      GeneratedColumn<double>('as_left_eccentricity11', aliasedName, true,
+          type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftEccentricity12Meta =
+      const VerificationMeta('asLeftEccentricity12');
+  @override
+  late final GeneratedColumn<double> asLeftEccentricity12 =
+      GeneratedColumn<double>('as_left_eccentricity12', aliasedName, true,
+          type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftEccentricity13Meta =
+      const VerificationMeta('asLeftEccentricity13');
+  @override
+  late final GeneratedColumn<double> asLeftEccentricity13 =
+      GeneratedColumn<double>('as_left_eccentricity13', aliasedName, true,
+          type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftEccentricity14Meta =
+      const VerificationMeta('asLeftEccentricity14');
+  @override
+  late final GeneratedColumn<double> asLeftEccentricity14 =
+      GeneratedColumn<double>('as_left_eccentricity14', aliasedName, true,
+          type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftEccentricity15Meta =
+      const VerificationMeta('asLeftEccentricity15');
+  @override
+  late final GeneratedColumn<double> asLeftEccentricity15 =
+      GeneratedColumn<double>('as_left_eccentricity15', aliasedName, true,
+          type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftEccentricity16Meta =
+      const VerificationMeta('asLeftEccentricity16');
+  @override
+  late final GeneratedColumn<double> asLeftEccentricity16 =
+      GeneratedColumn<double>('as_left_eccentricity16', aliasedName, true,
+          type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftEccentricity17Meta =
+      const VerificationMeta('asLeftEccentricity17');
+  @override
+  late final GeneratedColumn<double> asLeftEccentricity17 =
+      GeneratedColumn<double>('as_left_eccentricity17', aliasedName, true,
+          type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftEccentricity18Meta =
+      const VerificationMeta('asLeftEccentricity18');
+  @override
+  late final GeneratedColumn<double> asLeftEccentricity18 =
+      GeneratedColumn<double>('as_left_eccentricity18', aliasedName, true,
+          type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftEccentricity19Meta =
+      const VerificationMeta('asLeftEccentricity19');
+  @override
+  late final GeneratedColumn<double> asLeftEccentricity19 =
+      GeneratedColumn<double>('as_left_eccentricity19', aliasedName, true,
+          type: DriftSqlType.double, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftEccentricity20Meta =
+      const VerificationMeta('asLeftEccentricity20');
+  @override
+  late final GeneratedColumn<double> asLeftEccentricity20 =
+      GeneratedColumn<double>('as_left_eccentricity20', aliasedName, true,
+          type: DriftSqlType.double, requiredDuringInsert: false);
   static const VerificationMeta _eccentricityErrorMeta =
       const VerificationMeta('eccentricityError');
   @override
   late final GeneratedColumn<String> eccentricityError =
       GeneratedColumn<String>('eccentricity_error', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _asLeftEccentricityErrorMeta =
+      const VerificationMeta('asLeftEccentricityError');
+  @override
+  late final GeneratedColumn<String> asLeftEccentricityError =
+      GeneratedColumn<String>('as_left_eccentricity_error', aliasedName, true,
           type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _asFoundTest1Meta =
       const VerificationMeta('asFoundTest1');
@@ -4341,7 +4576,38 @@ class $WeightTestsTable extends WeightTests
         eccentricity8,
         eccentricity9,
         eccentricity10,
+        eccentricity11,
+        eccentricity12,
+        eccentricity13,
+        eccentricity14,
+        eccentricity15,
+        eccentricity16,
+        eccentricity17,
+        eccentricity18,
+        eccentricity19,
+        eccentricity20,
+        asLeftEccentricity1,
+        asLeftEccentricity2,
+        asLeftEccentricity3,
+        asLeftEccentricity4,
+        asLeftEccentricity5,
+        asLeftEccentricity6,
+        asLeftEccentricity7,
+        asLeftEccentricity8,
+        asLeftEccentricity9,
+        asLeftEccentricity10,
+        asLeftEccentricity11,
+        asLeftEccentricity12,
+        asLeftEccentricity13,
+        asLeftEccentricity14,
+        asLeftEccentricity15,
+        asLeftEccentricity16,
+        asLeftEccentricity17,
+        asLeftEccentricity18,
+        asLeftEccentricity19,
+        asLeftEccentricity20,
         eccentricityError,
+        asLeftEccentricityError,
         asFoundTest1,
         asFoundRead1,
         asFoundDiff1,
@@ -4483,11 +4749,198 @@ class $WeightTestsTable extends WeightTests
           eccentricity10.isAcceptableOrUnknown(
               data['eccentricity10']!, _eccentricity10Meta));
     }
+    if (data.containsKey('eccentricity11')) {
+      context.handle(
+          _eccentricity11Meta,
+          eccentricity11.isAcceptableOrUnknown(
+              data['eccentricity11']!, _eccentricity11Meta));
+    }
+    if (data.containsKey('eccentricity12')) {
+      context.handle(
+          _eccentricity12Meta,
+          eccentricity12.isAcceptableOrUnknown(
+              data['eccentricity12']!, _eccentricity12Meta));
+    }
+    if (data.containsKey('eccentricity13')) {
+      context.handle(
+          _eccentricity13Meta,
+          eccentricity13.isAcceptableOrUnknown(
+              data['eccentricity13']!, _eccentricity13Meta));
+    }
+    if (data.containsKey('eccentricity14')) {
+      context.handle(
+          _eccentricity14Meta,
+          eccentricity14.isAcceptableOrUnknown(
+              data['eccentricity14']!, _eccentricity14Meta));
+    }
+    if (data.containsKey('eccentricity15')) {
+      context.handle(
+          _eccentricity15Meta,
+          eccentricity15.isAcceptableOrUnknown(
+              data['eccentricity15']!, _eccentricity15Meta));
+    }
+    if (data.containsKey('eccentricity16')) {
+      context.handle(
+          _eccentricity16Meta,
+          eccentricity16.isAcceptableOrUnknown(
+              data['eccentricity16']!, _eccentricity16Meta));
+    }
+    if (data.containsKey('eccentricity17')) {
+      context.handle(
+          _eccentricity17Meta,
+          eccentricity17.isAcceptableOrUnknown(
+              data['eccentricity17']!, _eccentricity17Meta));
+    }
+    if (data.containsKey('eccentricity18')) {
+      context.handle(
+          _eccentricity18Meta,
+          eccentricity18.isAcceptableOrUnknown(
+              data['eccentricity18']!, _eccentricity18Meta));
+    }
+    if (data.containsKey('eccentricity19')) {
+      context.handle(
+          _eccentricity19Meta,
+          eccentricity19.isAcceptableOrUnknown(
+              data['eccentricity19']!, _eccentricity19Meta));
+    }
+    if (data.containsKey('eccentricity20')) {
+      context.handle(
+          _eccentricity20Meta,
+          eccentricity20.isAcceptableOrUnknown(
+              data['eccentricity20']!, _eccentricity20Meta));
+    }
+    if (data.containsKey('as_left_eccentricity1')) {
+      context.handle(
+          _asLeftEccentricity1Meta,
+          asLeftEccentricity1.isAcceptableOrUnknown(
+              data['as_left_eccentricity1']!, _asLeftEccentricity1Meta));
+    }
+    if (data.containsKey('as_left_eccentricity2')) {
+      context.handle(
+          _asLeftEccentricity2Meta,
+          asLeftEccentricity2.isAcceptableOrUnknown(
+              data['as_left_eccentricity2']!, _asLeftEccentricity2Meta));
+    }
+    if (data.containsKey('as_left_eccentricity3')) {
+      context.handle(
+          _asLeftEccentricity3Meta,
+          asLeftEccentricity3.isAcceptableOrUnknown(
+              data['as_left_eccentricity3']!, _asLeftEccentricity3Meta));
+    }
+    if (data.containsKey('as_left_eccentricity4')) {
+      context.handle(
+          _asLeftEccentricity4Meta,
+          asLeftEccentricity4.isAcceptableOrUnknown(
+              data['as_left_eccentricity4']!, _asLeftEccentricity4Meta));
+    }
+    if (data.containsKey('as_left_eccentricity5')) {
+      context.handle(
+          _asLeftEccentricity5Meta,
+          asLeftEccentricity5.isAcceptableOrUnknown(
+              data['as_left_eccentricity5']!, _asLeftEccentricity5Meta));
+    }
+    if (data.containsKey('as_left_eccentricity6')) {
+      context.handle(
+          _asLeftEccentricity6Meta,
+          asLeftEccentricity6.isAcceptableOrUnknown(
+              data['as_left_eccentricity6']!, _asLeftEccentricity6Meta));
+    }
+    if (data.containsKey('as_left_eccentricity7')) {
+      context.handle(
+          _asLeftEccentricity7Meta,
+          asLeftEccentricity7.isAcceptableOrUnknown(
+              data['as_left_eccentricity7']!, _asLeftEccentricity7Meta));
+    }
+    if (data.containsKey('as_left_eccentricity8')) {
+      context.handle(
+          _asLeftEccentricity8Meta,
+          asLeftEccentricity8.isAcceptableOrUnknown(
+              data['as_left_eccentricity8']!, _asLeftEccentricity8Meta));
+    }
+    if (data.containsKey('as_left_eccentricity9')) {
+      context.handle(
+          _asLeftEccentricity9Meta,
+          asLeftEccentricity9.isAcceptableOrUnknown(
+              data['as_left_eccentricity9']!, _asLeftEccentricity9Meta));
+    }
+    if (data.containsKey('as_left_eccentricity10')) {
+      context.handle(
+          _asLeftEccentricity10Meta,
+          asLeftEccentricity10.isAcceptableOrUnknown(
+              data['as_left_eccentricity10']!, _asLeftEccentricity10Meta));
+    }
+    if (data.containsKey('as_left_eccentricity11')) {
+      context.handle(
+          _asLeftEccentricity11Meta,
+          asLeftEccentricity11.isAcceptableOrUnknown(
+              data['as_left_eccentricity11']!, _asLeftEccentricity11Meta));
+    }
+    if (data.containsKey('as_left_eccentricity12')) {
+      context.handle(
+          _asLeftEccentricity12Meta,
+          asLeftEccentricity12.isAcceptableOrUnknown(
+              data['as_left_eccentricity12']!, _asLeftEccentricity12Meta));
+    }
+    if (data.containsKey('as_left_eccentricity13')) {
+      context.handle(
+          _asLeftEccentricity13Meta,
+          asLeftEccentricity13.isAcceptableOrUnknown(
+              data['as_left_eccentricity13']!, _asLeftEccentricity13Meta));
+    }
+    if (data.containsKey('as_left_eccentricity14')) {
+      context.handle(
+          _asLeftEccentricity14Meta,
+          asLeftEccentricity14.isAcceptableOrUnknown(
+              data['as_left_eccentricity14']!, _asLeftEccentricity14Meta));
+    }
+    if (data.containsKey('as_left_eccentricity15')) {
+      context.handle(
+          _asLeftEccentricity15Meta,
+          asLeftEccentricity15.isAcceptableOrUnknown(
+              data['as_left_eccentricity15']!, _asLeftEccentricity15Meta));
+    }
+    if (data.containsKey('as_left_eccentricity16')) {
+      context.handle(
+          _asLeftEccentricity16Meta,
+          asLeftEccentricity16.isAcceptableOrUnknown(
+              data['as_left_eccentricity16']!, _asLeftEccentricity16Meta));
+    }
+    if (data.containsKey('as_left_eccentricity17')) {
+      context.handle(
+          _asLeftEccentricity17Meta,
+          asLeftEccentricity17.isAcceptableOrUnknown(
+              data['as_left_eccentricity17']!, _asLeftEccentricity17Meta));
+    }
+    if (data.containsKey('as_left_eccentricity18')) {
+      context.handle(
+          _asLeftEccentricity18Meta,
+          asLeftEccentricity18.isAcceptableOrUnknown(
+              data['as_left_eccentricity18']!, _asLeftEccentricity18Meta));
+    }
+    if (data.containsKey('as_left_eccentricity19')) {
+      context.handle(
+          _asLeftEccentricity19Meta,
+          asLeftEccentricity19.isAcceptableOrUnknown(
+              data['as_left_eccentricity19']!, _asLeftEccentricity19Meta));
+    }
+    if (data.containsKey('as_left_eccentricity20')) {
+      context.handle(
+          _asLeftEccentricity20Meta,
+          asLeftEccentricity20.isAcceptableOrUnknown(
+              data['as_left_eccentricity20']!, _asLeftEccentricity20Meta));
+    }
     if (data.containsKey('eccentricity_error')) {
       context.handle(
           _eccentricityErrorMeta,
           eccentricityError.isAcceptableOrUnknown(
               data['eccentricity_error']!, _eccentricityErrorMeta));
+    }
+    if (data.containsKey('as_left_eccentricity_error')) {
+      context.handle(
+          _asLeftEccentricityErrorMeta,
+          asLeftEccentricityError.isAcceptableOrUnknown(
+              data['as_left_eccentricity_error']!,
+              _asLeftEccentricityErrorMeta));
     }
     if (data.containsKey('as_found_test1')) {
       context.handle(
@@ -4763,8 +5216,82 @@ class $WeightTestsTable extends WeightTests
           .read(DriftSqlType.double, data['${effectivePrefix}eccentricity9']),
       eccentricity10: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}eccentricity10']),
+      eccentricity11: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}eccentricity11']),
+      eccentricity12: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}eccentricity12']),
+      eccentricity13: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}eccentricity13']),
+      eccentricity14: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}eccentricity14']),
+      eccentricity15: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}eccentricity15']),
+      eccentricity16: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}eccentricity16']),
+      eccentricity17: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}eccentricity17']),
+      eccentricity18: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}eccentricity18']),
+      eccentricity19: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}eccentricity19']),
+      eccentricity20: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}eccentricity20']),
+      asLeftEccentricity1: attachedDatabase.typeMapping.read(
+          DriftSqlType.double, data['${effectivePrefix}as_left_eccentricity1']),
+      asLeftEccentricity2: attachedDatabase.typeMapping.read(
+          DriftSqlType.double, data['${effectivePrefix}as_left_eccentricity2']),
+      asLeftEccentricity3: attachedDatabase.typeMapping.read(
+          DriftSqlType.double, data['${effectivePrefix}as_left_eccentricity3']),
+      asLeftEccentricity4: attachedDatabase.typeMapping.read(
+          DriftSqlType.double, data['${effectivePrefix}as_left_eccentricity4']),
+      asLeftEccentricity5: attachedDatabase.typeMapping.read(
+          DriftSqlType.double, data['${effectivePrefix}as_left_eccentricity5']),
+      asLeftEccentricity6: attachedDatabase.typeMapping.read(
+          DriftSqlType.double, data['${effectivePrefix}as_left_eccentricity6']),
+      asLeftEccentricity7: attachedDatabase.typeMapping.read(
+          DriftSqlType.double, data['${effectivePrefix}as_left_eccentricity7']),
+      asLeftEccentricity8: attachedDatabase.typeMapping.read(
+          DriftSqlType.double, data['${effectivePrefix}as_left_eccentricity8']),
+      asLeftEccentricity9: attachedDatabase.typeMapping.read(
+          DriftSqlType.double, data['${effectivePrefix}as_left_eccentricity9']),
+      asLeftEccentricity10: attachedDatabase.typeMapping.read(
+          DriftSqlType.double,
+          data['${effectivePrefix}as_left_eccentricity10']),
+      asLeftEccentricity11: attachedDatabase.typeMapping.read(
+          DriftSqlType.double,
+          data['${effectivePrefix}as_left_eccentricity11']),
+      asLeftEccentricity12: attachedDatabase.typeMapping.read(
+          DriftSqlType.double,
+          data['${effectivePrefix}as_left_eccentricity12']),
+      asLeftEccentricity13: attachedDatabase.typeMapping.read(
+          DriftSqlType.double,
+          data['${effectivePrefix}as_left_eccentricity13']),
+      asLeftEccentricity14: attachedDatabase.typeMapping.read(
+          DriftSqlType.double,
+          data['${effectivePrefix}as_left_eccentricity14']),
+      asLeftEccentricity15: attachedDatabase.typeMapping.read(
+          DriftSqlType.double,
+          data['${effectivePrefix}as_left_eccentricity15']),
+      asLeftEccentricity16: attachedDatabase.typeMapping.read(
+          DriftSqlType.double,
+          data['${effectivePrefix}as_left_eccentricity16']),
+      asLeftEccentricity17: attachedDatabase.typeMapping.read(
+          DriftSqlType.double,
+          data['${effectivePrefix}as_left_eccentricity17']),
+      asLeftEccentricity18: attachedDatabase.typeMapping.read(
+          DriftSqlType.double,
+          data['${effectivePrefix}as_left_eccentricity18']),
+      asLeftEccentricity19: attachedDatabase.typeMapping.read(
+          DriftSqlType.double,
+          data['${effectivePrefix}as_left_eccentricity19']),
+      asLeftEccentricity20: attachedDatabase.typeMapping.read(
+          DriftSqlType.double,
+          data['${effectivePrefix}as_left_eccentricity20']),
       eccentricityError: attachedDatabase.typeMapping.read(
           DriftSqlType.string, data['${effectivePrefix}eccentricity_error']),
+      asLeftEccentricityError: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}as_left_eccentricity_error']),
       asFoundTest1: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}as_found_test1']),
       asFoundRead1: attachedDatabase.typeMapping
@@ -4868,7 +5395,38 @@ class WeightTest extends DataClass implements Insertable<WeightTest> {
   final double? eccentricity8;
   final double? eccentricity9;
   final double? eccentricity10;
+  final double? eccentricity11;
+  final double? eccentricity12;
+  final double? eccentricity13;
+  final double? eccentricity14;
+  final double? eccentricity15;
+  final double? eccentricity16;
+  final double? eccentricity17;
+  final double? eccentricity18;
+  final double? eccentricity19;
+  final double? eccentricity20;
+  final double? asLeftEccentricity1;
+  final double? asLeftEccentricity2;
+  final double? asLeftEccentricity3;
+  final double? asLeftEccentricity4;
+  final double? asLeftEccentricity5;
+  final double? asLeftEccentricity6;
+  final double? asLeftEccentricity7;
+  final double? asLeftEccentricity8;
+  final double? asLeftEccentricity9;
+  final double? asLeftEccentricity10;
+  final double? asLeftEccentricity11;
+  final double? asLeftEccentricity12;
+  final double? asLeftEccentricity13;
+  final double? asLeftEccentricity14;
+  final double? asLeftEccentricity15;
+  final double? asLeftEccentricity16;
+  final double? asLeftEccentricity17;
+  final double? asLeftEccentricity18;
+  final double? asLeftEccentricity19;
+  final double? asLeftEccentricity20;
   final String? eccentricityError;
+  final String? asLeftEccentricityError;
   final double? asFoundTest1;
   final double? asFoundRead1;
   final double? asFoundDiff1;
@@ -4924,7 +5482,38 @@ class WeightTest extends DataClass implements Insertable<WeightTest> {
       this.eccentricity8,
       this.eccentricity9,
       this.eccentricity10,
+      this.eccentricity11,
+      this.eccentricity12,
+      this.eccentricity13,
+      this.eccentricity14,
+      this.eccentricity15,
+      this.eccentricity16,
+      this.eccentricity17,
+      this.eccentricity18,
+      this.eccentricity19,
+      this.eccentricity20,
+      this.asLeftEccentricity1,
+      this.asLeftEccentricity2,
+      this.asLeftEccentricity3,
+      this.asLeftEccentricity4,
+      this.asLeftEccentricity5,
+      this.asLeftEccentricity6,
+      this.asLeftEccentricity7,
+      this.asLeftEccentricity8,
+      this.asLeftEccentricity9,
+      this.asLeftEccentricity10,
+      this.asLeftEccentricity11,
+      this.asLeftEccentricity12,
+      this.asLeftEccentricity13,
+      this.asLeftEccentricity14,
+      this.asLeftEccentricity15,
+      this.asLeftEccentricity16,
+      this.asLeftEccentricity17,
+      this.asLeftEccentricity18,
+      this.asLeftEccentricity19,
+      this.asLeftEccentricity20,
       this.eccentricityError,
+      this.asLeftEccentricityError,
       this.asFoundTest1,
       this.asFoundRead1,
       this.asFoundDiff1,
@@ -5004,8 +5593,102 @@ class WeightTest extends DataClass implements Insertable<WeightTest> {
     if (!nullToAbsent || eccentricity10 != null) {
       map['eccentricity10'] = Variable<double>(eccentricity10);
     }
+    if (!nullToAbsent || eccentricity11 != null) {
+      map['eccentricity11'] = Variable<double>(eccentricity11);
+    }
+    if (!nullToAbsent || eccentricity12 != null) {
+      map['eccentricity12'] = Variable<double>(eccentricity12);
+    }
+    if (!nullToAbsent || eccentricity13 != null) {
+      map['eccentricity13'] = Variable<double>(eccentricity13);
+    }
+    if (!nullToAbsent || eccentricity14 != null) {
+      map['eccentricity14'] = Variable<double>(eccentricity14);
+    }
+    if (!nullToAbsent || eccentricity15 != null) {
+      map['eccentricity15'] = Variable<double>(eccentricity15);
+    }
+    if (!nullToAbsent || eccentricity16 != null) {
+      map['eccentricity16'] = Variable<double>(eccentricity16);
+    }
+    if (!nullToAbsent || eccentricity17 != null) {
+      map['eccentricity17'] = Variable<double>(eccentricity17);
+    }
+    if (!nullToAbsent || eccentricity18 != null) {
+      map['eccentricity18'] = Variable<double>(eccentricity18);
+    }
+    if (!nullToAbsent || eccentricity19 != null) {
+      map['eccentricity19'] = Variable<double>(eccentricity19);
+    }
+    if (!nullToAbsent || eccentricity20 != null) {
+      map['eccentricity20'] = Variable<double>(eccentricity20);
+    }
+    if (!nullToAbsent || asLeftEccentricity1 != null) {
+      map['as_left_eccentricity1'] = Variable<double>(asLeftEccentricity1);
+    }
+    if (!nullToAbsent || asLeftEccentricity2 != null) {
+      map['as_left_eccentricity2'] = Variable<double>(asLeftEccentricity2);
+    }
+    if (!nullToAbsent || asLeftEccentricity3 != null) {
+      map['as_left_eccentricity3'] = Variable<double>(asLeftEccentricity3);
+    }
+    if (!nullToAbsent || asLeftEccentricity4 != null) {
+      map['as_left_eccentricity4'] = Variable<double>(asLeftEccentricity4);
+    }
+    if (!nullToAbsent || asLeftEccentricity5 != null) {
+      map['as_left_eccentricity5'] = Variable<double>(asLeftEccentricity5);
+    }
+    if (!nullToAbsent || asLeftEccentricity6 != null) {
+      map['as_left_eccentricity6'] = Variable<double>(asLeftEccentricity6);
+    }
+    if (!nullToAbsent || asLeftEccentricity7 != null) {
+      map['as_left_eccentricity7'] = Variable<double>(asLeftEccentricity7);
+    }
+    if (!nullToAbsent || asLeftEccentricity8 != null) {
+      map['as_left_eccentricity8'] = Variable<double>(asLeftEccentricity8);
+    }
+    if (!nullToAbsent || asLeftEccentricity9 != null) {
+      map['as_left_eccentricity9'] = Variable<double>(asLeftEccentricity9);
+    }
+    if (!nullToAbsent || asLeftEccentricity10 != null) {
+      map['as_left_eccentricity10'] = Variable<double>(asLeftEccentricity10);
+    }
+    if (!nullToAbsent || asLeftEccentricity11 != null) {
+      map['as_left_eccentricity11'] = Variable<double>(asLeftEccentricity11);
+    }
+    if (!nullToAbsent || asLeftEccentricity12 != null) {
+      map['as_left_eccentricity12'] = Variable<double>(asLeftEccentricity12);
+    }
+    if (!nullToAbsent || asLeftEccentricity13 != null) {
+      map['as_left_eccentricity13'] = Variable<double>(asLeftEccentricity13);
+    }
+    if (!nullToAbsent || asLeftEccentricity14 != null) {
+      map['as_left_eccentricity14'] = Variable<double>(asLeftEccentricity14);
+    }
+    if (!nullToAbsent || asLeftEccentricity15 != null) {
+      map['as_left_eccentricity15'] = Variable<double>(asLeftEccentricity15);
+    }
+    if (!nullToAbsent || asLeftEccentricity16 != null) {
+      map['as_left_eccentricity16'] = Variable<double>(asLeftEccentricity16);
+    }
+    if (!nullToAbsent || asLeftEccentricity17 != null) {
+      map['as_left_eccentricity17'] = Variable<double>(asLeftEccentricity17);
+    }
+    if (!nullToAbsent || asLeftEccentricity18 != null) {
+      map['as_left_eccentricity18'] = Variable<double>(asLeftEccentricity18);
+    }
+    if (!nullToAbsent || asLeftEccentricity19 != null) {
+      map['as_left_eccentricity19'] = Variable<double>(asLeftEccentricity19);
+    }
+    if (!nullToAbsent || asLeftEccentricity20 != null) {
+      map['as_left_eccentricity20'] = Variable<double>(asLeftEccentricity20);
+    }
     if (!nullToAbsent || eccentricityError != null) {
       map['eccentricity_error'] = Variable<String>(eccentricityError);
+    }
+    if (!nullToAbsent || asLeftEccentricityError != null) {
+      map['as_left_eccentricity_error'] =
+          Variable<String>(asLeftEccentricityError);
     }
     if (!nullToAbsent || asFoundTest1 != null) {
       map['as_found_test1'] = Variable<double>(asFoundTest1);
@@ -5164,9 +5847,102 @@ class WeightTest extends DataClass implements Insertable<WeightTest> {
       eccentricity10: eccentricity10 == null && nullToAbsent
           ? const Value.absent()
           : Value(eccentricity10),
+      eccentricity11: eccentricity11 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eccentricity11),
+      eccentricity12: eccentricity12 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eccentricity12),
+      eccentricity13: eccentricity13 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eccentricity13),
+      eccentricity14: eccentricity14 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eccentricity14),
+      eccentricity15: eccentricity15 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eccentricity15),
+      eccentricity16: eccentricity16 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eccentricity16),
+      eccentricity17: eccentricity17 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eccentricity17),
+      eccentricity18: eccentricity18 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eccentricity18),
+      eccentricity19: eccentricity19 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eccentricity19),
+      eccentricity20: eccentricity20 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(eccentricity20),
+      asLeftEccentricity1: asLeftEccentricity1 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftEccentricity1),
+      asLeftEccentricity2: asLeftEccentricity2 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftEccentricity2),
+      asLeftEccentricity3: asLeftEccentricity3 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftEccentricity3),
+      asLeftEccentricity4: asLeftEccentricity4 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftEccentricity4),
+      asLeftEccentricity5: asLeftEccentricity5 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftEccentricity5),
+      asLeftEccentricity6: asLeftEccentricity6 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftEccentricity6),
+      asLeftEccentricity7: asLeftEccentricity7 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftEccentricity7),
+      asLeftEccentricity8: asLeftEccentricity8 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftEccentricity8),
+      asLeftEccentricity9: asLeftEccentricity9 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftEccentricity9),
+      asLeftEccentricity10: asLeftEccentricity10 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftEccentricity10),
+      asLeftEccentricity11: asLeftEccentricity11 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftEccentricity11),
+      asLeftEccentricity12: asLeftEccentricity12 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftEccentricity12),
+      asLeftEccentricity13: asLeftEccentricity13 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftEccentricity13),
+      asLeftEccentricity14: asLeftEccentricity14 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftEccentricity14),
+      asLeftEccentricity15: asLeftEccentricity15 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftEccentricity15),
+      asLeftEccentricity16: asLeftEccentricity16 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftEccentricity16),
+      asLeftEccentricity17: asLeftEccentricity17 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftEccentricity17),
+      asLeftEccentricity18: asLeftEccentricity18 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftEccentricity18),
+      asLeftEccentricity19: asLeftEccentricity19 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftEccentricity19),
+      asLeftEccentricity20: asLeftEccentricity20 == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftEccentricity20),
       eccentricityError: eccentricityError == null && nullToAbsent
           ? const Value.absent()
           : Value(eccentricityError),
+      asLeftEccentricityError: asLeftEccentricityError == null && nullToAbsent
+          ? const Value.absent()
+          : Value(asLeftEccentricityError),
       asFoundTest1: asFoundTest1 == null && nullToAbsent
           ? const Value.absent()
           : Value(asFoundTest1),
@@ -5304,8 +6080,60 @@ class WeightTest extends DataClass implements Insertable<WeightTest> {
       eccentricity8: serializer.fromJson<double?>(json['eccentricity8']),
       eccentricity9: serializer.fromJson<double?>(json['eccentricity9']),
       eccentricity10: serializer.fromJson<double?>(json['eccentricity10']),
+      eccentricity11: serializer.fromJson<double?>(json['eccentricity11']),
+      eccentricity12: serializer.fromJson<double?>(json['eccentricity12']),
+      eccentricity13: serializer.fromJson<double?>(json['eccentricity13']),
+      eccentricity14: serializer.fromJson<double?>(json['eccentricity14']),
+      eccentricity15: serializer.fromJson<double?>(json['eccentricity15']),
+      eccentricity16: serializer.fromJson<double?>(json['eccentricity16']),
+      eccentricity17: serializer.fromJson<double?>(json['eccentricity17']),
+      eccentricity18: serializer.fromJson<double?>(json['eccentricity18']),
+      eccentricity19: serializer.fromJson<double?>(json['eccentricity19']),
+      eccentricity20: serializer.fromJson<double?>(json['eccentricity20']),
+      asLeftEccentricity1:
+          serializer.fromJson<double?>(json['asLeftEccentricity1']),
+      asLeftEccentricity2:
+          serializer.fromJson<double?>(json['asLeftEccentricity2']),
+      asLeftEccentricity3:
+          serializer.fromJson<double?>(json['asLeftEccentricity3']),
+      asLeftEccentricity4:
+          serializer.fromJson<double?>(json['asLeftEccentricity4']),
+      asLeftEccentricity5:
+          serializer.fromJson<double?>(json['asLeftEccentricity5']),
+      asLeftEccentricity6:
+          serializer.fromJson<double?>(json['asLeftEccentricity6']),
+      asLeftEccentricity7:
+          serializer.fromJson<double?>(json['asLeftEccentricity7']),
+      asLeftEccentricity8:
+          serializer.fromJson<double?>(json['asLeftEccentricity8']),
+      asLeftEccentricity9:
+          serializer.fromJson<double?>(json['asLeftEccentricity9']),
+      asLeftEccentricity10:
+          serializer.fromJson<double?>(json['asLeftEccentricity10']),
+      asLeftEccentricity11:
+          serializer.fromJson<double?>(json['asLeftEccentricity11']),
+      asLeftEccentricity12:
+          serializer.fromJson<double?>(json['asLeftEccentricity12']),
+      asLeftEccentricity13:
+          serializer.fromJson<double?>(json['asLeftEccentricity13']),
+      asLeftEccentricity14:
+          serializer.fromJson<double?>(json['asLeftEccentricity14']),
+      asLeftEccentricity15:
+          serializer.fromJson<double?>(json['asLeftEccentricity15']),
+      asLeftEccentricity16:
+          serializer.fromJson<double?>(json['asLeftEccentricity16']),
+      asLeftEccentricity17:
+          serializer.fromJson<double?>(json['asLeftEccentricity17']),
+      asLeftEccentricity18:
+          serializer.fromJson<double?>(json['asLeftEccentricity18']),
+      asLeftEccentricity19:
+          serializer.fromJson<double?>(json['asLeftEccentricity19']),
+      asLeftEccentricity20:
+          serializer.fromJson<double?>(json['asLeftEccentricity20']),
       eccentricityError:
           serializer.fromJson<String?>(json['eccentricityError']),
+      asLeftEccentricityError:
+          serializer.fromJson<String?>(json['asLeftEccentricityError']),
       asFoundTest1: serializer.fromJson<double?>(json['asFoundTest1']),
       asFoundRead1: serializer.fromJson<double?>(json['asFoundRead1']),
       asFoundDiff1: serializer.fromJson<double?>(json['asFoundDiff1']),
@@ -5367,7 +6195,39 @@ class WeightTest extends DataClass implements Insertable<WeightTest> {
       'eccentricity8': serializer.toJson<double?>(eccentricity8),
       'eccentricity9': serializer.toJson<double?>(eccentricity9),
       'eccentricity10': serializer.toJson<double?>(eccentricity10),
+      'eccentricity11': serializer.toJson<double?>(eccentricity11),
+      'eccentricity12': serializer.toJson<double?>(eccentricity12),
+      'eccentricity13': serializer.toJson<double?>(eccentricity13),
+      'eccentricity14': serializer.toJson<double?>(eccentricity14),
+      'eccentricity15': serializer.toJson<double?>(eccentricity15),
+      'eccentricity16': serializer.toJson<double?>(eccentricity16),
+      'eccentricity17': serializer.toJson<double?>(eccentricity17),
+      'eccentricity18': serializer.toJson<double?>(eccentricity18),
+      'eccentricity19': serializer.toJson<double?>(eccentricity19),
+      'eccentricity20': serializer.toJson<double?>(eccentricity20),
+      'asLeftEccentricity1': serializer.toJson<double?>(asLeftEccentricity1),
+      'asLeftEccentricity2': serializer.toJson<double?>(asLeftEccentricity2),
+      'asLeftEccentricity3': serializer.toJson<double?>(asLeftEccentricity3),
+      'asLeftEccentricity4': serializer.toJson<double?>(asLeftEccentricity4),
+      'asLeftEccentricity5': serializer.toJson<double?>(asLeftEccentricity5),
+      'asLeftEccentricity6': serializer.toJson<double?>(asLeftEccentricity6),
+      'asLeftEccentricity7': serializer.toJson<double?>(asLeftEccentricity7),
+      'asLeftEccentricity8': serializer.toJson<double?>(asLeftEccentricity8),
+      'asLeftEccentricity9': serializer.toJson<double?>(asLeftEccentricity9),
+      'asLeftEccentricity10': serializer.toJson<double?>(asLeftEccentricity10),
+      'asLeftEccentricity11': serializer.toJson<double?>(asLeftEccentricity11),
+      'asLeftEccentricity12': serializer.toJson<double?>(asLeftEccentricity12),
+      'asLeftEccentricity13': serializer.toJson<double?>(asLeftEccentricity13),
+      'asLeftEccentricity14': serializer.toJson<double?>(asLeftEccentricity14),
+      'asLeftEccentricity15': serializer.toJson<double?>(asLeftEccentricity15),
+      'asLeftEccentricity16': serializer.toJson<double?>(asLeftEccentricity16),
+      'asLeftEccentricity17': serializer.toJson<double?>(asLeftEccentricity17),
+      'asLeftEccentricity18': serializer.toJson<double?>(asLeftEccentricity18),
+      'asLeftEccentricity19': serializer.toJson<double?>(asLeftEccentricity19),
+      'asLeftEccentricity20': serializer.toJson<double?>(asLeftEccentricity20),
       'eccentricityError': serializer.toJson<String?>(eccentricityError),
+      'asLeftEccentricityError':
+          serializer.toJson<String?>(asLeftEccentricityError),
       'asFoundTest1': serializer.toJson<double?>(asFoundTest1),
       'asFoundRead1': serializer.toJson<double?>(asFoundRead1),
       'asFoundDiff1': serializer.toJson<double?>(asFoundDiff1),
@@ -5426,7 +6286,38 @@ class WeightTest extends DataClass implements Insertable<WeightTest> {
           Value<double?> eccentricity8 = const Value.absent(),
           Value<double?> eccentricity9 = const Value.absent(),
           Value<double?> eccentricity10 = const Value.absent(),
+          Value<double?> eccentricity11 = const Value.absent(),
+          Value<double?> eccentricity12 = const Value.absent(),
+          Value<double?> eccentricity13 = const Value.absent(),
+          Value<double?> eccentricity14 = const Value.absent(),
+          Value<double?> eccentricity15 = const Value.absent(),
+          Value<double?> eccentricity16 = const Value.absent(),
+          Value<double?> eccentricity17 = const Value.absent(),
+          Value<double?> eccentricity18 = const Value.absent(),
+          Value<double?> eccentricity19 = const Value.absent(),
+          Value<double?> eccentricity20 = const Value.absent(),
+          Value<double?> asLeftEccentricity1 = const Value.absent(),
+          Value<double?> asLeftEccentricity2 = const Value.absent(),
+          Value<double?> asLeftEccentricity3 = const Value.absent(),
+          Value<double?> asLeftEccentricity4 = const Value.absent(),
+          Value<double?> asLeftEccentricity5 = const Value.absent(),
+          Value<double?> asLeftEccentricity6 = const Value.absent(),
+          Value<double?> asLeftEccentricity7 = const Value.absent(),
+          Value<double?> asLeftEccentricity8 = const Value.absent(),
+          Value<double?> asLeftEccentricity9 = const Value.absent(),
+          Value<double?> asLeftEccentricity10 = const Value.absent(),
+          Value<double?> asLeftEccentricity11 = const Value.absent(),
+          Value<double?> asLeftEccentricity12 = const Value.absent(),
+          Value<double?> asLeftEccentricity13 = const Value.absent(),
+          Value<double?> asLeftEccentricity14 = const Value.absent(),
+          Value<double?> asLeftEccentricity15 = const Value.absent(),
+          Value<double?> asLeftEccentricity16 = const Value.absent(),
+          Value<double?> asLeftEccentricity17 = const Value.absent(),
+          Value<double?> asLeftEccentricity18 = const Value.absent(),
+          Value<double?> asLeftEccentricity19 = const Value.absent(),
+          Value<double?> asLeftEccentricity20 = const Value.absent(),
           Value<String?> eccentricityError = const Value.absent(),
+          Value<String?> asLeftEccentricityError = const Value.absent(),
           Value<double?> asFoundTest1 = const Value.absent(),
           Value<double?> asFoundRead1 = const Value.absent(),
           Value<double?> asFoundDiff1 = const Value.absent(),
@@ -5494,9 +6385,92 @@ class WeightTest extends DataClass implements Insertable<WeightTest> {
             eccentricity9.present ? eccentricity9.value : this.eccentricity9,
         eccentricity10:
             eccentricity10.present ? eccentricity10.value : this.eccentricity10,
+        eccentricity11:
+            eccentricity11.present ? eccentricity11.value : this.eccentricity11,
+        eccentricity12:
+            eccentricity12.present ? eccentricity12.value : this.eccentricity12,
+        eccentricity13:
+            eccentricity13.present ? eccentricity13.value : this.eccentricity13,
+        eccentricity14:
+            eccentricity14.present ? eccentricity14.value : this.eccentricity14,
+        eccentricity15:
+            eccentricity15.present ? eccentricity15.value : this.eccentricity15,
+        eccentricity16:
+            eccentricity16.present ? eccentricity16.value : this.eccentricity16,
+        eccentricity17:
+            eccentricity17.present ? eccentricity17.value : this.eccentricity17,
+        eccentricity18:
+            eccentricity18.present ? eccentricity18.value : this.eccentricity18,
+        eccentricity19:
+            eccentricity19.present ? eccentricity19.value : this.eccentricity19,
+        eccentricity20:
+            eccentricity20.present ? eccentricity20.value : this.eccentricity20,
+        asLeftEccentricity1: asLeftEccentricity1.present
+            ? asLeftEccentricity1.value
+            : this.asLeftEccentricity1,
+        asLeftEccentricity2: asLeftEccentricity2.present
+            ? asLeftEccentricity2.value
+            : this.asLeftEccentricity2,
+        asLeftEccentricity3: asLeftEccentricity3.present
+            ? asLeftEccentricity3.value
+            : this.asLeftEccentricity3,
+        asLeftEccentricity4: asLeftEccentricity4.present
+            ? asLeftEccentricity4.value
+            : this.asLeftEccentricity4,
+        asLeftEccentricity5: asLeftEccentricity5.present
+            ? asLeftEccentricity5.value
+            : this.asLeftEccentricity5,
+        asLeftEccentricity6: asLeftEccentricity6.present
+            ? asLeftEccentricity6.value
+            : this.asLeftEccentricity6,
+        asLeftEccentricity7: asLeftEccentricity7.present
+            ? asLeftEccentricity7.value
+            : this.asLeftEccentricity7,
+        asLeftEccentricity8: asLeftEccentricity8.present
+            ? asLeftEccentricity8.value
+            : this.asLeftEccentricity8,
+        asLeftEccentricity9: asLeftEccentricity9.present
+            ? asLeftEccentricity9.value
+            : this.asLeftEccentricity9,
+        asLeftEccentricity10: asLeftEccentricity10.present
+            ? asLeftEccentricity10.value
+            : this.asLeftEccentricity10,
+        asLeftEccentricity11: asLeftEccentricity11.present
+            ? asLeftEccentricity11.value
+            : this.asLeftEccentricity11,
+        asLeftEccentricity12: asLeftEccentricity12.present
+            ? asLeftEccentricity12.value
+            : this.asLeftEccentricity12,
+        asLeftEccentricity13: asLeftEccentricity13.present
+            ? asLeftEccentricity13.value
+            : this.asLeftEccentricity13,
+        asLeftEccentricity14: asLeftEccentricity14.present
+            ? asLeftEccentricity14.value
+            : this.asLeftEccentricity14,
+        asLeftEccentricity15: asLeftEccentricity15.present
+            ? asLeftEccentricity15.value
+            : this.asLeftEccentricity15,
+        asLeftEccentricity16: asLeftEccentricity16.present
+            ? asLeftEccentricity16.value
+            : this.asLeftEccentricity16,
+        asLeftEccentricity17: asLeftEccentricity17.present
+            ? asLeftEccentricity17.value
+            : this.asLeftEccentricity17,
+        asLeftEccentricity18: asLeftEccentricity18.present
+            ? asLeftEccentricity18.value
+            : this.asLeftEccentricity18,
+        asLeftEccentricity19: asLeftEccentricity19.present
+            ? asLeftEccentricity19.value
+            : this.asLeftEccentricity19,
+        asLeftEccentricity20: asLeftEccentricity20.present
+            ? asLeftEccentricity20.value
+            : this.asLeftEccentricity20,
         eccentricityError: eccentricityError.present
             ? eccentricityError.value
             : this.eccentricityError,
+        asLeftEccentricityError: asLeftEccentricityError.present
+            ? asLeftEccentricityError.value
+            : this.asLeftEccentricityError,
         asFoundTest1:
             asFoundTest1.present ? asFoundTest1.value : this.asFoundTest1,
         asFoundRead1:
@@ -5601,9 +6575,102 @@ class WeightTest extends DataClass implements Insertable<WeightTest> {
       eccentricity10: data.eccentricity10.present
           ? data.eccentricity10.value
           : this.eccentricity10,
+      eccentricity11: data.eccentricity11.present
+          ? data.eccentricity11.value
+          : this.eccentricity11,
+      eccentricity12: data.eccentricity12.present
+          ? data.eccentricity12.value
+          : this.eccentricity12,
+      eccentricity13: data.eccentricity13.present
+          ? data.eccentricity13.value
+          : this.eccentricity13,
+      eccentricity14: data.eccentricity14.present
+          ? data.eccentricity14.value
+          : this.eccentricity14,
+      eccentricity15: data.eccentricity15.present
+          ? data.eccentricity15.value
+          : this.eccentricity15,
+      eccentricity16: data.eccentricity16.present
+          ? data.eccentricity16.value
+          : this.eccentricity16,
+      eccentricity17: data.eccentricity17.present
+          ? data.eccentricity17.value
+          : this.eccentricity17,
+      eccentricity18: data.eccentricity18.present
+          ? data.eccentricity18.value
+          : this.eccentricity18,
+      eccentricity19: data.eccentricity19.present
+          ? data.eccentricity19.value
+          : this.eccentricity19,
+      eccentricity20: data.eccentricity20.present
+          ? data.eccentricity20.value
+          : this.eccentricity20,
+      asLeftEccentricity1: data.asLeftEccentricity1.present
+          ? data.asLeftEccentricity1.value
+          : this.asLeftEccentricity1,
+      asLeftEccentricity2: data.asLeftEccentricity2.present
+          ? data.asLeftEccentricity2.value
+          : this.asLeftEccentricity2,
+      asLeftEccentricity3: data.asLeftEccentricity3.present
+          ? data.asLeftEccentricity3.value
+          : this.asLeftEccentricity3,
+      asLeftEccentricity4: data.asLeftEccentricity4.present
+          ? data.asLeftEccentricity4.value
+          : this.asLeftEccentricity4,
+      asLeftEccentricity5: data.asLeftEccentricity5.present
+          ? data.asLeftEccentricity5.value
+          : this.asLeftEccentricity5,
+      asLeftEccentricity6: data.asLeftEccentricity6.present
+          ? data.asLeftEccentricity6.value
+          : this.asLeftEccentricity6,
+      asLeftEccentricity7: data.asLeftEccentricity7.present
+          ? data.asLeftEccentricity7.value
+          : this.asLeftEccentricity7,
+      asLeftEccentricity8: data.asLeftEccentricity8.present
+          ? data.asLeftEccentricity8.value
+          : this.asLeftEccentricity8,
+      asLeftEccentricity9: data.asLeftEccentricity9.present
+          ? data.asLeftEccentricity9.value
+          : this.asLeftEccentricity9,
+      asLeftEccentricity10: data.asLeftEccentricity10.present
+          ? data.asLeftEccentricity10.value
+          : this.asLeftEccentricity10,
+      asLeftEccentricity11: data.asLeftEccentricity11.present
+          ? data.asLeftEccentricity11.value
+          : this.asLeftEccentricity11,
+      asLeftEccentricity12: data.asLeftEccentricity12.present
+          ? data.asLeftEccentricity12.value
+          : this.asLeftEccentricity12,
+      asLeftEccentricity13: data.asLeftEccentricity13.present
+          ? data.asLeftEccentricity13.value
+          : this.asLeftEccentricity13,
+      asLeftEccentricity14: data.asLeftEccentricity14.present
+          ? data.asLeftEccentricity14.value
+          : this.asLeftEccentricity14,
+      asLeftEccentricity15: data.asLeftEccentricity15.present
+          ? data.asLeftEccentricity15.value
+          : this.asLeftEccentricity15,
+      asLeftEccentricity16: data.asLeftEccentricity16.present
+          ? data.asLeftEccentricity16.value
+          : this.asLeftEccentricity16,
+      asLeftEccentricity17: data.asLeftEccentricity17.present
+          ? data.asLeftEccentricity17.value
+          : this.asLeftEccentricity17,
+      asLeftEccentricity18: data.asLeftEccentricity18.present
+          ? data.asLeftEccentricity18.value
+          : this.asLeftEccentricity18,
+      asLeftEccentricity19: data.asLeftEccentricity19.present
+          ? data.asLeftEccentricity19.value
+          : this.asLeftEccentricity19,
+      asLeftEccentricity20: data.asLeftEccentricity20.present
+          ? data.asLeftEccentricity20.value
+          : this.asLeftEccentricity20,
       eccentricityError: data.eccentricityError.present
           ? data.eccentricityError.value
           : this.eccentricityError,
+      asLeftEccentricityError: data.asLeftEccentricityError.present
+          ? data.asLeftEccentricityError.value
+          : this.asLeftEccentricityError,
       asFoundTest1: data.asFoundTest1.present
           ? data.asFoundTest1.value
           : this.asFoundTest1,
@@ -5720,7 +6787,38 @@ class WeightTest extends DataClass implements Insertable<WeightTest> {
           ..write('eccentricity8: $eccentricity8, ')
           ..write('eccentricity9: $eccentricity9, ')
           ..write('eccentricity10: $eccentricity10, ')
+          ..write('eccentricity11: $eccentricity11, ')
+          ..write('eccentricity12: $eccentricity12, ')
+          ..write('eccentricity13: $eccentricity13, ')
+          ..write('eccentricity14: $eccentricity14, ')
+          ..write('eccentricity15: $eccentricity15, ')
+          ..write('eccentricity16: $eccentricity16, ')
+          ..write('eccentricity17: $eccentricity17, ')
+          ..write('eccentricity18: $eccentricity18, ')
+          ..write('eccentricity19: $eccentricity19, ')
+          ..write('eccentricity20: $eccentricity20, ')
+          ..write('asLeftEccentricity1: $asLeftEccentricity1, ')
+          ..write('asLeftEccentricity2: $asLeftEccentricity2, ')
+          ..write('asLeftEccentricity3: $asLeftEccentricity3, ')
+          ..write('asLeftEccentricity4: $asLeftEccentricity4, ')
+          ..write('asLeftEccentricity5: $asLeftEccentricity5, ')
+          ..write('asLeftEccentricity6: $asLeftEccentricity6, ')
+          ..write('asLeftEccentricity7: $asLeftEccentricity7, ')
+          ..write('asLeftEccentricity8: $asLeftEccentricity8, ')
+          ..write('asLeftEccentricity9: $asLeftEccentricity9, ')
+          ..write('asLeftEccentricity10: $asLeftEccentricity10, ')
+          ..write('asLeftEccentricity11: $asLeftEccentricity11, ')
+          ..write('asLeftEccentricity12: $asLeftEccentricity12, ')
+          ..write('asLeftEccentricity13: $asLeftEccentricity13, ')
+          ..write('asLeftEccentricity14: $asLeftEccentricity14, ')
+          ..write('asLeftEccentricity15: $asLeftEccentricity15, ')
+          ..write('asLeftEccentricity16: $asLeftEccentricity16, ')
+          ..write('asLeftEccentricity17: $asLeftEccentricity17, ')
+          ..write('asLeftEccentricity18: $asLeftEccentricity18, ')
+          ..write('asLeftEccentricity19: $asLeftEccentricity19, ')
+          ..write('asLeftEccentricity20: $asLeftEccentricity20, ')
           ..write('eccentricityError: $eccentricityError, ')
+          ..write('asLeftEccentricityError: $asLeftEccentricityError, ')
           ..write('asFoundTest1: $asFoundTest1, ')
           ..write('asFoundRead1: $asFoundRead1, ')
           ..write('asFoundDiff1: $asFoundDiff1, ')
@@ -5781,7 +6879,38 @@ class WeightTest extends DataClass implements Insertable<WeightTest> {
         eccentricity8,
         eccentricity9,
         eccentricity10,
+        eccentricity11,
+        eccentricity12,
+        eccentricity13,
+        eccentricity14,
+        eccentricity15,
+        eccentricity16,
+        eccentricity17,
+        eccentricity18,
+        eccentricity19,
+        eccentricity20,
+        asLeftEccentricity1,
+        asLeftEccentricity2,
+        asLeftEccentricity3,
+        asLeftEccentricity4,
+        asLeftEccentricity5,
+        asLeftEccentricity6,
+        asLeftEccentricity7,
+        asLeftEccentricity8,
+        asLeftEccentricity9,
+        asLeftEccentricity10,
+        asLeftEccentricity11,
+        asLeftEccentricity12,
+        asLeftEccentricity13,
+        asLeftEccentricity14,
+        asLeftEccentricity15,
+        asLeftEccentricity16,
+        asLeftEccentricity17,
+        asLeftEccentricity18,
+        asLeftEccentricity19,
+        asLeftEccentricity20,
         eccentricityError,
+        asLeftEccentricityError,
         asFoundTest1,
         asFoundRead1,
         asFoundDiff1,
@@ -5841,7 +6970,38 @@ class WeightTest extends DataClass implements Insertable<WeightTest> {
           other.eccentricity8 == this.eccentricity8 &&
           other.eccentricity9 == this.eccentricity9 &&
           other.eccentricity10 == this.eccentricity10 &&
+          other.eccentricity11 == this.eccentricity11 &&
+          other.eccentricity12 == this.eccentricity12 &&
+          other.eccentricity13 == this.eccentricity13 &&
+          other.eccentricity14 == this.eccentricity14 &&
+          other.eccentricity15 == this.eccentricity15 &&
+          other.eccentricity16 == this.eccentricity16 &&
+          other.eccentricity17 == this.eccentricity17 &&
+          other.eccentricity18 == this.eccentricity18 &&
+          other.eccentricity19 == this.eccentricity19 &&
+          other.eccentricity20 == this.eccentricity20 &&
+          other.asLeftEccentricity1 == this.asLeftEccentricity1 &&
+          other.asLeftEccentricity2 == this.asLeftEccentricity2 &&
+          other.asLeftEccentricity3 == this.asLeftEccentricity3 &&
+          other.asLeftEccentricity4 == this.asLeftEccentricity4 &&
+          other.asLeftEccentricity5 == this.asLeftEccentricity5 &&
+          other.asLeftEccentricity6 == this.asLeftEccentricity6 &&
+          other.asLeftEccentricity7 == this.asLeftEccentricity7 &&
+          other.asLeftEccentricity8 == this.asLeftEccentricity8 &&
+          other.asLeftEccentricity9 == this.asLeftEccentricity9 &&
+          other.asLeftEccentricity10 == this.asLeftEccentricity10 &&
+          other.asLeftEccentricity11 == this.asLeftEccentricity11 &&
+          other.asLeftEccentricity12 == this.asLeftEccentricity12 &&
+          other.asLeftEccentricity13 == this.asLeftEccentricity13 &&
+          other.asLeftEccentricity14 == this.asLeftEccentricity14 &&
+          other.asLeftEccentricity15 == this.asLeftEccentricity15 &&
+          other.asLeftEccentricity16 == this.asLeftEccentricity16 &&
+          other.asLeftEccentricity17 == this.asLeftEccentricity17 &&
+          other.asLeftEccentricity18 == this.asLeftEccentricity18 &&
+          other.asLeftEccentricity19 == this.asLeftEccentricity19 &&
+          other.asLeftEccentricity20 == this.asLeftEccentricity20 &&
           other.eccentricityError == this.eccentricityError &&
+          other.asLeftEccentricityError == this.asLeftEccentricityError &&
           other.asFoundTest1 == this.asFoundTest1 &&
           other.asFoundRead1 == this.asFoundRead1 &&
           other.asFoundDiff1 == this.asFoundDiff1 &&
@@ -5899,7 +7059,38 @@ class WeightTestsCompanion extends UpdateCompanion<WeightTest> {
   final Value<double?> eccentricity8;
   final Value<double?> eccentricity9;
   final Value<double?> eccentricity10;
+  final Value<double?> eccentricity11;
+  final Value<double?> eccentricity12;
+  final Value<double?> eccentricity13;
+  final Value<double?> eccentricity14;
+  final Value<double?> eccentricity15;
+  final Value<double?> eccentricity16;
+  final Value<double?> eccentricity17;
+  final Value<double?> eccentricity18;
+  final Value<double?> eccentricity19;
+  final Value<double?> eccentricity20;
+  final Value<double?> asLeftEccentricity1;
+  final Value<double?> asLeftEccentricity2;
+  final Value<double?> asLeftEccentricity3;
+  final Value<double?> asLeftEccentricity4;
+  final Value<double?> asLeftEccentricity5;
+  final Value<double?> asLeftEccentricity6;
+  final Value<double?> asLeftEccentricity7;
+  final Value<double?> asLeftEccentricity8;
+  final Value<double?> asLeftEccentricity9;
+  final Value<double?> asLeftEccentricity10;
+  final Value<double?> asLeftEccentricity11;
+  final Value<double?> asLeftEccentricity12;
+  final Value<double?> asLeftEccentricity13;
+  final Value<double?> asLeftEccentricity14;
+  final Value<double?> asLeftEccentricity15;
+  final Value<double?> asLeftEccentricity16;
+  final Value<double?> asLeftEccentricity17;
+  final Value<double?> asLeftEccentricity18;
+  final Value<double?> asLeftEccentricity19;
+  final Value<double?> asLeftEccentricity20;
   final Value<String?> eccentricityError;
+  final Value<String?> asLeftEccentricityError;
   final Value<double?> asFoundTest1;
   final Value<double?> asFoundRead1;
   final Value<double?> asFoundDiff1;
@@ -5955,7 +7146,38 @@ class WeightTestsCompanion extends UpdateCompanion<WeightTest> {
     this.eccentricity8 = const Value.absent(),
     this.eccentricity9 = const Value.absent(),
     this.eccentricity10 = const Value.absent(),
+    this.eccentricity11 = const Value.absent(),
+    this.eccentricity12 = const Value.absent(),
+    this.eccentricity13 = const Value.absent(),
+    this.eccentricity14 = const Value.absent(),
+    this.eccentricity15 = const Value.absent(),
+    this.eccentricity16 = const Value.absent(),
+    this.eccentricity17 = const Value.absent(),
+    this.eccentricity18 = const Value.absent(),
+    this.eccentricity19 = const Value.absent(),
+    this.eccentricity20 = const Value.absent(),
+    this.asLeftEccentricity1 = const Value.absent(),
+    this.asLeftEccentricity2 = const Value.absent(),
+    this.asLeftEccentricity3 = const Value.absent(),
+    this.asLeftEccentricity4 = const Value.absent(),
+    this.asLeftEccentricity5 = const Value.absent(),
+    this.asLeftEccentricity6 = const Value.absent(),
+    this.asLeftEccentricity7 = const Value.absent(),
+    this.asLeftEccentricity8 = const Value.absent(),
+    this.asLeftEccentricity9 = const Value.absent(),
+    this.asLeftEccentricity10 = const Value.absent(),
+    this.asLeftEccentricity11 = const Value.absent(),
+    this.asLeftEccentricity12 = const Value.absent(),
+    this.asLeftEccentricity13 = const Value.absent(),
+    this.asLeftEccentricity14 = const Value.absent(),
+    this.asLeftEccentricity15 = const Value.absent(),
+    this.asLeftEccentricity16 = const Value.absent(),
+    this.asLeftEccentricity17 = const Value.absent(),
+    this.asLeftEccentricity18 = const Value.absent(),
+    this.asLeftEccentricity19 = const Value.absent(),
+    this.asLeftEccentricity20 = const Value.absent(),
     this.eccentricityError = const Value.absent(),
+    this.asLeftEccentricityError = const Value.absent(),
     this.asFoundTest1 = const Value.absent(),
     this.asFoundRead1 = const Value.absent(),
     this.asFoundDiff1 = const Value.absent(),
@@ -6012,7 +7234,38 @@ class WeightTestsCompanion extends UpdateCompanion<WeightTest> {
     this.eccentricity8 = const Value.absent(),
     this.eccentricity9 = const Value.absent(),
     this.eccentricity10 = const Value.absent(),
+    this.eccentricity11 = const Value.absent(),
+    this.eccentricity12 = const Value.absent(),
+    this.eccentricity13 = const Value.absent(),
+    this.eccentricity14 = const Value.absent(),
+    this.eccentricity15 = const Value.absent(),
+    this.eccentricity16 = const Value.absent(),
+    this.eccentricity17 = const Value.absent(),
+    this.eccentricity18 = const Value.absent(),
+    this.eccentricity19 = const Value.absent(),
+    this.eccentricity20 = const Value.absent(),
+    this.asLeftEccentricity1 = const Value.absent(),
+    this.asLeftEccentricity2 = const Value.absent(),
+    this.asLeftEccentricity3 = const Value.absent(),
+    this.asLeftEccentricity4 = const Value.absent(),
+    this.asLeftEccentricity5 = const Value.absent(),
+    this.asLeftEccentricity6 = const Value.absent(),
+    this.asLeftEccentricity7 = const Value.absent(),
+    this.asLeftEccentricity8 = const Value.absent(),
+    this.asLeftEccentricity9 = const Value.absent(),
+    this.asLeftEccentricity10 = const Value.absent(),
+    this.asLeftEccentricity11 = const Value.absent(),
+    this.asLeftEccentricity12 = const Value.absent(),
+    this.asLeftEccentricity13 = const Value.absent(),
+    this.asLeftEccentricity14 = const Value.absent(),
+    this.asLeftEccentricity15 = const Value.absent(),
+    this.asLeftEccentricity16 = const Value.absent(),
+    this.asLeftEccentricity17 = const Value.absent(),
+    this.asLeftEccentricity18 = const Value.absent(),
+    this.asLeftEccentricity19 = const Value.absent(),
+    this.asLeftEccentricity20 = const Value.absent(),
     this.eccentricityError = const Value.absent(),
+    this.asLeftEccentricityError = const Value.absent(),
     this.asFoundTest1 = const Value.absent(),
     this.asFoundRead1 = const Value.absent(),
     this.asFoundDiff1 = const Value.absent(),
@@ -6070,7 +7323,38 @@ class WeightTestsCompanion extends UpdateCompanion<WeightTest> {
     Expression<double>? eccentricity8,
     Expression<double>? eccentricity9,
     Expression<double>? eccentricity10,
+    Expression<double>? eccentricity11,
+    Expression<double>? eccentricity12,
+    Expression<double>? eccentricity13,
+    Expression<double>? eccentricity14,
+    Expression<double>? eccentricity15,
+    Expression<double>? eccentricity16,
+    Expression<double>? eccentricity17,
+    Expression<double>? eccentricity18,
+    Expression<double>? eccentricity19,
+    Expression<double>? eccentricity20,
+    Expression<double>? asLeftEccentricity1,
+    Expression<double>? asLeftEccentricity2,
+    Expression<double>? asLeftEccentricity3,
+    Expression<double>? asLeftEccentricity4,
+    Expression<double>? asLeftEccentricity5,
+    Expression<double>? asLeftEccentricity6,
+    Expression<double>? asLeftEccentricity7,
+    Expression<double>? asLeftEccentricity8,
+    Expression<double>? asLeftEccentricity9,
+    Expression<double>? asLeftEccentricity10,
+    Expression<double>? asLeftEccentricity11,
+    Expression<double>? asLeftEccentricity12,
+    Expression<double>? asLeftEccentricity13,
+    Expression<double>? asLeftEccentricity14,
+    Expression<double>? asLeftEccentricity15,
+    Expression<double>? asLeftEccentricity16,
+    Expression<double>? asLeftEccentricity17,
+    Expression<double>? asLeftEccentricity18,
+    Expression<double>? asLeftEccentricity19,
+    Expression<double>? asLeftEccentricity20,
     Expression<String>? eccentricityError,
+    Expression<String>? asLeftEccentricityError,
     Expression<double>? asFoundTest1,
     Expression<double>? asFoundRead1,
     Expression<double>? asFoundDiff1,
@@ -6128,7 +7412,59 @@ class WeightTestsCompanion extends UpdateCompanion<WeightTest> {
       if (eccentricity8 != null) 'eccentricity8': eccentricity8,
       if (eccentricity9 != null) 'eccentricity9': eccentricity9,
       if (eccentricity10 != null) 'eccentricity10': eccentricity10,
+      if (eccentricity11 != null) 'eccentricity11': eccentricity11,
+      if (eccentricity12 != null) 'eccentricity12': eccentricity12,
+      if (eccentricity13 != null) 'eccentricity13': eccentricity13,
+      if (eccentricity14 != null) 'eccentricity14': eccentricity14,
+      if (eccentricity15 != null) 'eccentricity15': eccentricity15,
+      if (eccentricity16 != null) 'eccentricity16': eccentricity16,
+      if (eccentricity17 != null) 'eccentricity17': eccentricity17,
+      if (eccentricity18 != null) 'eccentricity18': eccentricity18,
+      if (eccentricity19 != null) 'eccentricity19': eccentricity19,
+      if (eccentricity20 != null) 'eccentricity20': eccentricity20,
+      if (asLeftEccentricity1 != null)
+        'as_left_eccentricity1': asLeftEccentricity1,
+      if (asLeftEccentricity2 != null)
+        'as_left_eccentricity2': asLeftEccentricity2,
+      if (asLeftEccentricity3 != null)
+        'as_left_eccentricity3': asLeftEccentricity3,
+      if (asLeftEccentricity4 != null)
+        'as_left_eccentricity4': asLeftEccentricity4,
+      if (asLeftEccentricity5 != null)
+        'as_left_eccentricity5': asLeftEccentricity5,
+      if (asLeftEccentricity6 != null)
+        'as_left_eccentricity6': asLeftEccentricity6,
+      if (asLeftEccentricity7 != null)
+        'as_left_eccentricity7': asLeftEccentricity7,
+      if (asLeftEccentricity8 != null)
+        'as_left_eccentricity8': asLeftEccentricity8,
+      if (asLeftEccentricity9 != null)
+        'as_left_eccentricity9': asLeftEccentricity9,
+      if (asLeftEccentricity10 != null)
+        'as_left_eccentricity10': asLeftEccentricity10,
+      if (asLeftEccentricity11 != null)
+        'as_left_eccentricity11': asLeftEccentricity11,
+      if (asLeftEccentricity12 != null)
+        'as_left_eccentricity12': asLeftEccentricity12,
+      if (asLeftEccentricity13 != null)
+        'as_left_eccentricity13': asLeftEccentricity13,
+      if (asLeftEccentricity14 != null)
+        'as_left_eccentricity14': asLeftEccentricity14,
+      if (asLeftEccentricity15 != null)
+        'as_left_eccentricity15': asLeftEccentricity15,
+      if (asLeftEccentricity16 != null)
+        'as_left_eccentricity16': asLeftEccentricity16,
+      if (asLeftEccentricity17 != null)
+        'as_left_eccentricity17': asLeftEccentricity17,
+      if (asLeftEccentricity18 != null)
+        'as_left_eccentricity18': asLeftEccentricity18,
+      if (asLeftEccentricity19 != null)
+        'as_left_eccentricity19': asLeftEccentricity19,
+      if (asLeftEccentricity20 != null)
+        'as_left_eccentricity20': asLeftEccentricity20,
       if (eccentricityError != null) 'eccentricity_error': eccentricityError,
+      if (asLeftEccentricityError != null)
+        'as_left_eccentricity_error': asLeftEccentricityError,
       if (asFoundTest1 != null) 'as_found_test1': asFoundTest1,
       if (asFoundRead1 != null) 'as_found_read1': asFoundRead1,
       if (asFoundDiff1 != null) 'as_found_diff1': asFoundDiff1,
@@ -6187,7 +7523,38 @@ class WeightTestsCompanion extends UpdateCompanion<WeightTest> {
       Value<double?>? eccentricity8,
       Value<double?>? eccentricity9,
       Value<double?>? eccentricity10,
+      Value<double?>? eccentricity11,
+      Value<double?>? eccentricity12,
+      Value<double?>? eccentricity13,
+      Value<double?>? eccentricity14,
+      Value<double?>? eccentricity15,
+      Value<double?>? eccentricity16,
+      Value<double?>? eccentricity17,
+      Value<double?>? eccentricity18,
+      Value<double?>? eccentricity19,
+      Value<double?>? eccentricity20,
+      Value<double?>? asLeftEccentricity1,
+      Value<double?>? asLeftEccentricity2,
+      Value<double?>? asLeftEccentricity3,
+      Value<double?>? asLeftEccentricity4,
+      Value<double?>? asLeftEccentricity5,
+      Value<double?>? asLeftEccentricity6,
+      Value<double?>? asLeftEccentricity7,
+      Value<double?>? asLeftEccentricity8,
+      Value<double?>? asLeftEccentricity9,
+      Value<double?>? asLeftEccentricity10,
+      Value<double?>? asLeftEccentricity11,
+      Value<double?>? asLeftEccentricity12,
+      Value<double?>? asLeftEccentricity13,
+      Value<double?>? asLeftEccentricity14,
+      Value<double?>? asLeftEccentricity15,
+      Value<double?>? asLeftEccentricity16,
+      Value<double?>? asLeftEccentricity17,
+      Value<double?>? asLeftEccentricity18,
+      Value<double?>? asLeftEccentricity19,
+      Value<double?>? asLeftEccentricity20,
       Value<String?>? eccentricityError,
+      Value<String?>? asLeftEccentricityError,
       Value<double?>? asFoundTest1,
       Value<double?>? asFoundRead1,
       Value<double?>? asFoundDiff1,
@@ -6244,7 +7611,39 @@ class WeightTestsCompanion extends UpdateCompanion<WeightTest> {
       eccentricity8: eccentricity8 ?? this.eccentricity8,
       eccentricity9: eccentricity9 ?? this.eccentricity9,
       eccentricity10: eccentricity10 ?? this.eccentricity10,
+      eccentricity11: eccentricity11 ?? this.eccentricity11,
+      eccentricity12: eccentricity12 ?? this.eccentricity12,
+      eccentricity13: eccentricity13 ?? this.eccentricity13,
+      eccentricity14: eccentricity14 ?? this.eccentricity14,
+      eccentricity15: eccentricity15 ?? this.eccentricity15,
+      eccentricity16: eccentricity16 ?? this.eccentricity16,
+      eccentricity17: eccentricity17 ?? this.eccentricity17,
+      eccentricity18: eccentricity18 ?? this.eccentricity18,
+      eccentricity19: eccentricity19 ?? this.eccentricity19,
+      eccentricity20: eccentricity20 ?? this.eccentricity20,
+      asLeftEccentricity1: asLeftEccentricity1 ?? this.asLeftEccentricity1,
+      asLeftEccentricity2: asLeftEccentricity2 ?? this.asLeftEccentricity2,
+      asLeftEccentricity3: asLeftEccentricity3 ?? this.asLeftEccentricity3,
+      asLeftEccentricity4: asLeftEccentricity4 ?? this.asLeftEccentricity4,
+      asLeftEccentricity5: asLeftEccentricity5 ?? this.asLeftEccentricity5,
+      asLeftEccentricity6: asLeftEccentricity6 ?? this.asLeftEccentricity6,
+      asLeftEccentricity7: asLeftEccentricity7 ?? this.asLeftEccentricity7,
+      asLeftEccentricity8: asLeftEccentricity8 ?? this.asLeftEccentricity8,
+      asLeftEccentricity9: asLeftEccentricity9 ?? this.asLeftEccentricity9,
+      asLeftEccentricity10: asLeftEccentricity10 ?? this.asLeftEccentricity10,
+      asLeftEccentricity11: asLeftEccentricity11 ?? this.asLeftEccentricity11,
+      asLeftEccentricity12: asLeftEccentricity12 ?? this.asLeftEccentricity12,
+      asLeftEccentricity13: asLeftEccentricity13 ?? this.asLeftEccentricity13,
+      asLeftEccentricity14: asLeftEccentricity14 ?? this.asLeftEccentricity14,
+      asLeftEccentricity15: asLeftEccentricity15 ?? this.asLeftEccentricity15,
+      asLeftEccentricity16: asLeftEccentricity16 ?? this.asLeftEccentricity16,
+      asLeftEccentricity17: asLeftEccentricity17 ?? this.asLeftEccentricity17,
+      asLeftEccentricity18: asLeftEccentricity18 ?? this.asLeftEccentricity18,
+      asLeftEccentricity19: asLeftEccentricity19 ?? this.asLeftEccentricity19,
+      asLeftEccentricity20: asLeftEccentricity20 ?? this.asLeftEccentricity20,
       eccentricityError: eccentricityError ?? this.eccentricityError,
+      asLeftEccentricityError:
+          asLeftEccentricityError ?? this.asLeftEccentricityError,
       asFoundTest1: asFoundTest1 ?? this.asFoundTest1,
       asFoundRead1: asFoundRead1 ?? this.asFoundRead1,
       asFoundDiff1: asFoundDiff1 ?? this.asFoundDiff1,
@@ -6336,8 +7735,122 @@ class WeightTestsCompanion extends UpdateCompanion<WeightTest> {
     if (eccentricity10.present) {
       map['eccentricity10'] = Variable<double>(eccentricity10.value);
     }
+    if (eccentricity11.present) {
+      map['eccentricity11'] = Variable<double>(eccentricity11.value);
+    }
+    if (eccentricity12.present) {
+      map['eccentricity12'] = Variable<double>(eccentricity12.value);
+    }
+    if (eccentricity13.present) {
+      map['eccentricity13'] = Variable<double>(eccentricity13.value);
+    }
+    if (eccentricity14.present) {
+      map['eccentricity14'] = Variable<double>(eccentricity14.value);
+    }
+    if (eccentricity15.present) {
+      map['eccentricity15'] = Variable<double>(eccentricity15.value);
+    }
+    if (eccentricity16.present) {
+      map['eccentricity16'] = Variable<double>(eccentricity16.value);
+    }
+    if (eccentricity17.present) {
+      map['eccentricity17'] = Variable<double>(eccentricity17.value);
+    }
+    if (eccentricity18.present) {
+      map['eccentricity18'] = Variable<double>(eccentricity18.value);
+    }
+    if (eccentricity19.present) {
+      map['eccentricity19'] = Variable<double>(eccentricity19.value);
+    }
+    if (eccentricity20.present) {
+      map['eccentricity20'] = Variable<double>(eccentricity20.value);
+    }
+    if (asLeftEccentricity1.present) {
+      map['as_left_eccentricity1'] =
+          Variable<double>(asLeftEccentricity1.value);
+    }
+    if (asLeftEccentricity2.present) {
+      map['as_left_eccentricity2'] =
+          Variable<double>(asLeftEccentricity2.value);
+    }
+    if (asLeftEccentricity3.present) {
+      map['as_left_eccentricity3'] =
+          Variable<double>(asLeftEccentricity3.value);
+    }
+    if (asLeftEccentricity4.present) {
+      map['as_left_eccentricity4'] =
+          Variable<double>(asLeftEccentricity4.value);
+    }
+    if (asLeftEccentricity5.present) {
+      map['as_left_eccentricity5'] =
+          Variable<double>(asLeftEccentricity5.value);
+    }
+    if (asLeftEccentricity6.present) {
+      map['as_left_eccentricity6'] =
+          Variable<double>(asLeftEccentricity6.value);
+    }
+    if (asLeftEccentricity7.present) {
+      map['as_left_eccentricity7'] =
+          Variable<double>(asLeftEccentricity7.value);
+    }
+    if (asLeftEccentricity8.present) {
+      map['as_left_eccentricity8'] =
+          Variable<double>(asLeftEccentricity8.value);
+    }
+    if (asLeftEccentricity9.present) {
+      map['as_left_eccentricity9'] =
+          Variable<double>(asLeftEccentricity9.value);
+    }
+    if (asLeftEccentricity10.present) {
+      map['as_left_eccentricity10'] =
+          Variable<double>(asLeftEccentricity10.value);
+    }
+    if (asLeftEccentricity11.present) {
+      map['as_left_eccentricity11'] =
+          Variable<double>(asLeftEccentricity11.value);
+    }
+    if (asLeftEccentricity12.present) {
+      map['as_left_eccentricity12'] =
+          Variable<double>(asLeftEccentricity12.value);
+    }
+    if (asLeftEccentricity13.present) {
+      map['as_left_eccentricity13'] =
+          Variable<double>(asLeftEccentricity13.value);
+    }
+    if (asLeftEccentricity14.present) {
+      map['as_left_eccentricity14'] =
+          Variable<double>(asLeftEccentricity14.value);
+    }
+    if (asLeftEccentricity15.present) {
+      map['as_left_eccentricity15'] =
+          Variable<double>(asLeftEccentricity15.value);
+    }
+    if (asLeftEccentricity16.present) {
+      map['as_left_eccentricity16'] =
+          Variable<double>(asLeftEccentricity16.value);
+    }
+    if (asLeftEccentricity17.present) {
+      map['as_left_eccentricity17'] =
+          Variable<double>(asLeftEccentricity17.value);
+    }
+    if (asLeftEccentricity18.present) {
+      map['as_left_eccentricity18'] =
+          Variable<double>(asLeftEccentricity18.value);
+    }
+    if (asLeftEccentricity19.present) {
+      map['as_left_eccentricity19'] =
+          Variable<double>(asLeftEccentricity19.value);
+    }
+    if (asLeftEccentricity20.present) {
+      map['as_left_eccentricity20'] =
+          Variable<double>(asLeftEccentricity20.value);
+    }
     if (eccentricityError.present) {
       map['eccentricity_error'] = Variable<String>(eccentricityError.value);
+    }
+    if (asLeftEccentricityError.present) {
+      map['as_left_eccentricity_error'] =
+          Variable<String>(asLeftEccentricityError.value);
     }
     if (asFoundTest1.present) {
       map['as_found_test1'] = Variable<double>(asFoundTest1.value);
@@ -6477,7 +7990,38 @@ class WeightTestsCompanion extends UpdateCompanion<WeightTest> {
           ..write('eccentricity8: $eccentricity8, ')
           ..write('eccentricity9: $eccentricity9, ')
           ..write('eccentricity10: $eccentricity10, ')
+          ..write('eccentricity11: $eccentricity11, ')
+          ..write('eccentricity12: $eccentricity12, ')
+          ..write('eccentricity13: $eccentricity13, ')
+          ..write('eccentricity14: $eccentricity14, ')
+          ..write('eccentricity15: $eccentricity15, ')
+          ..write('eccentricity16: $eccentricity16, ')
+          ..write('eccentricity17: $eccentricity17, ')
+          ..write('eccentricity18: $eccentricity18, ')
+          ..write('eccentricity19: $eccentricity19, ')
+          ..write('eccentricity20: $eccentricity20, ')
+          ..write('asLeftEccentricity1: $asLeftEccentricity1, ')
+          ..write('asLeftEccentricity2: $asLeftEccentricity2, ')
+          ..write('asLeftEccentricity3: $asLeftEccentricity3, ')
+          ..write('asLeftEccentricity4: $asLeftEccentricity4, ')
+          ..write('asLeftEccentricity5: $asLeftEccentricity5, ')
+          ..write('asLeftEccentricity6: $asLeftEccentricity6, ')
+          ..write('asLeftEccentricity7: $asLeftEccentricity7, ')
+          ..write('asLeftEccentricity8: $asLeftEccentricity8, ')
+          ..write('asLeftEccentricity9: $asLeftEccentricity9, ')
+          ..write('asLeftEccentricity10: $asLeftEccentricity10, ')
+          ..write('asLeftEccentricity11: $asLeftEccentricity11, ')
+          ..write('asLeftEccentricity12: $asLeftEccentricity12, ')
+          ..write('asLeftEccentricity13: $asLeftEccentricity13, ')
+          ..write('asLeftEccentricity14: $asLeftEccentricity14, ')
+          ..write('asLeftEccentricity15: $asLeftEccentricity15, ')
+          ..write('asLeftEccentricity16: $asLeftEccentricity16, ')
+          ..write('asLeftEccentricity17: $asLeftEccentricity17, ')
+          ..write('asLeftEccentricity18: $asLeftEccentricity18, ')
+          ..write('asLeftEccentricity19: $asLeftEccentricity19, ')
+          ..write('asLeftEccentricity20: $asLeftEccentricity20, ')
           ..write('eccentricityError: $eccentricityError, ')
+          ..write('asLeftEccentricityError: $asLeftEccentricityError, ')
           ..write('asFoundTest1: $asFoundTest1, ')
           ..write('asFoundRead1: $asFoundRead1, ')
           ..write('asFoundDiff1: $asFoundDiff1, ')
@@ -8355,6 +9899,523 @@ class InventoryTransactionsCompanion
   }
 }
 
+class $PricesTable extends Prices with TableInfo<$PricesTable, Price> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PricesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _codeMeta = const VerificationMeta('code');
+  @override
+  late final GeneratedColumn<String> code = GeneratedColumn<String>(
+      'code', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _descriptionMeta =
+      const VerificationMeta('description');
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+      'description', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
+  static const VerificationMeta _unitMeta = const VerificationMeta('unit');
+  @override
+  late final GeneratedColumn<String> unit = GeneratedColumn<String>(
+      'unit', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _rateMeta = const VerificationMeta('rate');
+  @override
+  late final GeneratedColumn<double> rate = GeneratedColumn<double>(
+      'rate', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _activeMeta = const VerificationMeta('active');
+  @override
+  late final GeneratedColumn<bool> active = GeneratedColumn<bool>(
+      'active', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("active" IN (0, 1))'),
+      defaultValue: const Constant(true));
+  static const VerificationMeta _effectiveFromMeta =
+      const VerificationMeta('effectiveFrom');
+  @override
+  late final GeneratedColumn<DateTime> effectiveFrom =
+      GeneratedColumn<DateTime>('effective_from', aliasedName, true,
+          type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _effectiveToMeta =
+      const VerificationMeta('effectiveTo');
+  @override
+  late final GeneratedColumn<DateTime> effectiveTo = GeneratedColumn<DateTime>(
+      'effective_to', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime,
+      requiredDuringInsert: false,
+      defaultValue: currentDateAndTime);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        code,
+        description,
+        unit,
+        rate,
+        active,
+        effectiveFrom,
+        effectiveTo,
+        createdAt,
+        updatedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'prices';
+  @override
+  VerificationContext validateIntegrity(Insertable<Price> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('code')) {
+      context.handle(
+          _codeMeta, code.isAcceptableOrUnknown(data['code']!, _codeMeta));
+    } else if (isInserting) {
+      context.missing(_codeMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+          _descriptionMeta,
+          description.isAcceptableOrUnknown(
+              data['description']!, _descriptionMeta));
+    }
+    if (data.containsKey('unit')) {
+      context.handle(
+          _unitMeta, unit.isAcceptableOrUnknown(data['unit']!, _unitMeta));
+    } else if (isInserting) {
+      context.missing(_unitMeta);
+    }
+    if (data.containsKey('rate')) {
+      context.handle(
+          _rateMeta, rate.isAcceptableOrUnknown(data['rate']!, _rateMeta));
+    } else if (isInserting) {
+      context.missing(_rateMeta);
+    }
+    if (data.containsKey('active')) {
+      context.handle(_activeMeta,
+          active.isAcceptableOrUnknown(data['active']!, _activeMeta));
+    }
+    if (data.containsKey('effective_from')) {
+      context.handle(
+          _effectiveFromMeta,
+          effectiveFrom.isAcceptableOrUnknown(
+              data['effective_from']!, _effectiveFromMeta));
+    }
+    if (data.containsKey('effective_to')) {
+      context.handle(
+          _effectiveToMeta,
+          effectiveTo.isAcceptableOrUnknown(
+              data['effective_to']!, _effectiveToMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+        {code},
+      ];
+  @override
+  Price map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Price(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      code: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}code'])!,
+      description: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}description'])!,
+      unit: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}unit'])!,
+      rate: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}rate'])!,
+      active: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}active'])!,
+      effectiveFrom: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}effective_from']),
+      effectiveTo: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}effective_to']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+    );
+  }
+
+  @override
+  $PricesTable createAlias(String alias) {
+    return $PricesTable(attachedDatabase, alias);
+  }
+}
+
+class Price extends DataClass implements Insertable<Price> {
+  final int id;
+
+  /// Stable key you’ll use in code, e.g. "labour", "test_truck_km"
+  final String code;
+
+  /// Human label shown in UI
+  final String description;
+
+  /// Unit for the rate: "hour", "km", "flat", "each"
+  final String unit;
+
+  /// Price per unit
+  final double rate;
+
+  /// Toggle availability (soft-disable a row)
+  final bool active;
+
+  /// Optional effective dates (ignore if not needed)
+  final DateTime? effectiveFrom;
+  final DateTime? effectiveTo;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const Price(
+      {required this.id,
+      required this.code,
+      required this.description,
+      required this.unit,
+      required this.rate,
+      required this.active,
+      this.effectiveFrom,
+      this.effectiveTo,
+      required this.createdAt,
+      required this.updatedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['code'] = Variable<String>(code);
+    map['description'] = Variable<String>(description);
+    map['unit'] = Variable<String>(unit);
+    map['rate'] = Variable<double>(rate);
+    map['active'] = Variable<bool>(active);
+    if (!nullToAbsent || effectiveFrom != null) {
+      map['effective_from'] = Variable<DateTime>(effectiveFrom);
+    }
+    if (!nullToAbsent || effectiveTo != null) {
+      map['effective_to'] = Variable<DateTime>(effectiveTo);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  PricesCompanion toCompanion(bool nullToAbsent) {
+    return PricesCompanion(
+      id: Value(id),
+      code: Value(code),
+      description: Value(description),
+      unit: Value(unit),
+      rate: Value(rate),
+      active: Value(active),
+      effectiveFrom: effectiveFrom == null && nullToAbsent
+          ? const Value.absent()
+          : Value(effectiveFrom),
+      effectiveTo: effectiveTo == null && nullToAbsent
+          ? const Value.absent()
+          : Value(effectiveTo),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory Price.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Price(
+      id: serializer.fromJson<int>(json['id']),
+      code: serializer.fromJson<String>(json['code']),
+      description: serializer.fromJson<String>(json['description']),
+      unit: serializer.fromJson<String>(json['unit']),
+      rate: serializer.fromJson<double>(json['rate']),
+      active: serializer.fromJson<bool>(json['active']),
+      effectiveFrom: serializer.fromJson<DateTime?>(json['effectiveFrom']),
+      effectiveTo: serializer.fromJson<DateTime?>(json['effectiveTo']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'code': serializer.toJson<String>(code),
+      'description': serializer.toJson<String>(description),
+      'unit': serializer.toJson<String>(unit),
+      'rate': serializer.toJson<double>(rate),
+      'active': serializer.toJson<bool>(active),
+      'effectiveFrom': serializer.toJson<DateTime?>(effectiveFrom),
+      'effectiveTo': serializer.toJson<DateTime?>(effectiveTo),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  Price copyWith(
+          {int? id,
+          String? code,
+          String? description,
+          String? unit,
+          double? rate,
+          bool? active,
+          Value<DateTime?> effectiveFrom = const Value.absent(),
+          Value<DateTime?> effectiveTo = const Value.absent(),
+          DateTime? createdAt,
+          DateTime? updatedAt}) =>
+      Price(
+        id: id ?? this.id,
+        code: code ?? this.code,
+        description: description ?? this.description,
+        unit: unit ?? this.unit,
+        rate: rate ?? this.rate,
+        active: active ?? this.active,
+        effectiveFrom:
+            effectiveFrom.present ? effectiveFrom.value : this.effectiveFrom,
+        effectiveTo: effectiveTo.present ? effectiveTo.value : this.effectiveTo,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+      );
+  Price copyWithCompanion(PricesCompanion data) {
+    return Price(
+      id: data.id.present ? data.id.value : this.id,
+      code: data.code.present ? data.code.value : this.code,
+      description:
+          data.description.present ? data.description.value : this.description,
+      unit: data.unit.present ? data.unit.value : this.unit,
+      rate: data.rate.present ? data.rate.value : this.rate,
+      active: data.active.present ? data.active.value : this.active,
+      effectiveFrom: data.effectiveFrom.present
+          ? data.effectiveFrom.value
+          : this.effectiveFrom,
+      effectiveTo:
+          data.effectiveTo.present ? data.effectiveTo.value : this.effectiveTo,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Price(')
+          ..write('id: $id, ')
+          ..write('code: $code, ')
+          ..write('description: $description, ')
+          ..write('unit: $unit, ')
+          ..write('rate: $rate, ')
+          ..write('active: $active, ')
+          ..write('effectiveFrom: $effectiveFrom, ')
+          ..write('effectiveTo: $effectiveTo, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, code, description, unit, rate, active,
+      effectiveFrom, effectiveTo, createdAt, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Price &&
+          other.id == this.id &&
+          other.code == this.code &&
+          other.description == this.description &&
+          other.unit == this.unit &&
+          other.rate == this.rate &&
+          other.active == this.active &&
+          other.effectiveFrom == this.effectiveFrom &&
+          other.effectiveTo == this.effectiveTo &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class PricesCompanion extends UpdateCompanion<Price> {
+  final Value<int> id;
+  final Value<String> code;
+  final Value<String> description;
+  final Value<String> unit;
+  final Value<double> rate;
+  final Value<bool> active;
+  final Value<DateTime?> effectiveFrom;
+  final Value<DateTime?> effectiveTo;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  const PricesCompanion({
+    this.id = const Value.absent(),
+    this.code = const Value.absent(),
+    this.description = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.rate = const Value.absent(),
+    this.active = const Value.absent(),
+    this.effectiveFrom = const Value.absent(),
+    this.effectiveTo = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  PricesCompanion.insert({
+    this.id = const Value.absent(),
+    required String code,
+    this.description = const Value.absent(),
+    required String unit,
+    required double rate,
+    this.active = const Value.absent(),
+    this.effectiveFrom = const Value.absent(),
+    this.effectiveTo = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  })  : code = Value(code),
+        unit = Value(unit),
+        rate = Value(rate);
+  static Insertable<Price> custom({
+    Expression<int>? id,
+    Expression<String>? code,
+    Expression<String>? description,
+    Expression<String>? unit,
+    Expression<double>? rate,
+    Expression<bool>? active,
+    Expression<DateTime>? effectiveFrom,
+    Expression<DateTime>? effectiveTo,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (code != null) 'code': code,
+      if (description != null) 'description': description,
+      if (unit != null) 'unit': unit,
+      if (rate != null) 'rate': rate,
+      if (active != null) 'active': active,
+      if (effectiveFrom != null) 'effective_from': effectiveFrom,
+      if (effectiveTo != null) 'effective_to': effectiveTo,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  PricesCompanion copyWith(
+      {Value<int>? id,
+      Value<String>? code,
+      Value<String>? description,
+      Value<String>? unit,
+      Value<double>? rate,
+      Value<bool>? active,
+      Value<DateTime?>? effectiveFrom,
+      Value<DateTime?>? effectiveTo,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt}) {
+    return PricesCompanion(
+      id: id ?? this.id,
+      code: code ?? this.code,
+      description: description ?? this.description,
+      unit: unit ?? this.unit,
+      rate: rate ?? this.rate,
+      active: active ?? this.active,
+      effectiveFrom: effectiveFrom ?? this.effectiveFrom,
+      effectiveTo: effectiveTo ?? this.effectiveTo,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (code.present) {
+      map['code'] = Variable<String>(code.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (unit.present) {
+      map['unit'] = Variable<String>(unit.value);
+    }
+    if (rate.present) {
+      map['rate'] = Variable<double>(rate.value);
+    }
+    if (active.present) {
+      map['active'] = Variable<bool>(active.value);
+    }
+    if (effectiveFrom.present) {
+      map['effective_from'] = Variable<DateTime>(effectiveFrom.value);
+    }
+    if (effectiveTo.present) {
+      map['effective_to'] = Variable<DateTime>(effectiveTo.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PricesCompanion(')
+          ..write('id: $id, ')
+          ..write('code: $code, ')
+          ..write('description: $description, ')
+          ..write('unit: $unit, ')
+          ..write('rate: $rate, ')
+          ..write('active: $active, ')
+          ..write('effectiveFrom: $effectiveFrom, ')
+          ..write('effectiveTo: $effectiveTo, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -8368,6 +10429,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $InventoryItemsTable inventoryItems = $InventoryItemsTable(this);
   late final $InventoryTransactionsTable inventoryTransactions =
       $InventoryTransactionsTable(this);
+  late final $PricesTable prices = $PricesTable(this);
   late final CustomerDao customerDao = CustomerDao(this as AppDatabase);
   late final ContactDao contactDao = ContactDao(this as AppDatabase);
   late final WorkOrderDao workOrderDao = WorkOrderDao(this as AppDatabase);
@@ -8379,6 +10441,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       WorkOrderWithCustomerDao(this as AppDatabase);
   late final UserDao userDao = UserDao(this as AppDatabase);
   late final InventoryDao inventoryDao = InventoryDao(this as AppDatabase);
+  late final PriceDao priceDao = PriceDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -8392,7 +10455,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         weightTests,
         users,
         inventoryItems,
-        inventoryTransactions
+        inventoryTransactions,
+        prices
       ];
 }
 
@@ -10747,6 +12811,7 @@ typedef $$ServiceReportsTableCreateCompanionBuilder = ServiceReportsCompanion
   Value<DateTime> createdAt,
   Value<bool> complete,
   Value<bool> synced,
+  Value<Map<String, dynamic>?> ipoStateJson,
 });
 typedef $$ServiceReportsTableUpdateCompanionBuilder = ServiceReportsCompanion
     Function({
@@ -10758,6 +12823,7 @@ typedef $$ServiceReportsTableUpdateCompanionBuilder = ServiceReportsCompanion
   Value<DateTime> createdAt,
   Value<bool> complete,
   Value<bool> synced,
+  Value<Map<String, dynamic>?> ipoStateJson,
 });
 
 final class $$ServiceReportsTableReferences
@@ -10837,6 +12903,12 @@ class $$ServiceReportsTableFilterComposer
 
   ColumnFilters<bool> get synced => $composableBuilder(
       column: $table.synced, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<Map<String, dynamic>?, Map<String, dynamic>,
+          String>
+      get ipoStateJson => $composableBuilder(
+          column: $table.ipoStateJson,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
 
   $$WorkOrdersTableFilterComposer get workOrderId {
     final $$WorkOrdersTableFilterComposer composer = $composerBuilder(
@@ -10927,6 +12999,10 @@ class $$ServiceReportsTableOrderingComposer
   ColumnOrderings<bool> get synced => $composableBuilder(
       column: $table.synced, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get ipoStateJson => $composableBuilder(
+      column: $table.ipoStateJson,
+      builder: (column) => ColumnOrderings(column));
+
   $$WorkOrdersTableOrderingComposer get workOrderId {
     final $$WorkOrdersTableOrderingComposer composer = $composerBuilder(
         composer: this,
@@ -10994,6 +13070,10 @@ class $$ServiceReportsTableAnnotationComposer
 
   GeneratedColumn<bool> get synced =>
       $composableBuilder(column: $table.synced, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Map<String, dynamic>?, String>
+      get ipoStateJson => $composableBuilder(
+          column: $table.ipoStateJson, builder: (column) => column);
 
   $$WorkOrdersTableAnnotationComposer get workOrderId {
     final $$WorkOrdersTableAnnotationComposer composer = $composerBuilder(
@@ -11090,6 +13170,7 @@ class $$ServiceReportsTableTableManager extends RootTableManager<
             Value<DateTime> createdAt = const Value.absent(),
             Value<bool> complete = const Value.absent(),
             Value<bool> synced = const Value.absent(),
+            Value<Map<String, dynamic>?> ipoStateJson = const Value.absent(),
           }) =>
               ServiceReportsCompanion(
             id: id,
@@ -11100,6 +13181,7 @@ class $$ServiceReportsTableTableManager extends RootTableManager<
             createdAt: createdAt,
             complete: complete,
             synced: synced,
+            ipoStateJson: ipoStateJson,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
@@ -11110,6 +13192,7 @@ class $$ServiceReportsTableTableManager extends RootTableManager<
             Value<DateTime> createdAt = const Value.absent(),
             Value<bool> complete = const Value.absent(),
             Value<bool> synced = const Value.absent(),
+            Value<Map<String, dynamic>?> ipoStateJson = const Value.absent(),
           }) =>
               ServiceReportsCompanion.insert(
             id: id,
@@ -11120,6 +13203,7 @@ class $$ServiceReportsTableTableManager extends RootTableManager<
             createdAt: createdAt,
             complete: complete,
             synced: synced,
+            ipoStateJson: ipoStateJson,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (
@@ -11221,7 +13305,38 @@ typedef $$WeightTestsTableCreateCompanionBuilder = WeightTestsCompanion
   Value<double?> eccentricity8,
   Value<double?> eccentricity9,
   Value<double?> eccentricity10,
+  Value<double?> eccentricity11,
+  Value<double?> eccentricity12,
+  Value<double?> eccentricity13,
+  Value<double?> eccentricity14,
+  Value<double?> eccentricity15,
+  Value<double?> eccentricity16,
+  Value<double?> eccentricity17,
+  Value<double?> eccentricity18,
+  Value<double?> eccentricity19,
+  Value<double?> eccentricity20,
+  Value<double?> asLeftEccentricity1,
+  Value<double?> asLeftEccentricity2,
+  Value<double?> asLeftEccentricity3,
+  Value<double?> asLeftEccentricity4,
+  Value<double?> asLeftEccentricity5,
+  Value<double?> asLeftEccentricity6,
+  Value<double?> asLeftEccentricity7,
+  Value<double?> asLeftEccentricity8,
+  Value<double?> asLeftEccentricity9,
+  Value<double?> asLeftEccentricity10,
+  Value<double?> asLeftEccentricity11,
+  Value<double?> asLeftEccentricity12,
+  Value<double?> asLeftEccentricity13,
+  Value<double?> asLeftEccentricity14,
+  Value<double?> asLeftEccentricity15,
+  Value<double?> asLeftEccentricity16,
+  Value<double?> asLeftEccentricity17,
+  Value<double?> asLeftEccentricity18,
+  Value<double?> asLeftEccentricity19,
+  Value<double?> asLeftEccentricity20,
   Value<String?> eccentricityError,
+  Value<String?> asLeftEccentricityError,
   Value<double?> asFoundTest1,
   Value<double?> asFoundRead1,
   Value<double?> asFoundDiff1,
@@ -11279,7 +13394,38 @@ typedef $$WeightTestsTableUpdateCompanionBuilder = WeightTestsCompanion
   Value<double?> eccentricity8,
   Value<double?> eccentricity9,
   Value<double?> eccentricity10,
+  Value<double?> eccentricity11,
+  Value<double?> eccentricity12,
+  Value<double?> eccentricity13,
+  Value<double?> eccentricity14,
+  Value<double?> eccentricity15,
+  Value<double?> eccentricity16,
+  Value<double?> eccentricity17,
+  Value<double?> eccentricity18,
+  Value<double?> eccentricity19,
+  Value<double?> eccentricity20,
+  Value<double?> asLeftEccentricity1,
+  Value<double?> asLeftEccentricity2,
+  Value<double?> asLeftEccentricity3,
+  Value<double?> asLeftEccentricity4,
+  Value<double?> asLeftEccentricity5,
+  Value<double?> asLeftEccentricity6,
+  Value<double?> asLeftEccentricity7,
+  Value<double?> asLeftEccentricity8,
+  Value<double?> asLeftEccentricity9,
+  Value<double?> asLeftEccentricity10,
+  Value<double?> asLeftEccentricity11,
+  Value<double?> asLeftEccentricity12,
+  Value<double?> asLeftEccentricity13,
+  Value<double?> asLeftEccentricity14,
+  Value<double?> asLeftEccentricity15,
+  Value<double?> asLeftEccentricity16,
+  Value<double?> asLeftEccentricity17,
+  Value<double?> asLeftEccentricity18,
+  Value<double?> asLeftEccentricity19,
+  Value<double?> asLeftEccentricity20,
   Value<String?> eccentricityError,
+  Value<String?> asLeftEccentricityError,
   Value<double?> asFoundTest1,
   Value<double?> asFoundRead1,
   Value<double?> asFoundDiff1,
@@ -11396,8 +13542,132 @@ class $$WeightTestsTableFilterComposer
       column: $table.eccentricity10,
       builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<double> get eccentricity11 => $composableBuilder(
+      column: $table.eccentricity11,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get eccentricity12 => $composableBuilder(
+      column: $table.eccentricity12,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get eccentricity13 => $composableBuilder(
+      column: $table.eccentricity13,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get eccentricity14 => $composableBuilder(
+      column: $table.eccentricity14,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get eccentricity15 => $composableBuilder(
+      column: $table.eccentricity15,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get eccentricity16 => $composableBuilder(
+      column: $table.eccentricity16,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get eccentricity17 => $composableBuilder(
+      column: $table.eccentricity17,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get eccentricity18 => $composableBuilder(
+      column: $table.eccentricity18,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get eccentricity19 => $composableBuilder(
+      column: $table.eccentricity19,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get eccentricity20 => $composableBuilder(
+      column: $table.eccentricity20,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftEccentricity1 => $composableBuilder(
+      column: $table.asLeftEccentricity1,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftEccentricity2 => $composableBuilder(
+      column: $table.asLeftEccentricity2,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftEccentricity3 => $composableBuilder(
+      column: $table.asLeftEccentricity3,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftEccentricity4 => $composableBuilder(
+      column: $table.asLeftEccentricity4,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftEccentricity5 => $composableBuilder(
+      column: $table.asLeftEccentricity5,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftEccentricity6 => $composableBuilder(
+      column: $table.asLeftEccentricity6,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftEccentricity7 => $composableBuilder(
+      column: $table.asLeftEccentricity7,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftEccentricity8 => $composableBuilder(
+      column: $table.asLeftEccentricity8,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftEccentricity9 => $composableBuilder(
+      column: $table.asLeftEccentricity9,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftEccentricity10 => $composableBuilder(
+      column: $table.asLeftEccentricity10,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftEccentricity11 => $composableBuilder(
+      column: $table.asLeftEccentricity11,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftEccentricity12 => $composableBuilder(
+      column: $table.asLeftEccentricity12,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftEccentricity13 => $composableBuilder(
+      column: $table.asLeftEccentricity13,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftEccentricity14 => $composableBuilder(
+      column: $table.asLeftEccentricity14,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftEccentricity15 => $composableBuilder(
+      column: $table.asLeftEccentricity15,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftEccentricity16 => $composableBuilder(
+      column: $table.asLeftEccentricity16,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftEccentricity17 => $composableBuilder(
+      column: $table.asLeftEccentricity17,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftEccentricity18 => $composableBuilder(
+      column: $table.asLeftEccentricity18,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftEccentricity19 => $composableBuilder(
+      column: $table.asLeftEccentricity19,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get asLeftEccentricity20 => $composableBuilder(
+      column: $table.asLeftEccentricity20,
+      builder: (column) => ColumnFilters(column));
+
   ColumnFilters<String> get eccentricityError => $composableBuilder(
       column: $table.eccentricityError,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get asLeftEccentricityError => $composableBuilder(
+      column: $table.asLeftEccentricityError,
       builder: (column) => ColumnFilters(column));
 
   ColumnFilters<double> get asFoundTest1 => $composableBuilder(
@@ -11603,8 +13873,132 @@ class $$WeightTestsTableOrderingComposer
       column: $table.eccentricity10,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<double> get eccentricity11 => $composableBuilder(
+      column: $table.eccentricity11,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get eccentricity12 => $composableBuilder(
+      column: $table.eccentricity12,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get eccentricity13 => $composableBuilder(
+      column: $table.eccentricity13,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get eccentricity14 => $composableBuilder(
+      column: $table.eccentricity14,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get eccentricity15 => $composableBuilder(
+      column: $table.eccentricity15,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get eccentricity16 => $composableBuilder(
+      column: $table.eccentricity16,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get eccentricity17 => $composableBuilder(
+      column: $table.eccentricity17,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get eccentricity18 => $composableBuilder(
+      column: $table.eccentricity18,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get eccentricity19 => $composableBuilder(
+      column: $table.eccentricity19,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get eccentricity20 => $composableBuilder(
+      column: $table.eccentricity20,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftEccentricity1 => $composableBuilder(
+      column: $table.asLeftEccentricity1,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftEccentricity2 => $composableBuilder(
+      column: $table.asLeftEccentricity2,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftEccentricity3 => $composableBuilder(
+      column: $table.asLeftEccentricity3,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftEccentricity4 => $composableBuilder(
+      column: $table.asLeftEccentricity4,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftEccentricity5 => $composableBuilder(
+      column: $table.asLeftEccentricity5,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftEccentricity6 => $composableBuilder(
+      column: $table.asLeftEccentricity6,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftEccentricity7 => $composableBuilder(
+      column: $table.asLeftEccentricity7,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftEccentricity8 => $composableBuilder(
+      column: $table.asLeftEccentricity8,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftEccentricity9 => $composableBuilder(
+      column: $table.asLeftEccentricity9,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftEccentricity10 => $composableBuilder(
+      column: $table.asLeftEccentricity10,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftEccentricity11 => $composableBuilder(
+      column: $table.asLeftEccentricity11,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftEccentricity12 => $composableBuilder(
+      column: $table.asLeftEccentricity12,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftEccentricity13 => $composableBuilder(
+      column: $table.asLeftEccentricity13,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftEccentricity14 => $composableBuilder(
+      column: $table.asLeftEccentricity14,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftEccentricity15 => $composableBuilder(
+      column: $table.asLeftEccentricity15,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftEccentricity16 => $composableBuilder(
+      column: $table.asLeftEccentricity16,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftEccentricity17 => $composableBuilder(
+      column: $table.asLeftEccentricity17,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftEccentricity18 => $composableBuilder(
+      column: $table.asLeftEccentricity18,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftEccentricity19 => $composableBuilder(
+      column: $table.asLeftEccentricity19,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get asLeftEccentricity20 => $composableBuilder(
+      column: $table.asLeftEccentricity20,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get eccentricityError => $composableBuilder(
       column: $table.eccentricityError,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get asLeftEccentricityError => $composableBuilder(
+      column: $table.asLeftEccentricityError,
       builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<double> get asFoundTest1 => $composableBuilder(
@@ -11815,8 +14209,101 @@ class $$WeightTestsTableAnnotationComposer
   GeneratedColumn<double> get eccentricity10 => $composableBuilder(
       column: $table.eccentricity10, builder: (column) => column);
 
+  GeneratedColumn<double> get eccentricity11 => $composableBuilder(
+      column: $table.eccentricity11, builder: (column) => column);
+
+  GeneratedColumn<double> get eccentricity12 => $composableBuilder(
+      column: $table.eccentricity12, builder: (column) => column);
+
+  GeneratedColumn<double> get eccentricity13 => $composableBuilder(
+      column: $table.eccentricity13, builder: (column) => column);
+
+  GeneratedColumn<double> get eccentricity14 => $composableBuilder(
+      column: $table.eccentricity14, builder: (column) => column);
+
+  GeneratedColumn<double> get eccentricity15 => $composableBuilder(
+      column: $table.eccentricity15, builder: (column) => column);
+
+  GeneratedColumn<double> get eccentricity16 => $composableBuilder(
+      column: $table.eccentricity16, builder: (column) => column);
+
+  GeneratedColumn<double> get eccentricity17 => $composableBuilder(
+      column: $table.eccentricity17, builder: (column) => column);
+
+  GeneratedColumn<double> get eccentricity18 => $composableBuilder(
+      column: $table.eccentricity18, builder: (column) => column);
+
+  GeneratedColumn<double> get eccentricity19 => $composableBuilder(
+      column: $table.eccentricity19, builder: (column) => column);
+
+  GeneratedColumn<double> get eccentricity20 => $composableBuilder(
+      column: $table.eccentricity20, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftEccentricity1 => $composableBuilder(
+      column: $table.asLeftEccentricity1, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftEccentricity2 => $composableBuilder(
+      column: $table.asLeftEccentricity2, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftEccentricity3 => $composableBuilder(
+      column: $table.asLeftEccentricity3, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftEccentricity4 => $composableBuilder(
+      column: $table.asLeftEccentricity4, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftEccentricity5 => $composableBuilder(
+      column: $table.asLeftEccentricity5, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftEccentricity6 => $composableBuilder(
+      column: $table.asLeftEccentricity6, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftEccentricity7 => $composableBuilder(
+      column: $table.asLeftEccentricity7, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftEccentricity8 => $composableBuilder(
+      column: $table.asLeftEccentricity8, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftEccentricity9 => $composableBuilder(
+      column: $table.asLeftEccentricity9, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftEccentricity10 => $composableBuilder(
+      column: $table.asLeftEccentricity10, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftEccentricity11 => $composableBuilder(
+      column: $table.asLeftEccentricity11, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftEccentricity12 => $composableBuilder(
+      column: $table.asLeftEccentricity12, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftEccentricity13 => $composableBuilder(
+      column: $table.asLeftEccentricity13, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftEccentricity14 => $composableBuilder(
+      column: $table.asLeftEccentricity14, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftEccentricity15 => $composableBuilder(
+      column: $table.asLeftEccentricity15, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftEccentricity16 => $composableBuilder(
+      column: $table.asLeftEccentricity16, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftEccentricity17 => $composableBuilder(
+      column: $table.asLeftEccentricity17, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftEccentricity18 => $composableBuilder(
+      column: $table.asLeftEccentricity18, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftEccentricity19 => $composableBuilder(
+      column: $table.asLeftEccentricity19, builder: (column) => column);
+
+  GeneratedColumn<double> get asLeftEccentricity20 => $composableBuilder(
+      column: $table.asLeftEccentricity20, builder: (column) => column);
+
   GeneratedColumn<String> get eccentricityError => $composableBuilder(
       column: $table.eccentricityError, builder: (column) => column);
+
+  GeneratedColumn<String> get asLeftEccentricityError => $composableBuilder(
+      column: $table.asLeftEccentricityError, builder: (column) => column);
 
   GeneratedColumn<double> get asFoundTest1 => $composableBuilder(
       column: $table.asFoundTest1, builder: (column) => column);
@@ -11994,7 +14481,38 @@ class $$WeightTestsTableTableManager extends RootTableManager<
             Value<double?> eccentricity8 = const Value.absent(),
             Value<double?> eccentricity9 = const Value.absent(),
             Value<double?> eccentricity10 = const Value.absent(),
+            Value<double?> eccentricity11 = const Value.absent(),
+            Value<double?> eccentricity12 = const Value.absent(),
+            Value<double?> eccentricity13 = const Value.absent(),
+            Value<double?> eccentricity14 = const Value.absent(),
+            Value<double?> eccentricity15 = const Value.absent(),
+            Value<double?> eccentricity16 = const Value.absent(),
+            Value<double?> eccentricity17 = const Value.absent(),
+            Value<double?> eccentricity18 = const Value.absent(),
+            Value<double?> eccentricity19 = const Value.absent(),
+            Value<double?> eccentricity20 = const Value.absent(),
+            Value<double?> asLeftEccentricity1 = const Value.absent(),
+            Value<double?> asLeftEccentricity2 = const Value.absent(),
+            Value<double?> asLeftEccentricity3 = const Value.absent(),
+            Value<double?> asLeftEccentricity4 = const Value.absent(),
+            Value<double?> asLeftEccentricity5 = const Value.absent(),
+            Value<double?> asLeftEccentricity6 = const Value.absent(),
+            Value<double?> asLeftEccentricity7 = const Value.absent(),
+            Value<double?> asLeftEccentricity8 = const Value.absent(),
+            Value<double?> asLeftEccentricity9 = const Value.absent(),
+            Value<double?> asLeftEccentricity10 = const Value.absent(),
+            Value<double?> asLeftEccentricity11 = const Value.absent(),
+            Value<double?> asLeftEccentricity12 = const Value.absent(),
+            Value<double?> asLeftEccentricity13 = const Value.absent(),
+            Value<double?> asLeftEccentricity14 = const Value.absent(),
+            Value<double?> asLeftEccentricity15 = const Value.absent(),
+            Value<double?> asLeftEccentricity16 = const Value.absent(),
+            Value<double?> asLeftEccentricity17 = const Value.absent(),
+            Value<double?> asLeftEccentricity18 = const Value.absent(),
+            Value<double?> asLeftEccentricity19 = const Value.absent(),
+            Value<double?> asLeftEccentricity20 = const Value.absent(),
             Value<String?> eccentricityError = const Value.absent(),
+            Value<String?> asLeftEccentricityError = const Value.absent(),
             Value<double?> asFoundTest1 = const Value.absent(),
             Value<double?> asFoundRead1 = const Value.absent(),
             Value<double?> asFoundDiff1 = const Value.absent(),
@@ -12051,7 +14569,38 @@ class $$WeightTestsTableTableManager extends RootTableManager<
             eccentricity8: eccentricity8,
             eccentricity9: eccentricity9,
             eccentricity10: eccentricity10,
+            eccentricity11: eccentricity11,
+            eccentricity12: eccentricity12,
+            eccentricity13: eccentricity13,
+            eccentricity14: eccentricity14,
+            eccentricity15: eccentricity15,
+            eccentricity16: eccentricity16,
+            eccentricity17: eccentricity17,
+            eccentricity18: eccentricity18,
+            eccentricity19: eccentricity19,
+            eccentricity20: eccentricity20,
+            asLeftEccentricity1: asLeftEccentricity1,
+            asLeftEccentricity2: asLeftEccentricity2,
+            asLeftEccentricity3: asLeftEccentricity3,
+            asLeftEccentricity4: asLeftEccentricity4,
+            asLeftEccentricity5: asLeftEccentricity5,
+            asLeftEccentricity6: asLeftEccentricity6,
+            asLeftEccentricity7: asLeftEccentricity7,
+            asLeftEccentricity8: asLeftEccentricity8,
+            asLeftEccentricity9: asLeftEccentricity9,
+            asLeftEccentricity10: asLeftEccentricity10,
+            asLeftEccentricity11: asLeftEccentricity11,
+            asLeftEccentricity12: asLeftEccentricity12,
+            asLeftEccentricity13: asLeftEccentricity13,
+            asLeftEccentricity14: asLeftEccentricity14,
+            asLeftEccentricity15: asLeftEccentricity15,
+            asLeftEccentricity16: asLeftEccentricity16,
+            asLeftEccentricity17: asLeftEccentricity17,
+            asLeftEccentricity18: asLeftEccentricity18,
+            asLeftEccentricity19: asLeftEccentricity19,
+            asLeftEccentricity20: asLeftEccentricity20,
             eccentricityError: eccentricityError,
+            asLeftEccentricityError: asLeftEccentricityError,
             asFoundTest1: asFoundTest1,
             asFoundRead1: asFoundRead1,
             asFoundDiff1: asFoundDiff1,
@@ -12108,7 +14657,38 @@ class $$WeightTestsTableTableManager extends RootTableManager<
             Value<double?> eccentricity8 = const Value.absent(),
             Value<double?> eccentricity9 = const Value.absent(),
             Value<double?> eccentricity10 = const Value.absent(),
+            Value<double?> eccentricity11 = const Value.absent(),
+            Value<double?> eccentricity12 = const Value.absent(),
+            Value<double?> eccentricity13 = const Value.absent(),
+            Value<double?> eccentricity14 = const Value.absent(),
+            Value<double?> eccentricity15 = const Value.absent(),
+            Value<double?> eccentricity16 = const Value.absent(),
+            Value<double?> eccentricity17 = const Value.absent(),
+            Value<double?> eccentricity18 = const Value.absent(),
+            Value<double?> eccentricity19 = const Value.absent(),
+            Value<double?> eccentricity20 = const Value.absent(),
+            Value<double?> asLeftEccentricity1 = const Value.absent(),
+            Value<double?> asLeftEccentricity2 = const Value.absent(),
+            Value<double?> asLeftEccentricity3 = const Value.absent(),
+            Value<double?> asLeftEccentricity4 = const Value.absent(),
+            Value<double?> asLeftEccentricity5 = const Value.absent(),
+            Value<double?> asLeftEccentricity6 = const Value.absent(),
+            Value<double?> asLeftEccentricity7 = const Value.absent(),
+            Value<double?> asLeftEccentricity8 = const Value.absent(),
+            Value<double?> asLeftEccentricity9 = const Value.absent(),
+            Value<double?> asLeftEccentricity10 = const Value.absent(),
+            Value<double?> asLeftEccentricity11 = const Value.absent(),
+            Value<double?> asLeftEccentricity12 = const Value.absent(),
+            Value<double?> asLeftEccentricity13 = const Value.absent(),
+            Value<double?> asLeftEccentricity14 = const Value.absent(),
+            Value<double?> asLeftEccentricity15 = const Value.absent(),
+            Value<double?> asLeftEccentricity16 = const Value.absent(),
+            Value<double?> asLeftEccentricity17 = const Value.absent(),
+            Value<double?> asLeftEccentricity18 = const Value.absent(),
+            Value<double?> asLeftEccentricity19 = const Value.absent(),
+            Value<double?> asLeftEccentricity20 = const Value.absent(),
             Value<String?> eccentricityError = const Value.absent(),
+            Value<String?> asLeftEccentricityError = const Value.absent(),
             Value<double?> asFoundTest1 = const Value.absent(),
             Value<double?> asFoundRead1 = const Value.absent(),
             Value<double?> asFoundDiff1 = const Value.absent(),
@@ -12165,7 +14745,38 @@ class $$WeightTestsTableTableManager extends RootTableManager<
             eccentricity8: eccentricity8,
             eccentricity9: eccentricity9,
             eccentricity10: eccentricity10,
+            eccentricity11: eccentricity11,
+            eccentricity12: eccentricity12,
+            eccentricity13: eccentricity13,
+            eccentricity14: eccentricity14,
+            eccentricity15: eccentricity15,
+            eccentricity16: eccentricity16,
+            eccentricity17: eccentricity17,
+            eccentricity18: eccentricity18,
+            eccentricity19: eccentricity19,
+            eccentricity20: eccentricity20,
+            asLeftEccentricity1: asLeftEccentricity1,
+            asLeftEccentricity2: asLeftEccentricity2,
+            asLeftEccentricity3: asLeftEccentricity3,
+            asLeftEccentricity4: asLeftEccentricity4,
+            asLeftEccentricity5: asLeftEccentricity5,
+            asLeftEccentricity6: asLeftEccentricity6,
+            asLeftEccentricity7: asLeftEccentricity7,
+            asLeftEccentricity8: asLeftEccentricity8,
+            asLeftEccentricity9: asLeftEccentricity9,
+            asLeftEccentricity10: asLeftEccentricity10,
+            asLeftEccentricity11: asLeftEccentricity11,
+            asLeftEccentricity12: asLeftEccentricity12,
+            asLeftEccentricity13: asLeftEccentricity13,
+            asLeftEccentricity14: asLeftEccentricity14,
+            asLeftEccentricity15: asLeftEccentricity15,
+            asLeftEccentricity16: asLeftEccentricity16,
+            asLeftEccentricity17: asLeftEccentricity17,
+            asLeftEccentricity18: asLeftEccentricity18,
+            asLeftEccentricity19: asLeftEccentricity19,
+            asLeftEccentricity20: asLeftEccentricity20,
             eccentricityError: eccentricityError,
+            asLeftEccentricityError: asLeftEccentricityError,
             asFoundTest1: asFoundTest1,
             asFoundRead1: asFoundRead1,
             asFoundDiff1: asFoundDiff1,
@@ -13806,6 +16417,241 @@ typedef $$InventoryTransactionsTableProcessedTableManager
             bool customerId,
             bool workOrderId,
             bool userId})>;
+typedef $$PricesTableCreateCompanionBuilder = PricesCompanion Function({
+  Value<int> id,
+  required String code,
+  Value<String> description,
+  required String unit,
+  required double rate,
+  Value<bool> active,
+  Value<DateTime?> effectiveFrom,
+  Value<DateTime?> effectiveTo,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+});
+typedef $$PricesTableUpdateCompanionBuilder = PricesCompanion Function({
+  Value<int> id,
+  Value<String> code,
+  Value<String> description,
+  Value<String> unit,
+  Value<double> rate,
+  Value<bool> active,
+  Value<DateTime?> effectiveFrom,
+  Value<DateTime?> effectiveTo,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+});
+
+class $$PricesTableFilterComposer
+    extends Composer<_$AppDatabase, $PricesTable> {
+  $$PricesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get code => $composableBuilder(
+      column: $table.code, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get unit => $composableBuilder(
+      column: $table.unit, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get rate => $composableBuilder(
+      column: $table.rate, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get active => $composableBuilder(
+      column: $table.active, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get effectiveFrom => $composableBuilder(
+      column: $table.effectiveFrom, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get effectiveTo => $composableBuilder(
+      column: $table.effectiveTo, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$PricesTableOrderingComposer
+    extends Composer<_$AppDatabase, $PricesTable> {
+  $$PricesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get code => $composableBuilder(
+      column: $table.code, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get unit => $composableBuilder(
+      column: $table.unit, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get rate => $composableBuilder(
+      column: $table.rate, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get active => $composableBuilder(
+      column: $table.active, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get effectiveFrom => $composableBuilder(
+      column: $table.effectiveFrom,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get effectiveTo => $composableBuilder(
+      column: $table.effectiveTo, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$PricesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PricesTable> {
+  $$PricesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get code =>
+      $composableBuilder(column: $table.code, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => column);
+
+  GeneratedColumn<String> get unit =>
+      $composableBuilder(column: $table.unit, builder: (column) => column);
+
+  GeneratedColumn<double> get rate =>
+      $composableBuilder(column: $table.rate, builder: (column) => column);
+
+  GeneratedColumn<bool> get active =>
+      $composableBuilder(column: $table.active, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get effectiveFrom => $composableBuilder(
+      column: $table.effectiveFrom, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get effectiveTo => $composableBuilder(
+      column: $table.effectiveTo, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$PricesTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $PricesTable,
+    Price,
+    $$PricesTableFilterComposer,
+    $$PricesTableOrderingComposer,
+    $$PricesTableAnnotationComposer,
+    $$PricesTableCreateCompanionBuilder,
+    $$PricesTableUpdateCompanionBuilder,
+    (Price, BaseReferences<_$AppDatabase, $PricesTable, Price>),
+    Price,
+    PrefetchHooks Function()> {
+  $$PricesTableTableManager(_$AppDatabase db, $PricesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PricesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PricesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PricesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String> code = const Value.absent(),
+            Value<String> description = const Value.absent(),
+            Value<String> unit = const Value.absent(),
+            Value<double> rate = const Value.absent(),
+            Value<bool> active = const Value.absent(),
+            Value<DateTime?> effectiveFrom = const Value.absent(),
+            Value<DateTime?> effectiveTo = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+          }) =>
+              PricesCompanion(
+            id: id,
+            code: code,
+            description: description,
+            unit: unit,
+            rate: rate,
+            active: active,
+            effectiveFrom: effectiveFrom,
+            effectiveTo: effectiveTo,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required String code,
+            Value<String> description = const Value.absent(),
+            required String unit,
+            required double rate,
+            Value<bool> active = const Value.absent(),
+            Value<DateTime?> effectiveFrom = const Value.absent(),
+            Value<DateTime?> effectiveTo = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+          }) =>
+              PricesCompanion.insert(
+            id: id,
+            code: code,
+            description: description,
+            unit: unit,
+            rate: rate,
+            active: active,
+            effectiveFrom: effectiveFrom,
+            effectiveTo: effectiveTo,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$PricesTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $PricesTable,
+    Price,
+    $$PricesTableFilterComposer,
+    $$PricesTableOrderingComposer,
+    $$PricesTableAnnotationComposer,
+    $$PricesTableCreateCompanionBuilder,
+    $$PricesTableUpdateCompanionBuilder,
+    (Price, BaseReferences<_$AppDatabase, $PricesTable, Price>),
+    Price,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -13828,4 +16674,6 @@ class $AppDatabaseManager {
       $$InventoryItemsTableTableManager(_db, _db.inventoryItems);
   $$InventoryTransactionsTableTableManager get inventoryTransactions =>
       $$InventoryTransactionsTableTableManager(_db, _db.inventoryTransactions);
+  $$PricesTableTableManager get prices =>
+      $$PricesTableTableManager(_db, _db.prices);
 }

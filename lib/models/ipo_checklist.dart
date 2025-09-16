@@ -1,9 +1,10 @@
-// File: lib/models/ipo_checklist.dart
+// lib/models/ipo_checklist.dart
+import 'ipo_section.dart';
 
 class IPOChecklist {
-  final String id;         // e.g., IPO-1
-  final String title;      // e.g., "General Requirements"
-  final List<String> sections;
+  final String id;
+  final String title;
+  final List<IPOSection> sections;
 
   const IPOChecklist({
     required this.id,

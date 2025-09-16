@@ -14,6 +14,8 @@ class SectionDiagramPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    debugPrint('🎨 SectionDiagramPainter.paint() called with: sections=$sections, isDirectional=$isDirectional');
+
     final paint = Paint()
       ..color = Colors.black
       ..strokeWidth = 2
@@ -34,7 +36,6 @@ class SectionDiagramPainter extends CustomPainter {
     final radius = min(size.width, size.height) / 3;
 
     if (isDirectional) {
-      // DIRECTIONAL: vertical rectangle with label pairs (E1/E11, E2/E12, ...)
       final pairCount = sections;
       final rowHeight = 24.0;
       final startY = center.dy - (rowHeight * pairCount / 2);
@@ -47,7 +48,6 @@ class SectionDiagramPainter extends CustomPainter {
         drawText('E${i + 11}', Offset(rightX, y));
       }
 
-      // Rectangle border around the area
       final rectTop = startY - rowHeight / 2;
       final rectBottom = startY + rowHeight * pairCount - rowHeight / 2;
       final rect = Rect.fromLTRB(leftX - 20, rectTop, rightX + 20, rectBottom);
@@ -58,84 +58,86 @@ class SectionDiagramPainter extends CustomPainter {
     // SECTIONAL MODE
     switch (sections) {
       case 1:
-        // No drawing or label
         break;
 
-case 2:
-  final offset = 24.0;
-  final top = Offset(center.dx, center.dy - radius);
-  final bottom = Offset(center.dx, center.dy + radius);
-  canvas.drawLine(top, bottom, paint);
-  drawText('1', top.translate(0, -offset));
-  drawText('2', bottom.translate(0, offset));
-  break;
+      case 2:
+        final offset = 24.0;
+        final top = Offset(center.dx, center.dy - radius);
+        final bottom = Offset(center.dx, center.dy + radius);
+        canvas.drawLine(top, bottom, paint);
+        drawText('1', top.translate(0, -offset));
+        drawText('2', bottom.translate(0, offset));
+        break;
 
-case 3:
-case 5:
-  final angleStep = 2 * pi / sections;
-  canvas.drawCircle(center, radius, paint);
-  final labelRadius = radius + 18; // Padding
-  for (int i = 0; i < sections; i++) {
-    final angle = angleStep * i - pi / 2;
-    final dx = center.dx + labelRadius * cos(angle);
-    final dy = center.dy + labelRadius * sin(angle);
-    drawText('${i + 1}', Offset(dx, dy));
-  }
-  break;
+      case 3:
+      case 5:
+        final angleStep = 2 * pi / sections;
+        canvas.drawCircle(center, radius, paint);
+        final labelRadius = radius + 18;
+        for (int i = 0; i < sections; i++) {
+          final angle = angleStep * i - pi / 2;
+          final dx = center.dx + labelRadius * cos(angle);
+          final dy = center.dy + labelRadius * sin(angle);
+          drawText('${i + 1}', Offset(dx, dy));
+        }
+        break;
 
-case 4:
-  final squareSize = radius * 1.5;
-  final padding = 18.0;
-  final offsetX = squareSize / 2;
-  final offsetY = squareSize / 2;
+      case 4:
+        final squareSize = radius * 1.5;
+        final padding = 18.0;
+        final offsetX = squareSize / 2;
+        final offsetY = squareSize / 2;
 
-  final corners = [
-    Offset(center.dx - offsetX - padding, center.dy - offsetY - padding), // 1
-    Offset(center.dx + offsetX + padding, center.dy - offsetY - padding), // 2
-    Offset(center.dx - offsetX - padding, center.dy + offsetY + padding), // 3
-    Offset(center.dx + offsetX + padding, center.dy + offsetY + padding), // 4
-  ];
+        final corners = [
+          Offset(center.dx - offsetX - padding, center.dy - offsetY - padding), // 1
+          Offset(center.dx + offsetX + padding, center.dy - offsetY - padding), // 2
+          Offset(center.dx - offsetX - padding, center.dy + offsetY + padding), // 3
+          Offset(center.dx + offsetX + padding, center.dy + offsetY + padding), // 4
+        ];
 
-  final rect = Rect.fromCenter(center: center, width: squareSize, height: squareSize);
-  canvas.drawRect(rect, paint);
+        final rect = Rect.fromCenter(center: center, width: squareSize, height: squareSize);
+        canvas.drawRect(rect, paint);
 
-  for (int i = 0; i < 4; i++) {
-    drawText('${i + 1}', corners[i]);
-  }
-  break;
+        for (int i = 0; i < 4; i++) {
+          drawText('${i + 1}', corners[i]);
+        }
+        break;
 
-case 6:
-case 8:
-case 10:
-  final cols = 2;
-  final rows = (sections / cols).ceil();
-  final cellWidth = 48.0;
-  final cellHeight = 36.0;
-  final gridWidth = cellWidth * cols;
-  final gridHeight = cellHeight * rows;
+      case 6:
+      case 8:
+      case 10:
+        final cols = 2;
+        final rows = (sections / cols).ceil();
+        final cellWidth = 48.0;
+        final cellHeight = 36.0;
+        final gridWidth = cellWidth * cols;
+        final gridHeight = cellHeight * rows;
 
-  final startX = center.dx - gridWidth / 2;
-  final startY = center.dy - gridHeight / 2;
+        final startX = center.dx - gridWidth / 2;
+        final startY = center.dy - gridHeight / 2;
 
-  final rect = Rect.fromLTWH(startX, startY, gridWidth, gridHeight);
-  canvas.drawRect(rect, paint);
+        final rect = Rect.fromLTWH(startX, startY, gridWidth, gridHeight);
+        canvas.drawRect(rect, paint);
 
-  for (int i = 0; i < sections; i++) {
-    final row = i ~/ cols;
-    final col = i % cols;
+        for (int i = 0; i < sections; i++) {
+          final row = i ~/ cols;
+          final col = i % cols;
 
-    final x = startX + (col + 0.5) * cellWidth;
-    final y = startY + (row + 0.5) * cellHeight;
+          final x = startX + (col + 0.5) * cellWidth;
+          final y = startY + (row + 0.5) * cellHeight;
 
-    drawText('${i + 1}', Offset(x, y));
-  }
-  break;
-
+          drawText('${i + 1}', Offset(x, y));
+        }
+        break;
     }
   }
 
   @override
   bool shouldRepaint(covariant SectionDiagramPainter oldDelegate) {
-    return oldDelegate.sections != sections || oldDelegate.isDirectional != isDirectional;
+    final changed = oldDelegate.sections != sections || oldDelegate.isDirectional != isDirectional;
+    if (changed) {
+      debugPrint('🔁 Repainting diagram: sections changed from ${oldDelegate.sections} to $sections');
+    }
+    return changed;
   }
 }

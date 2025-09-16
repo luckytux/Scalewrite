@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
+import './json_converter.dart';
 
 // Tables
 import 'tables/customers.dart';
@@ -15,6 +16,7 @@ import 'tables/weight_tests.dart';
 import 'tables/users.dart';
 import 'tables/inventory_items.dart';
 import 'tables/inventory_transactions.dart';
+import 'tables/prices.dart'; // ✅ NEW
 
 // DAOs
 import 'daos/customer_dao.dart';
@@ -26,6 +28,7 @@ import 'daos/weight_test_dao.dart';
 import 'daos/work_order_with_customer_dao.dart';
 import 'daos/user_dao.dart';
 import 'daos/inventory_dao.dart';
+import 'daos/price_dao.dart'; // ✅ NEW
 
 part 'database.g.dart';
 
@@ -40,6 +43,7 @@ part 'database.g.dart';
     Users,
     InventoryItems,
     InventoryTransactions,
+    Prices, // ✅ NEW
   ],
   daos: [
     CustomerDao,
@@ -51,6 +55,7 @@ part 'database.g.dart';
     WorkOrderWithCustomerDao,
     UserDao,
     InventoryDao,
+    PriceDao, // ✅ NEW
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -58,7 +63,7 @@ class AppDatabase extends _$AppDatabase {
 
   // Schema version
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4; // ⬆️ bumped for Prices table
 
   // Manual DAO access
   late final customerDao = CustomerDao(this);
@@ -70,6 +75,7 @@ class AppDatabase extends _$AppDatabase {
   late final workOrderWithCustomerDao = WorkOrderWithCustomerDao(this);
   late final userDao = UserDao(this);
   late final inventoryDao = InventoryDao(this);
+  late final priceDao = PriceDao(this); // ✅ NEW
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -77,14 +83,21 @@ class AppDatabase extends _$AppDatabase {
           await m.createAll();
         },
         onUpgrade: (Migrator m, int from, int to) async {
+          // Previous inventory fix
           if (from < 3) {
             await m.deleteTable('inventory_items'); // Drop bad constraint
             await m.createTable(inventoryItems);
             await m.createTable(inventoryTransactions);
           }
+          // ➕ Create Prices table when upgrading to v4
+          if (from < 4) {
+            await m.createTable(prices);
+          }
         },
         beforeOpen: (details) async {
-          // Ready for hooks
+          // Ensure default price rows exist (safe to call repeatedly)
+          // You can remove this if you prefer a separate seeding step.
+          await priceDao.ensureDefaultPrices();
         },
       );
 }

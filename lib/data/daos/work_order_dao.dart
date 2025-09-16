@@ -54,7 +54,6 @@ class WorkOrderDao extends DatabaseAccessor<AppDatabase> with _$WorkOrderDaoMixi
     await (update(workOrders)..where((w) => w.id.equals(id))).write(entry);
   }
 
-
   Future<WorkOrder?> getMostRecentForCustomer(int customerId) {
     return (select(workOrders)
           ..where((w) => w.customerId.equals(customerId))
@@ -82,5 +81,12 @@ class WorkOrderDao extends DatabaseAccessor<AppDatabase> with _$WorkOrderDaoMixi
     return query.map((row) {
       return (row.readTable(workOrders), row.readTable(customers));
     }).get();
+  }
+
+  // ✅ NEW METHOD: Used in main.dart to determine if seed is needed
+  Future<int> countWorkOrders() async {
+    final query = selectOnly(workOrders)..addColumns([workOrders.id.count()]);
+    final row = await query.getSingle();
+    return row.read(workOrders.id.count()) ?? 0;
   }
 }

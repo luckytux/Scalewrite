@@ -90,7 +90,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                     label: 'Service Report',
                     onPressed: () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const CreateServiceReportPage()),
+                      MaterialPageRoute(
+                        builder: (_) => const CreateServiceReportPage(), // Open blank SR form from Home
+                      ),
                     ),
                   ),
                 ],
@@ -115,7 +117,6 @@ class _HomePageState extends ConsumerState<HomePage> {
                       MaterialPageRoute(builder: (_) => const ViewWorkOrdersPage()),
                     ),
                   ),
-
                   if (isAdmin)
                     _buildTileButton(
                       context,

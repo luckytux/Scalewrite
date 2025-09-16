@@ -1,4 +1,4 @@
-// File: lib\data\daos\service_report_dao.dart
+// File: lib/data/daos/service_report_dao.dart
 import 'package:drift/drift.dart';
 import '../database.dart';
 import '../tables/service_reports.dart';
@@ -68,5 +68,13 @@ class ServiceReportDao extends DatabaseAccessor<AppDatabase>
       report: row.readTable(serviceReports),
       scale: row.readTable(scales),
     );
+  }
+
+  Future<void> updateIpoState({
+    required int reportId,
+    required Map<String, dynamic> ipoStateJson,
+  }) {
+    return (update(serviceReports)..where((tbl) => tbl.id.equals(reportId)))
+        .write(ServiceReportsCompanion(ipoStateJson: Value(ipoStateJson)));
   }
 }

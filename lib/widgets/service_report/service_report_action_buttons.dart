@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:scalewrite_v2/providers/service_report_form_provider.dart';
 import 'package:scalewrite_v2/pages/create_weight_test_page.dart';
 import 'package:scalewrite_v2/pages/home_page.dart';
+import 'package:scalewrite_v2/providers/drift_providers.dart'; // for database/DAOs
+import 'package:scalewrite_v2/data/dao_shims/service_report_dao_shims.dart'; // ✅ analyzer-visible shim
 
 class ServiceReportActionButtons extends ConsumerWidget {
   const ServiceReportActionButtons({super.key});
@@ -12,9 +14,11 @@ class ServiceReportActionButtons extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = ref.watch(serviceReportFormProvider);
+    final db = ref.read(databaseProvider);
 
     return Row(
       children: [
+        // Save Service Report
         Expanded(
           child: ElevatedButton.icon(
             icon: const Icon(Icons.save),
@@ -37,11 +41,17 @@ class ServiceReportActionButtons extends ConsumerWidget {
                   MaterialPageRoute(builder: (_) => const HomePage()),
                   (route) => false,
                 );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Failed to save Service Report')),
+                );
               }
             },
           ),
         ),
         const SizedBox(width: 12),
+
+        // Add Forms (e.g., Weight Test)
         Expanded(
           child: ElevatedButton.icon(
             icon: const Icon(Icons.add_circle_outline),
@@ -52,17 +62,63 @@ class ServiceReportActionButtons extends ConsumerWidget {
               padding: const EdgeInsets.all(16),
             ),
             onPressed: () async {
-              final success = await controller.save();
-              if (!context.mounted || !success) return;
+              // Save latest changes first
+              final saved = await controller.save();
+              if (!context.mounted || !saved) return;
 
-              if (controller.selectedServiceReportId != null) {
+              final srId = controller.selectedServiceReportId;
+              if (srId == null) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please save the Service Report first.')),
+                );
+                return;
+              }
+
+              try {
+                // Use shimmed helper (or your real DAO method if present)
+                final serviceReport = await db.serviceReportDao.getServiceReportById(srId);
+                if (serviceReport == null) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Could not load Service Report.')),
+                  );
+                  return;
+                }
+
+                final scaleId = serviceReport.scaleId;
+                if (scaleId == null) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('No scale is linked to this Service Report.')),
+                  );
+                  return;
+                }
+
+                final scale = await db.scaleDao.getScaleById(scaleId);
+                if (scale == null) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Scale not found for this Service Report.')),
+                  );
+                  return;
+                }
+
+                if (!context.mounted) return;
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => CreateWeightTestPage(
-                      serviceReportId: controller.selectedServiceReportId!,
+                      serviceReportId: srId,
+                      division: scale.division,
+                      numberOfSections: scale.numberOfSections,
                     ),
                   ),
+                );
+              } catch (e) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error preparing Weight Test: $e')),
                 );
               }
             },

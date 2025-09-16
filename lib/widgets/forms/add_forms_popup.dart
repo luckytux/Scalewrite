@@ -41,12 +41,13 @@ class AddFormsPopup extends StatelessWidget {
   void _showIpoDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (_) {
+      // barrierDismissible: false, // optional: prevent accidental dismissal
+      builder: (context) {
         return AlertDialog(
           title: const Text('Select IPO Type'),
           content: SizedBox(
             width: double.maxFinite,
-            height: 300, // fix the height
+            height: 300,
             child: ListView(
               shrinkWrap: true,
               children: ipoChecklists.entries.map((e) {
@@ -55,8 +56,8 @@ class AddFormsPopup extends StatelessWidget {
                 return ListTile(
                   title: Text('$id — $title'),
                   onTap: () {
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pop(); // also close parent dialog
+                    Navigator.of(context).pop(); // close IPO list
+                    Navigator.of(context).pop(); // close parent dialog
                     onFormSelected('Inspection Procedure', ipoType: id);
                   },
                 );

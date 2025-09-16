@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:scalewrite_v2/pages/create_service_report_page.dart';
+import 'package:scalewrite_v2/pages/work_order_billing_page.dart';
 import 'package:scalewrite_v2/providers/drift_providers.dart';
 import 'package:scalewrite_v2/providers/work_order_form_provider.dart';
 
@@ -14,9 +15,13 @@ class WorkOrderActionButtons extends ConsumerWidget {
     final controller = ref.watch(workOrderFormProvider);
     final db = ref.read(databaseProvider);
 
-    return Row(
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
       children: [
-        Expanded(
+        // Save Work Order
+        SizedBox(
+          width: 280,
           child: ElevatedButton.icon(
             onPressed: () async {
               final success = await controller.save();
@@ -24,7 +29,7 @@ class WorkOrderActionButtons extends ConsumerWidget {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Work Order Saved')),
                 );
-                Navigator.pop(context); // Return to home
+                Navigator.pop(context);
               }
             },
             icon: const Icon(Icons.save),
@@ -36,8 +41,10 @@ class WorkOrderActionButtons extends ConsumerWidget {
             ),
           ),
         ),
-        const SizedBox(width: 12),
-        Expanded(
+
+        // Create Service Report (allow blank even if no scales yet)
+        SizedBox(
+          width: 280,
           child: ElevatedButton.icon(
             onPressed: () async {
               final success = await controller.save();
@@ -58,10 +65,15 @@ class WorkOrderActionButtons extends ConsumerWidget {
               final workOrder = await db.workOrderDao.getWorkOrderById(workOrderId);
               if (workOrder == null) return;
 
+              // 🚫 Removed the "no scale found" blocker. We always open a blank SR if needed.
+              if (!context.mounted) return;
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                 builder: (_) => CreateServiceReportPage(workOrderId: workOrder.id),
+                  builder: (_) => CreateServiceReportPage(
+                    workOrderId: workOrder.id,
+                    customerId: workOrder.customerId,
+                  ),
                 ),
               );
             },
@@ -69,6 +81,46 @@ class WorkOrderActionButtons extends ConsumerWidget {
             label: const Text('Create Service Report'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.all(16),
+            ),
+          ),
+        ),
+
+        // Billing
+        SizedBox(
+          width: 280,
+          child: ElevatedButton.icon(
+            onPressed: () async {
+              final saved = await controller.save();
+              if (!context.mounted || !saved) return;
+
+              final workOrderId = controller.editingWorkOrderId;
+              if (workOrderId == null) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please save the Work Order first.')),
+                  );
+                }
+                return;
+              }
+
+              final workOrder = await db.workOrderDao.getWorkOrderById(workOrderId);
+              if (!context.mounted || workOrder == null) return;
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => WorkOrderBillingPage(
+                    workOrderId: workOrderId,
+                  ),
+                ),
+              );
+            },
+            icon: const Icon(Icons.receipt_long),
+            label: const Text('Billing'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.indigo,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.all(16),
             ),

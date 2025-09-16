@@ -136,6 +136,9 @@ Future<void> seedTestData(AppDatabase db) async {
           createdAt: Value(DateTime.tryParse(sr['createdAt'] ?? '') ?? DateTime.now()),
           complete: const Value(false),
           synced: const Value(false),
+          ipoStateJson: sr['ipoStateJson'] != null
+              ? Value(sr['ipoStateJson'] as Map<String, dynamic>)
+              : const Value.absent(),
         ));
         serviceReportIndex++;
 
