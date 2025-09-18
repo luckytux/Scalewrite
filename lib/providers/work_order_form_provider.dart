@@ -103,12 +103,23 @@ class WorkOrderFormController extends ChangeNotifier {
     workOrderNumber = generateWorkOrderNumber(uid);
   }
 
+  /// New, shorter format: <UID>-<YY><DDD>-<HHMM>
   String generateWorkOrderNumber(int uid) {
     final now = DateTime.now();
-    final date = '${now.year}${_twoDigits(now.month)}${_twoDigits(now.day)}';
-    final time = '${_twoDigits(now.hour)}${_twoDigits(now.minute)}';
-    return '$uid-$date-$time';
+
+    final yy   = now.year % 100; // 0..99
+    final doy  = _dayOfYear(now); // 1..366
+    final hhmm = '${_twoDigits(now.hour)}${_twoDigits(now.minute)}';
+
+    return '$uid-${_twoDigits(yy)}${_threeDigits(doy)}-$hhmm';
   }
+
+  int _dayOfYear(DateTime d) {
+    final jan1 = DateTime(d.year, 1, 1);
+    return d.difference(jan1).inDays + 1;
+  }
+
+  String _threeDigits(int n) => n.toString().padLeft(3, '0');
 
   String _twoDigits(int n) => n.toString().padLeft(2, '0');
 

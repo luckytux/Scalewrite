@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:scalewrite_v2/pages/admin/price_admin_page.dart';
 
 import 'data/database.dart';
 import 'dev/seed_inventory.dart';
@@ -70,6 +71,7 @@ class MyApp extends StatelessWidget {
         '/admin/users': (_) => const ManageUsersPage(),
         '/admin/unsynced': (_) => const ViewUnsyncedWorkOrdersPage(),
         '/admin/inventory': (_) => const ManageInventoryPage(),
+        '/admin/prices': (_) => const PriceAdminPage(),
       },
     );
   }

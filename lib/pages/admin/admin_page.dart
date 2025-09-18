@@ -56,6 +56,15 @@ class AdminPage extends ConsumerWidget {
                   ),
                   _buildTile(
                     context,
+                    icon: Icons.price_change,
+                    label: 'Adjust Prices',
+                    onPressed: () {
+                      debugPrint('➡️ Navigating to PriceAdminPage');
+                      Navigator.pushNamed(context, '/admin/prices');
+                    },
+                  ),
+                  _buildTile(
+                    context,
                     icon: Icons.exit_to_app,
                     label: 'Back to Home',
                     onPressed: () {

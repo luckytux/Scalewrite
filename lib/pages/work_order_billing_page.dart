@@ -1,406 +1,331 @@
 // File: lib/pages/work_order_billing_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
-import '../providers/price_providers.dart';   // Price DAO provider
-import '../providers/drift_providers.dart';   // databaseProvider -> inventoryDao
+import '../providers/drift_providers.dart';
+import '../data/daos/price_dao.dart'; // PriceCodes + dao methods
+import '../data/database.dart'; // InventoryItem type
 import '../widgets/inventory/inventory_picker_sheet.dart';
-import '../data/database.dart';               // for InventoryItem
-import '../data/static/price_codes.dart';
 
 class WorkOrderBillingPage extends ConsumerStatefulWidget {
   final int workOrderId;
+  /// Optional – some entry points may not have created a Service Report yet.
+  final int? serviceReportId;
 
-  const WorkOrderBillingPage({super.key, required this.workOrderId});
+  const WorkOrderBillingPage({
+    super.key,
+    required this.workOrderId,
+    this.serviceReportId,
+  });
 
   @override
-  ConsumerState<WorkOrderBillingPage> createState() =>
-      _WorkOrderBillingPageState();
+  ConsumerState<WorkOrderBillingPage> createState() => _WorkOrderBillingPageState();
 }
 
 class _WorkOrderBillingPageState extends ConsumerState<WorkOrderBillingPage> {
-  // ===== Non-part billed quantities =====
-  final labourHoursCtrl = TextEditingController();
-  final ttFlatCountCtrl = TextEditingController(text: '0');
-  final ttKmCtrl = TextEditingController();
-  final ttOnSiteHoursCtrl = TextEditingController();
-  final svcKmCtrl = TextEditingController();
-  final miscEachQtyCtrl = TextEditingController();
-  final miscEachNoteCtrl = TextEditingController();
-  final techTravelHoursCtrl = TextEditingController();
+  final _currency = NumberFormat.currency(symbol: r'$');
 
-  // Loaded master rates (from Prices table)
-  double? labourRate, partsRate, ttFlatRate, ttKmRate, ttOnSiteRate, svcKmRate, miscEachRate, techTravelRate;
+  // qty controllers
+  final labourHrsCtrl = TextEditingController(text: '0');
+  final overtimeHrsCtrl = TextEditingController(text: '0');
+  final techTravelHrsCtrl = TextEditingController(text: '0');   // technician travel time
+  final ttOnsiteHrsCtrl = TextEditingController(text: '0');     // test truck on-site hours
+  final ttFlatCtrl = TextEditingController(text: '0');          // count (0/1/2…)
+  final ttKmCtrl = TextEditingController(text: '0');            // km
+  final svcKmCtrl = TextEditingController(text: '0');           // km
 
-  // ===== Parts lines (each part on its own line) =====
-  final List<_PartLine> _parts = [];
+  // Picked parts from inventory (1 line per item)
+  final List<InventoryItem> _parts = [];
 
-  bool _loadingRates = true;
+  // Rates (loaded from DB)
+  final Map<String, double> _rates = {
+    PriceCodes.labour: 0,
+    PriceCodes.overtime: 0,
+    PriceCodes.techTravel: 0,
+    PriceCodes.testTruckOnSite: 0,
+    PriceCodes.testTruckFlat: 0,
+    PriceCodes.testTruckKm: 0,
+    PriceCodes.serviceVehicleKm: 0,
+    PriceCodes.miscPercent: 0, // stored as percent (e.g., 10 means 10%)
+    PriceCodes.taxGst: 5,      // stored as percent
+  };
+
+  // Helpers
+  double _qty(TextEditingController c) => double.tryParse(c.text.trim()) ?? 0;
+
+  // Amounts
+  double get _labourAmt   => _qty(labourHrsCtrl)   * (_rates[PriceCodes.labour] ?? 0);
+  double get _otAmt       => _qty(overtimeHrsCtrl) * (_rates[PriceCodes.overtime] ?? 0);
+
+  // Travel time (hours-based)
+  double get _techTravelAmt =>
+      _qty(techTravelHrsCtrl) * (_rates[PriceCodes.techTravel] ?? 0);
+  double get _ttOnsiteAmt =>
+      _qty(ttOnsiteHrsCtrl) * (_rates[PriceCodes.testTruckOnSite] ?? 0);
+
+  // Truck flat / kms / service vehicle kms
+  double get _ttFlatAmt => _qty(ttFlatCtrl) * (_rates[PriceCodes.testTruckFlat] ?? 0);
+  double get _ttKmAmt   => _qty(ttKmCtrl)   * (_rates[PriceCodes.testTruckKm] ?? 0);
+  double get _svcKmAmt  => _qty(svcKmCtrl)  * (_rates[PriceCodes.serviceVehicleKm] ?? 0);
+
+  // Parts subtotal (from picked inventory items)
+  double get _partsSubtotal =>
+      _parts.fold(0.0, (sum, it) => sum + (it.price ?? 0.0));
+
+  // Travel *time* bucket for misc %
+  double get _travelTimeAmt => _techTravelAmt + _ttOnsiteAmt;
+
+  // Misc is % of (labour + overtime + travel time)
+  double get _miscAmt {
+    final pct = _rates[PriceCodes.miscPercent] ?? 0; // e.g., 10 = 10%
+    final base = _labourAmt + _otAmt + _travelTimeAmt;
+    return (pct / 100.0) * base;
+  }
+
+  // Subtotals & tax
+  double get _subtotalTaxable =>
+      _labourAmt +
+      _otAmt +
+      _techTravelAmt +
+      _ttOnsiteAmt +
+      _ttFlatAmt +
+      _ttKmAmt +
+      _svcKmAmt +
+      _miscAmt +
+      _partsSubtotal;
+
+  double get _gstAmt =>
+      (_rates[PriceCodes.taxGst] ?? 5) / 100.0 * _subtotalTaxable;
+
+  double get _grandTotal => _subtotalTaxable + _gstAmt;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final priceDao = ref.read(priceDaoProvider);
-      await priceDao.ensureDefaultPrices();
-      await _loadRates();
-    });
+
+    // Recalc on any qty change
+    for (final c in [
+      labourHrsCtrl,
+      overtimeHrsCtrl,
+      techTravelHrsCtrl,
+      ttOnsiteHrsCtrl,
+      ttFlatCtrl,
+      ttKmCtrl,
+      svcKmCtrl,
+    ]) {
+      c.addListener(() => setState(() {}));
+    }
+
+    _loadRates();
   }
 
   Future<void> _loadRates() async {
     final priceDao = ref.read(priceDaoProvider);
 
-    final labour = await priceDao.getByCode(PriceCodes.labour);
-    final parts  = await priceDao.getByCode(PriceCodes.parts);
-    final ttFlat = await priceDao.getByCode(PriceCodes.testTruckFlat);
-    final ttKm   = await priceDao.getByCode(PriceCodes.testTruckKm);
-    final ttOn   = await priceDao.getByCode(PriceCodes.testTruckOnSite);
-    final svcKm  = await priceDao.getByCode(PriceCodes.serviceVehicleKm);
-    final misc   = await priceDao.getByCode(PriceCodes.miscExpense);
-    final travel = await priceDao.getByCode(PriceCodes.techTravel);
+    Future<void> loadOne(String code) async {
+      final p = await priceDao.getByCode(code);
+      if (p != null) _rates[code] = p.rate;
+    }
 
-    setState(() {
-      labourRate     = labour?.rate;
-      partsRate      = parts?.rate;     // fallback when inventory.price is null
-      ttFlatRate     = ttFlat?.rate;
-      ttKmRate       = ttKm?.rate;
-      ttOnSiteRate   = ttOn?.rate;
-      svcKmRate      = svcKm?.rate;
-      miscEachRate   = misc?.rate;
-      techTravelRate = travel?.rate;
-      _loadingRates  = false;
-    });
+    await Future.wait([
+      loadOne(PriceCodes.labour),
+      loadOne(PriceCodes.overtime),
+      loadOne(PriceCodes.techTravel),
+      loadOne(PriceCodes.testTruckOnSite),
+      loadOne(PriceCodes.testTruckFlat),
+      loadOne(PriceCodes.testTruckKm),
+      loadOne(PriceCodes.serviceVehicleKm),
+      loadOne(PriceCodes.miscPercent),
+      loadOne(PriceCodes.taxGst),
+    ]);
+
+    // Sensible default for overtime if not set: 1.5x labour
+    if ((_rates[PriceCodes.overtime] ?? 0) <= 0) {
+      _rates[PriceCodes.overtime] = (_rates[PriceCodes.labour] ?? 0) * 1.5;
+    }
+
+    if (mounted) setState(() {});
   }
 
-  // ---------- Math helpers ----------
-  double _p(String v) => double.tryParse(v.trim()) ?? 0.0;
-
-  double get _lineLabour   => _p(labourHoursCtrl.text)     * (labourRate ?? 0);
-  double get _lineTTFlat   => _p(ttFlatCountCtrl.text)     * (ttFlatRate ?? 0);
-  double get _lineTTKm     => _p(ttKmCtrl.text)            * (ttKmRate ?? 0);
-  double get _lineTTOnSite => _p(ttOnSiteHoursCtrl.text)   * (ttOnSiteRate ?? 0);
-  double get _lineSvcKm    => _p(svcKmCtrl.text)           * (svcKmRate ?? 0);
-  double get _lineMiscEach => _p(miscEachQtyCtrl.text)     * (miscEachRate ?? 0);
-  double get _lineTravel   => _p(techTravelHoursCtrl.text) * (techTravelRate ?? 0);
-  double get _partsTotal   => _parts.fold(0.0, (s, e) => s + e.total);
-
-  double get _grandTotal =>
-      _lineLabour +
-      _lineTTFlat +
-      _lineTTKm +
-      _lineTTOnSite +
-      _lineSvcKm +
-      _lineMiscEach +
-      _lineTravel +
-      _partsTotal;
+  String _rateText(String code, {required String unit}) {
+    final r = _rates[code] ?? 0;
+    final money = _currency.format(r);
+    return ' @ $money / $unit';
+  }
 
   @override
   void dispose() {
-    labourHoursCtrl.dispose();
-    ttFlatCountCtrl.dispose();
+    labourHrsCtrl.dispose();
+    overtimeHrsCtrl.dispose();
+    techTravelHrsCtrl.dispose();
+    ttOnsiteHrsCtrl.dispose();
+    ttFlatCtrl.dispose();
     ttKmCtrl.dispose();
-    ttOnSiteHoursCtrl.dispose();
     svcKmCtrl.dispose();
-    miscEachQtyCtrl.dispose();
-    miscEachNoteCtrl.dispose();
-    techTravelHoursCtrl.dispose();
-    for (final p in _parts) {
-      p.dispose();
-    }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final currency = NumberFormatCurrency.maybeCAD();
-
+    // The labels already show current rates; no separate “rates” box needed.
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Work Order Billing'),
-        // 🔒 No Edit Rates here — keep in Admin only.
-      ),
-      body: _loadingRates
-          ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                _sectionHeader('Parts (from Inventory)'),
-                _partsBuilder(currency),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: OutlinedButton.icon(
-                    icon: const Icon(Icons.add),
-                    label: const Text('Add part from Inventory'),
-                    onPressed: () async {
-                      final db = ref.read(databaseProvider);
-                      final invItem = await showModalBottomSheet<InventoryItem>(
-                        context: context,
-                        isScrollControlled: true,
-                        builder: (_) => InventoryPickerSheet(dao: db.inventoryDao),
-                      );
-                      if (!mounted || invItem == null) return;
+      appBar: AppBar(title: const Text('Work Order Billing')),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          // ---------------- Parts from Inventory ----------------
+          const Text('Parts (from Inventory)',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
 
-                      final unit = invItem.price ?? (partsRate ?? 0);
-                      setState(() {
-                        _parts.add(_PartLine(
-                          itemId: invItem.id,
-                          workOrderId: widget.workOrderId,
-                          name: '${invItem.partNumber} — ${invItem.description}',
-                          unitPrice: unit,
-                          defaultPriceSource: invItem.price != null ? 'Item' : 'Parts rate',
-                        ));
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                _sectionHeader('Other billable entries'),
-                _qtyMoneyRow(
-                  context,
-                  label: 'Labour (hours)',
-                  qtyCtrl: labourHoursCtrl,
-                  amount: _lineLabour,
-                  currency: currency,
-                  unitRate: labourRate,
-                  unitLabel: '/ hr',
-                ),
-                _qtyMoneyRow(
-                  context,
-                  label: 'Test Truck – flat (0/1/2...)',
-                  qtyCtrl: ttFlatCountCtrl,
-                  amount: _lineTTFlat,
-                  currency: currency,
-                  unitRate: ttFlatRate,
-                  unitLabel: 'each',
-                ),
-                _qtyMoneyRow(
-                  context,
-                  label: 'Test Truck – kilometres',
-                  qtyCtrl: ttKmCtrl,
-                  amount: _lineTTKm,
-                  currency: currency,
-                  unitRate: ttKmRate,
-                  unitLabel: '/ km',
-                ),
-                _qtyMoneyRow(
-                  context,
-                  label: 'Test Truck – on site (hours)',
-                  qtyCtrl: ttOnSiteHoursCtrl,
-                  amount: _lineTTOnSite,
-                  currency: currency,
-                  unitRate: ttOnSiteRate,
-                  unitLabel: '/ hr',
-                ),
-                _qtyMoneyRow(
-                  context,
-                  label: 'Service Vehicle – kilometres',
-                  qtyCtrl: svcKmCtrl,
-                  amount: _lineSvcKm,
-                  currency: currency,
-                  unitRate: svcKmRate,
-                  unitLabel: '/ km',
-                ),
-                _qtyMoneyRow(
-                  context,
-                  label: 'Misc material & expense (qty)',
-                  qtyCtrl: miscEachQtyCtrl,
-                  amount: _lineMiscEach,
-                  currency: currency,
-                  unitRate: miscEachRate,
-                  unitLabel: 'each',
-                ),
-                TextField(
-                  controller: miscEachNoteCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Misc description (optional)',
-                  ),
-                ),
-                _qtyMoneyRow(
-                  context,
-                  label: 'Technician travel (hours)',
-                  qtyCtrl: techTravelHoursCtrl,
-                  amount: _lineTravel,
-                  currency: currency,
-                  unitRate: techTravelRate,
-                  unitLabel: '/ hr',
-                ),
-
-                const Divider(height: 32),
-                ListTile(
-                  title: const Text(
-                    'Grand total',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  trailing: Text(
-                    currency.format(_grandTotal),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
+          if (_parts.isEmpty)
+            const Padding(
+              padding: EdgeInsets.only(bottom: 8),
+              child: Text('No parts added.'),
+            )
+          else
+            Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                side: BorderSide(color: Colors.teal.shade100),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: List.generate(_parts.length, (i) {
+                  final it = _parts[i];
+                  return ListTile(
+                    dense: true,
+                    title: Text(it.description),
+                    subtitle: Text(
+                      '${it.partNumber.isNotEmpty ? 'PN ${it.partNumber} • ' : ''}'
+                      'Unit: ${_currency.format(it.price ?? 0)}',
                     ),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-                FilledButton.icon(
-                  onPressed: () {
-                    // TODO (next step): Persist billing lines
-                    //   - Parts → inventory_transactions (type: 'used' or 'sold'), referencing the workOrderId
-                    //   - Services → billing_lines (new table) with code + qty + rate snapshot
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Calculated totals (not saved).')),
-                    );
-                  },
-                  icon: const Icon(Icons.save),
-                  label: const Text('Save Billing'),
-                ),
-              ],
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete_outline),
+                      onPressed: () => setState(() => _parts.removeAt(i)),
+                    ),
+                  );
+                }),
+              ),
             ),
-    );
-  }
 
-  // ---- UI helpers ----
-
-  Widget _partsBuilder(NumberFormatCurrency currency) {
-    if (_parts.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.only(bottom: 8.0),
-        child: Text('No parts added.'),
-      );
-    }
-
-    return Column(
-      children: [
-        ..._parts.asMap().entries.map((entry) {
-          final i = entry.key;
-          final line = entry.value;
-
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 5,
-                  child: TextField(
-                    controller: line.nameCtrl,
-                    readOnly: true,
-                    decoration: InputDecoration(
-                      labelText: 'Part',
-                      isDense: true,
-                      border: const OutlineInputBorder(),
-                      helperText: line.defaultPriceSource == null
-                          ? null
-                          : 'Default: ${line.defaultPriceSource}',
-                      helperMaxLines: 1,
-                    ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: OutlinedButton.icon(
+              icon: const Icon(Icons.add),
+              label: const Text('Add part from Inventory'),
+              onPressed: () async {
+                final picked = await showModalBottomSheet<InventoryItem?>(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (_) => InventoryPickerSheet(
+                    dao: ref.read(inventoryDaoProvider),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  flex: 2,
-                  child: TextField(
-                    controller: line.qtyCtrl,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(
-                      labelText: 'Qty',
-                      isDense: true,
-                      border: OutlineInputBorder(),
-                    ),
-                    onChanged: (_) => setState(() {}),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  flex: 3,
-                  child: TextField(
-                    controller: line.unitCtrl,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(
-                      labelText: 'Unit price',
-                      isDense: true,
-                      border: OutlineInputBorder(),
-                    ),
-                    onChanged: (_) => setState(() {}),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  flex: 3,
-                  child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Line total',
-                      isDense: true,
-                      border: OutlineInputBorder(),
-                    ),
-                    child: Text(
-                      currency.format(line.total),
-                      textAlign: TextAlign.right,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ),
-                IconButton(
-                  tooltip: 'Remove',
-                  icon: const Icon(Icons.delete_outline),
-                  onPressed: () => setState(() => _parts.removeAt(i)),
-                ),
-              ],
-            ),
-          );
-        }),
-        Align(
-          alignment: Alignment.centerRight,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 6),
-            child: Text(
-              'Parts total: ${currency.format(_partsTotal)}',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+                );
+                if (picked != null) {
+                  setState(() {
+                    _parts.add(picked);
+                  });
+                }
+              },
             ),
           ),
-        ),
-      ],
-    );
-  }
 
-  Widget _sectionHeader(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0, top: 8.0),
-      child: Text(
-        text,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          const SizedBox(height: 24),
+
+          // ---------------- Other billable entries ----------------
+          const Text('Other billable entries',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 12),
+
+          _qtyLine(
+            label: 'Labour (hours${_rateText(PriceCodes.labour, unit: 'hour')})',
+            controller: labourHrsCtrl,
+            amount: _labourAmt,
+          ),
+          _qtyLine(
+            label: 'Overtime (hours${_rateText(PriceCodes.overtime, unit: 'hour')})',
+            controller: overtimeHrsCtrl,
+            amount: _otAmt,
+          ),
+          _qtyLine(
+            label: 'Technician Travel (hours${_rateText(PriceCodes.techTravel, unit: 'hour')})',
+            controller: techTravelHrsCtrl,
+            amount: _techTravelAmt,
+          ),
+          _qtyLine(
+            label: 'Test Truck - On Site (hours${_rateText(PriceCodes.testTruckOnSite, unit: 'hour')})',
+            controller: ttOnsiteHrsCtrl,
+            amount: _ttOnsiteAmt,
+          ),
+          _qtyLine(
+            label: 'Test Truck - flat (0/1/2…${_rateText(PriceCodes.testTruckFlat, unit: 'flat')})',
+            controller: ttFlatCtrl,
+            amount: _ttFlatAmt,
+          ),
+          _qtyLine(
+            label: 'Test Truck - km${_rateText(PriceCodes.testTruckKm, unit: 'km')}',
+            controller: ttKmCtrl,
+            amount: _ttKmAmt,
+          ),
+          _qtyLine(
+            label: 'Service Vehicle - km${_rateText(PriceCodes.serviceVehicleKm, unit: 'km')}',
+            controller: svcKmCtrl,
+            amount: _svcKmAmt,
+          ),
+
+          // Read-only computed misc total (no qty, no "each")
+          _readOnlyTotal(
+            label:
+                'Misc Materials & Expense (${(_rates[PriceCodes.miscPercent] ?? 0).toStringAsFixed(1)}% of labour + OT + travel time)',
+            amount: _miscAmt,
+          ),
+
+          const Divider(height: 32),
+
+          // ---------------- Totals ----------------
+          _totalsRow('Parts Subtotal', _partsSubtotal),
+          const SizedBox(height: 4),
+          _totalsRow('Subtotal (taxable)', _subtotalTaxable),
+          const SizedBox(height: 4),
+          _totalsRow('GST ${(_rates[PriceCodes.taxGst] ?? 5).toStringAsFixed(1)}%', _gstAmt),
+          const SizedBox(height: 8),
+          _totalsRow('Grand Total', _grandTotal, strong: true),
+
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: _saveBilling,
+            icon: const Icon(Icons.save),
+            label: const Text('Save Billing'),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _qtyMoneyRow(
-    BuildContext context, {
+  // --------- Widgets ---------
+
+  Widget _qtyLine({
     required String label,
-    required TextEditingController qtyCtrl,
+    required TextEditingController controller,
     required double amount,
-    required NumberFormatCurrency currency,
-    double? unitRate,
-    String? unitLabel,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Expanded(
             child: TextField(
-              controller: qtyCtrl,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              controller: controller,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+                signed: false,
+              ),
               decoration: InputDecoration(
                 labelText: label,
                 border: const OutlineInputBorder(),
-                isDense: true,
-                helperText: unitRate == null
-                    ? null
-                    : 'Rate: ${currency.format(unitRate)}${unitLabel == null ? '' : ' $unitLabel'}',
-                helperMaxLines: 1,
               ),
-              onChanged: (_) => setState(() {}),
             ),
           ),
           const SizedBox(width: 12),
@@ -410,10 +335,9 @@ class _WorkOrderBillingPageState extends ConsumerState<WorkOrderBillingPage> {
               decoration: const InputDecoration(
                 labelText: 'Amount',
                 border: OutlineInputBorder(),
-                isDense: true,
               ),
               child: Text(
-                currency.format(amount),
+                _currency.format(amount),
                 textAlign: TextAlign.right,
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
@@ -423,46 +347,76 @@ class _WorkOrderBillingPageState extends ConsumerState<WorkOrderBillingPage> {
       ),
     );
   }
-}
 
-// ---------- Parts line UI model ----------
-
-class _PartLine {
-  final int itemId;        // inventory id
-  final int workOrderId;   // for future persistence
-  final TextEditingController nameCtrl;
-  final TextEditingController qtyCtrl;
-  final TextEditingController unitCtrl;
-  final String? defaultPriceSource;
-
-  _PartLine({
-    required this.itemId,
-    required this.workOrderId,
-    required String name,
-    required double unitPrice,
-    this.defaultPriceSource,
-    double qty = 1,
-  })  : nameCtrl = TextEditingController(text: name),
-        qtyCtrl  = TextEditingController(text: qty.toStringAsFixed(2)),
-        unitCtrl = TextEditingController(text: unitPrice.toStringAsFixed(2));
-
-  double get total {
-    final q = double.tryParse(qtyCtrl.text) ?? 0;
-    final u = double.tryParse(unitCtrl.text) ?? 0;
-    return q * u;
+  Widget _readOnlyTotal({
+    required String label,
+    required double amount,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: InputDecorator(
+              decoration: InputDecoration(
+                labelText: label,
+                border: const OutlineInputBorder(),
+                fillColor: Colors.grey.shade100,
+                filled: true,
+              ),
+              child: const SizedBox(height: 20), // keep height consistent
+            ),
+          ),
+          const SizedBox(width: 12),
+          SizedBox(
+            width: 160,
+            child: InputDecorator(
+              decoration: const InputDecoration(
+                labelText: 'Amount',
+                border: OutlineInputBorder(),
+              ),
+              child: Text(
+                _currency.format(amount),
+                textAlign: TextAlign.right,
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
-  void dispose() {
-    nameCtrl.dispose();
-    qtyCtrl.dispose();
-    unitCtrl.dispose();
+  Widget _totalsRow(String label, double amount, {bool strong = false}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Text(
+          '$label: ',
+          style: TextStyle(
+            fontSize: strong ? 18 : 16,
+            fontWeight: strong ? FontWeight.w700 : FontWeight.w600,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          _currency.format(amount),
+          style: TextStyle(
+            fontSize: strong ? 18 : 16,
+            fontWeight: strong ? FontWeight.w700 : FontWeight.w600,
+          ),
+        ),
+      ],
+    );
   }
-}
 
-/// Tiny helper to format currency without intl dependency.
-class NumberFormatCurrency {
-  final String symbol;
-  NumberFormatCurrency._(this.symbol);
-  static NumberFormatCurrency maybeCAD() => NumberFormatCurrency._('\$');
-  String format(double v) => '$symbol${v.toStringAsFixed(2)}';
+  // --------- Persistence Stub ---------
+
+  Future<void> _saveBilling() async {
+    // TODO: Persist _parts and line quantities -> your billing schema.
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Billing saved (stub).')),
+    );
+  }
 }

@@ -3,14 +3,19 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:scalewrite_v2/pages/create_work_order_page.dart';
 import 'package:scalewrite_v2/pages/create_service_report_page.dart';
 import 'package:scalewrite_v2/pages/create_customer_page.dart';
 import 'package:scalewrite_v2/pages/view_work_orders_page.dart';
 import 'package:scalewrite_v2/pages/admin/admin_page.dart';
+
 import 'package:scalewrite_v2/providers/test_data_loader_provider.dart';
 import 'package:scalewrite_v2/providers/customer_list_provider.dart';
 import 'package:scalewrite_v2/providers/auth_provider.dart';
+
+// ⬇️ NEW: sync preview UI
+import 'package:scalewrite_v2/sync/sync_ui.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -25,7 +30,16 @@ class _HomePageState extends ConsumerState<HomePage> {
     final isAdmin = ref.watch(authControllerProvider)?.isAdmin ?? false;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('ScaleWrite Home')),
+      appBar: AppBar(
+        title: const Text('ScaleWrite Home'),
+        actions: [
+          IconButton(
+            tooltip: 'Sync',
+            icon: const Icon(Icons.sync),
+            onPressed: () => showSyncPreviewSheet(context, ref),
+          ),
+        ],
+      ),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(12.0),
@@ -91,7 +105,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     onPressed: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const CreateServiceReportPage(), // Open blank SR form from Home
+                        builder: (_) => const CreateServiceReportPage(),
                       ),
                     ),
                   ),
