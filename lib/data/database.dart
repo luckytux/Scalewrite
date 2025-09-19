@@ -17,6 +17,8 @@ import 'tables/users.dart';
 import 'tables/inventory_items.dart';
 import 'tables/inventory_transactions.dart';
 import 'tables/prices.dart';
+import 'tables/work_order_charges.dart';     // ← NEW
+import 'tables/work_order_parts.dart';       // ← NEW
 
 // DAOs
 import 'daos/customer_dao.dart';
@@ -29,6 +31,7 @@ import 'daos/work_order_with_customer_dao.dart';
 import 'daos/user_dao.dart';
 import 'daos/inventory_dao.dart';
 import 'daos/price_dao.dart';
+import 'daos/work_order_billing_dao.dart';   // ← NEW
 
 part 'database.g.dart';
 
@@ -44,6 +47,8 @@ part 'database.g.dart';
     InventoryItems,
     InventoryTransactions,
     Prices,
+    WorkOrderCharges,   // ← NEW
+    WorkOrderParts,     // ← NEW
   ],
   daos: [
     CustomerDao,
@@ -56,6 +61,7 @@ part 'database.g.dart';
     UserDao,
     InventoryDao,
     PriceDao,
+    WorkOrderBillingDao, // ← NEW
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -63,7 +69,7 @@ class AppDatabase extends _$AppDatabase {
 
   // 🔢 bump so upgrades run on existing installs
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 9; // ← was 8
 
   // 🔌 handy DAO fields
   late final customerDao = CustomerDao(this);
@@ -76,11 +82,13 @@ class AppDatabase extends _$AppDatabase {
   late final userDao = UserDao(this);
   late final inventoryDao = InventoryDao(this);
   late final priceDao = PriceDao(this);
+  late final workOrderBillingDao = WorkOrderBillingDao(this); // ← NEW
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) async {
           await m.createAll();
+          // v8 unique index is also ensured in beforeOpen (idempotent).
         },
         onUpgrade: (migrator, from, to) async {
           // v3: inventory table fix
@@ -93,9 +101,141 @@ class AppDatabase extends _$AppDatabase {
           if (from < 6) {
             await migrator.createTable(prices);
           }
+          // v7: contacts created_at / updated_at columns
+          if (from < 7) {
+            try { await migrator.addColumn(contacts, contacts.createdAt); } catch (_) {}
+            try { await migrator.addColumn(contacts, contacts.updatedAt); } catch (_) {}
+          }
+          // v8: enforce uniqueness for ServiceReports (work_order_id, scale_id)
+          if (from < 8) {
+            // 1) Deduplicate existing rows, keep the newest per pair
+            await customStatement('''
+              DELETE FROM service_reports
+              WHERE id NOT IN (
+                SELECT MAX(id)
+                FROM service_reports
+                GROUP BY work_order_id, scale_id
+              );
+            ''');
+
+            // 2) Create the unique index (idempotent)
+            await customStatement('''
+              CREATE UNIQUE INDEX IF NOT EXISTS idx_sr_unique_wo_scale
+              ON service_reports(work_order_id, scale_id);
+            ''');
+          }
+          // v9: new billing tables
+          if (from < 9) {
+            await migrator.createTable(workOrderCharges);
+            await migrator.createTable(workOrderParts);
+          }
         },
         beforeOpen: (details) async {
-          // Seed and then normalize any legacy alias codes
+          // --- Contacts: ensure columns exist + normalize to epoch ms ---
+          try {
+            final rows = await customSelect(
+              'PRAGMA table_info(contacts);',
+              readsFrom: {contacts},
+            ).get();
+
+            final cols = rows.map((r) => r.data['name']).join(', ');
+            print('📋 contacts columns: $cols');
+
+            bool hasCreatedAt = false;
+            bool hasUpdatedAt = false;
+            for (final r in rows) {
+              final name = (r.data['name'] as String).toLowerCase();
+              if (name == 'created_at') hasCreatedAt = true;
+              if (name == 'updated_at') hasUpdatedAt = true;
+            }
+
+            if (!hasCreatedAt) {
+              await customStatement('ALTER TABLE contacts ADD COLUMN created_at TEXT;');
+              print('🛠️ added contacts.created_at');
+            }
+            if (!hasUpdatedAt) {
+              await customStatement('ALTER TABLE contacts ADD COLUMN updated_at TEXT;');
+              print('🛠️ added contacts.updated_at');
+            }
+
+            // Normalize any ISO-like values to epoch ms
+            await customStatement('''
+              UPDATE contacts
+              SET created_at = CAST(strftime('%s', created_at) AS INTEGER) * 1000
+              WHERE created_at IS NOT NULL AND created_at LIKE '____-__-__%';
+            ''');
+            await customStatement('''
+              UPDATE contacts
+              SET updated_at = CAST(strftime('%s', updated_at) AS INTEGER) * 1000
+              WHERE updated_at IS NOT NULL AND updated_at LIKE '____-__-__%';
+            ''');
+
+            // Fill null/empty with now
+            await customStatement('''
+              UPDATE contacts
+              SET created_at = CAST(strftime('%s', 'now') AS INTEGER) * 1000
+              WHERE created_at IS NULL OR TRIM(created_at) = '';
+            ''');
+            await customStatement('''
+              UPDATE contacts
+              SET updated_at = CAST(strftime('%s', 'now') AS INTEGER) * 1000
+              WHERE updated_at IS NULL OR TRIM(updated_at) = '';
+            ''');
+
+            // Force numeric storage (helps Drift parse reliably)
+            await customStatement('''
+              UPDATE contacts
+              SET created_at = CAST(created_at AS INTEGER)
+              WHERE typeof(created_at) IN ('text');
+            ''');
+            await customStatement('''
+              UPDATE contacts
+              SET updated_at = CAST(updated_at AS INTEGER)
+              WHERE typeof(updated_at) IN ('text');
+            ''');
+
+            // Triggers to keep updated_at fresh
+            await customStatement('DROP TRIGGER IF EXISTS contacts_timestamps_insert;');
+            await customStatement('DROP TRIGGER IF EXISTS contacts_timestamps_update;');
+
+            await customStatement('''
+              CREATE TRIGGER IF NOT EXISTS contacts_timestamps_insert
+              AFTER INSERT ON contacts
+              BEGIN
+                UPDATE contacts
+                  SET created_at = COALESCE(NEW.created_at,
+                                             CAST(strftime('%s','now') AS INTEGER) * 1000),
+                      updated_at = COALESCE(NEW.updated_at,
+                                             CAST(strftime('%s','now') AS INTEGER) * 1000)
+                WHERE id = NEW.id;
+              END;
+            ''');
+
+            await customStatement('''
+              CREATE TRIGGER IF NOT EXISTS contacts_timestamps_update
+              AFTER UPDATE ON contacts
+              BEGIN
+                UPDATE contacts
+                  SET updated_at = CAST(strftime('%s','now') AS INTEGER) * 1000
+                WHERE id = NEW.id;
+              END;
+            ''');
+
+          } catch (e) {
+            print('⚠️ contacts self-heal/normalize failed: $e');
+          }
+
+          // --- ServiceReports: belt-and-suspenders ensure unique index exists ---
+          try {
+            await customStatement('''
+              CREATE UNIQUE INDEX IF NOT EXISTS idx_sr_unique_wo_scale
+              ON service_reports(work_order_id, scale_id);
+            ''');
+          } catch (e) {
+            print('⚠️ ensure unique idx on service_reports failed: $e');
+          }
+
+          // Prices seed/normalize
           await priceDao.ensureDefaultPrices();
           await priceDao.canonicalizeAliases();
         },

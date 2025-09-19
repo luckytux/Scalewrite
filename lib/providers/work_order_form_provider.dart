@@ -21,8 +21,12 @@ class WorkOrderFormController extends ChangeNotifier {
   int? editingWorkOrderId;
   String? workOrderNumber;
   bool customerFieldsEnabled = false;
+
+  /// When true, the Billing section is shown and its fields are saved
+  /// independently of the Site address. When false, Site values are used.
   bool showBilling = false;
 
+  // --- Site ---
   final businessNameController = TextEditingController();
   final siteAddressController = TextEditingController();
   final siteCityController = TextEditingController();
@@ -30,13 +34,16 @@ class WorkOrderFormController extends ChangeNotifier {
   final sitePostalController = TextEditingController();
   final gpsLocationController = TextEditingController();
 
+  // --- Billing (optional) ---
   final billingAddressController = TextEditingController();
   final billingCityController = TextEditingController();
   final billingProvinceController = TextEditingController();
   final billingPostalController = TextEditingController();
 
+  // Notes
   final customerNotesController = TextEditingController();
 
+  // Contacts for this Work Order's customer
   List<Contact> _contacts = [];
   List<Contact> get contacts => List.unmodifiable(_contacts);
 
@@ -55,6 +62,8 @@ class WorkOrderFormController extends ChangeNotifier {
   }
 
   WorkOrderFormController(this.ref);
+
+  // -------------------- Lifecycle / Reset --------------------
 
   Future<void> resetForm() async {
     selectedCustomerId = null;
@@ -81,7 +90,9 @@ class WorkOrderFormController extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<String> get provinces => [
+  // -------------------- Province list --------------------
+
+  List<String> get provinces => const [
         'Alberta',
         'British Columbia',
         'Saskatchewan',
@@ -97,20 +108,20 @@ class WorkOrderFormController extends ChangeNotifier {
         'Nunavut',
       ];
 
+  // -------------------- Work Order Number --------------------
+
   Future<void> generateWorkOrderNumberForCurrentUser() async {
     final user = ref.read(auth.authControllerProvider);
     final uid = user?.uidNumber ?? 999;
     workOrderNumber = generateWorkOrderNumber(uid);
   }
 
-  /// New, shorter format: <UID>-<YY><DDD>-<HHMM>
+  /// Short format: <UID>-<YY><DDD>-<HHMM>
   String generateWorkOrderNumber(int uid) {
     final now = DateTime.now();
-
-    final yy   = now.year % 100; // 0..99
-    final doy  = _dayOfYear(now); // 1..366
+    final yy = now.year % 100;
+    final doy = _dayOfYear(now);
     final hhmm = '${_twoDigits(now.hour)}${_twoDigits(now.minute)}';
-
     return '$uid-${_twoDigits(yy)}${_threeDigits(doy)}-$hhmm';
   }
 
@@ -120,27 +131,59 @@ class WorkOrderFormController extends ChangeNotifier {
   }
 
   String _threeDigits(int n) => n.toString().padLeft(3, '0');
-
   String _twoDigits(int n) => n.toString().padLeft(2, '0');
+
+  // -------------------- UI Toggles --------------------
 
   void enableCustomerEditing(bool value) {
     customerFieldsEnabled = value;
     notifyListeners();
   }
 
+  /// Show/Hide the Billing section. When enabling, if billing fields are
+  /// empty we prefill them from the Site address to speed up entry.
   void toggleBillingVisibility(bool value) {
     showBilling = value;
+    if (value) {
+      // Prefill billing from site if billing is empty
+      if (billingAddressController.text.trim().isEmpty &&
+          billingCityController.text.trim().isEmpty &&
+          billingProvinceController.text.trim().isEmpty &&
+          billingPostalController.text.trim().isEmpty) {
+        copySiteToBilling();
+      }
+    }
     notifyListeners();
   }
 
-  /// Start with a blank name (must be filled before save).
-  /// Optional fields use `null`, matching table nullability.
+  /// Explicit helpers for UI buttons (optional)
+  void copySiteToBilling() {
+    billingAddressController.text = siteAddressController.text;
+    billingCityController.text = siteCityController.text;
+    billingProvinceController.text =
+        siteProvinceController.text.isNotEmpty ? siteProvinceController.text : 'Alberta';
+    billingPostalController.text = sitePostalController.text;
+    notifyListeners();
+  }
+
+  void copyBillingToSite() {
+    siteAddressController.text = billingAddressController.text;
+    siteCityController.text = billingCityController.text;
+    siteProvinceController.text =
+        billingProvinceController.text.isNotEmpty ? billingProvinceController.text : 'Alberta';
+    sitePostalController.text = billingPostalController.text;
+    notifyListeners();
+  }
+
+  // -------------------- Contacts --------------------
+
+  /// Add a new (unsaved) contact row to the form.
   void addNewContact() {
     final now = DateTime.now();
     _contacts.add(Contact(
-      id: DateTime.now().millisecondsSinceEpoch,
+      id: DateTime.now().millisecondsSinceEpoch, // temp id for UI
       customerId: selectedCustomerId ?? 0,
-      name: '', // must be filled out before save
+      name: '',
       phone: null,
       email: null,
       notes: null,
@@ -149,7 +192,7 @@ class WorkOrderFormController extends ChangeNotifier {
       auditFlag: true,
       synced: false,
       createdAt: now,
-      updatedAt: now, // ✅ keep in sync on create
+      updatedAt: now,
     ));
     contactValidationError = false;
     notifyListeners();
@@ -190,6 +233,8 @@ class WorkOrderFormController extends ChangeNotifier {
     }
   }
 
+  // -------------------- Customer selection --------------------
+
   void setIsCreatingNewCustomer(String name) {
     selectedCustomerId = null;
     customerFieldsEnabled = true;
@@ -209,6 +254,8 @@ class WorkOrderFormController extends ChangeNotifier {
       final customer = customers.firstWhere((c) => c.id == customerId);
 
       businessNameController.text = customer.businessName;
+
+      // Site
       siteAddressController.text = customer.siteAddress ?? '';
       siteCityController.text = customer.siteCity ?? '';
       siteProvinceController.text =
@@ -218,19 +265,31 @@ class WorkOrderFormController extends ChangeNotifier {
       sitePostalController.text = customer.sitePostalCode ?? '';
       gpsLocationController.text = customer.gpsLocation ?? '';
 
-      billingAddressController.text = customer.billingAddress ?? '';
-      billingCityController.text = customer.billingCity ?? '';
-      billingProvinceController.text =
-          (customer.billingProvince?.isNotEmpty ?? false)
-              ? customer.billingProvince!
-              : 'Alberta';
-      billingPostalController.text = customer.billingPostalCode ?? '';
+      // Billing – if customer has a billing address, use it; otherwise default to site
+      final hasBilling = (customer.billingAddress?.trim().isNotEmpty ?? false);
+      if (hasBilling) {
+        billingAddressController.text = customer.billingAddress ?? '';
+        billingCityController.text = customer.billingCity ?? '';
+        billingProvinceController.text =
+            (customer.billingProvince?.isNotEmpty ?? false)
+                ? customer.billingProvince!
+                : 'Alberta';
+        billingPostalController.text = customer.billingPostalCode ?? '';
+        showBilling = true;
+      } else {
+        billingAddressController.clear();
+        billingCityController.clear();
+        billingProvinceController.text = 'Alberta';
+        billingPostalController.clear();
+        showBilling = false;
+      }
 
       customerFieldsEnabled = false;
 
+      // Load only active contacts; DAO sorts with main first
       final contactDao = ref.read(providers.contactDaoProvider);
       final customerContacts =
-          await contactDao.getContactsForCustomer(customerId);
+          await contactDao.getContactsForCustomer(customerId, onlyActive: true);
       _contacts = customerContacts;
     }
 
@@ -239,17 +298,22 @@ class WorkOrderFormController extends ChangeNotifier {
 
   void _clearFields() {
     businessNameController.clear();
+
     siteAddressController.clear();
     siteCityController.clear();
     siteProvinceController.text = 'Alberta';
     sitePostalController.clear();
     gpsLocationController.clear();
+
     billingAddressController.clear();
     billingCityController.clear();
     billingProvinceController.text = 'Alberta';
     billingPostalController.clear();
+
     _contacts.clear();
   }
+
+  // -------------------- Load existing WO --------------------
 
   Future<void> loadExistingWorkOrder(WorkOrder wo) async {
     editingWorkOrderId = wo.id;
@@ -274,7 +338,6 @@ class WorkOrderFormController extends ChangeNotifier {
     final customer = await customerDao.getCustomerById(wo.customerId);
 
     if (customer != null) {
-      // Ensure customer-derived fields and contacts get populated
       await selectCustomer(customer.id, [customer]);
     } else {
       businessNameController.text = '[Missing Customer]';
@@ -283,16 +346,19 @@ class WorkOrderFormController extends ChangeNotifier {
     notifyListeners();
   }
 
+  // -------------------- Persist --------------------
+
   Future<bool> save() async {
     if (!formKey.currentState!.validate()) {
       return false;
     }
 
-    // Contact validation: name required AND at least one contact method.
+    // Require at least one valid contact: name + (phone or email)
     final hasValidContact = _contacts.any((c) {
       final hasName = c.name.trim().isNotEmpty;
       final hasPhoneOrEmail =
-          (c.phone?.trim().isNotEmpty ?? false) || (c.email?.trim().isNotEmpty ?? false);
+          (c.phone?.trim().isNotEmpty ?? false) ||
+          (c.email?.trim().isNotEmpty ?? false);
       return hasName && hasPhoneOrEmail;
     });
 
@@ -307,7 +373,7 @@ class WorkOrderFormController extends ChangeNotifier {
 
     int? customerId = selectedCustomerId;
 
-    // Create customer if needed
+    // If we don't have a customer yet, create one now from the form
     if (customerId == null) {
       final customerEntry = CustomersCompanion(
         businessName: drift.Value(businessNameController.text),
@@ -315,12 +381,15 @@ class WorkOrderFormController extends ChangeNotifier {
         siteCity: drift.Value(siteCityController.text),
         siteProvince: drift.Value(siteProvinceController.text),
         sitePostalCode: drift.Value(cleanPostalCode(sitePostalController.text)),
-        billingAddress: drift.Value(
-            showBilling ? billingAddressController.text : siteAddressController.text),
-        billingCity: drift.Value(
-            showBilling ? billingCityController.text : siteCityController.text),
-        billingProvince: drift.Value(
-            showBilling ? billingProvinceController.text : siteProvinceController.text),
+        billingAddress: drift.Value(showBilling
+            ? billingAddressController.text
+            : siteAddressController.text),
+        billingCity: drift.Value(showBilling
+            ? billingCityController.text
+            : siteCityController.text),
+        billingProvince: drift.Value(showBilling
+            ? billingProvinceController.text
+            : siteProvinceController.text),
         billingPostalCode: drift.Value(showBilling
             ? cleanPostalCode(billingPostalController.text)
             : cleanPostalCode(sitePostalController.text)),
@@ -335,7 +404,7 @@ class WorkOrderFormController extends ChangeNotifier {
       selectedCustomerId = customerId;
     }
 
-    // Upsert work order
+    // Upsert Work Order (DAO will stamp lastModified)
     final workOrderEntry = WorkOrdersCompanion(
       customerId: drift.Value(customerId),
       workOrderNumber: drift.Value(workOrderNumber ?? ''),
@@ -344,15 +413,21 @@ class WorkOrderFormController extends ChangeNotifier {
       siteProvince: drift.Value(siteProvinceController.text),
       sitePostalCode: drift.Value(cleanPostalCode(sitePostalController.text)),
       gpsLocation: drift.Value(gpsLocationController.text),
-      billingAddress: drift.Value(
-          showBilling ? billingAddressController.text : siteAddressController.text),
-      billingCity: drift.Value(
-          showBilling ? billingCityController.text : siteCityController.text),
-      billingProvince: drift.Value(
-          showBilling ? billingProvinceController.text : siteProvinceController.text),
+
+      // Billing saved only if showBilling=true, otherwise mirror site values
+      billingAddress: drift.Value(showBilling
+          ? billingAddressController.text
+          : siteAddressController.text),
+      billingCity: drift.Value(showBilling
+          ? billingCityController.text
+          : siteCityController.text),
+      billingProvince: drift.Value(showBilling
+          ? billingProvinceController.text
+          : siteProvinceController.text),
       billingPostalCode: drift.Value(showBilling
           ? cleanPostalCode(billingPostalController.text)
           : cleanPostalCode(sitePostalController.text)),
+
       customerNotes: drift.Value(customerNotesController.text),
     );
 
@@ -362,36 +437,48 @@ class WorkOrderFormController extends ChangeNotifier {
       editingWorkOrderId = await db.workOrderDao.insertWorkOrder(workOrderEntry);
     }
 
-    // Replace contacts set: deactivate old, then insert current list
-    await contactDao.deactivateContactsForCustomer(customerId);
+    // Upsert contacts (no bulk duplication)
+    final existing = await contactDao.getAllForCustomer(customerId);
+    final existingIds = existing.map((c) => c.id).toSet();
+    final keptIds = <int>[];
 
     for (final c in _contacts) {
       final cleanName = c.name.trim();
       if (cleanName.isEmpty) {
-        // Shouldn’t happen due to earlier validation, but double-guard.
         contactValidationError = true;
         notifyListeners();
         return false;
       }
 
-      final contactEntry = ContactsCompanion(
+      final entry = ContactsCompanion(
         customerId: drift.Value(customerId),
-        name: drift.Value(cleanName),                // non-nullable
-        phone: drift.Value(_nullIfBlank(c.phone)),   // nullable column
-        email: drift.Value(_nullIfBlank(c.email)),   // nullable column
-        notes: drift.Value(_nullIfBlank(c.notes)),   // nullable column
+        name: drift.Value(cleanName),
+        phone: drift.Value(_nullIfBlank(c.phone)),
+        email: drift.Value(_nullIfBlank(c.email)),
+        notes: drift.Value(_nullIfBlank(c.notes)),
         isMain: drift.Value(c.isMain),
-        deactivate: drift.Value(c.deactivate),
+        deactivate: const drift.Value(false),
         auditFlag: const drift.Value(true),
         synced: const drift.Value(false),
       );
 
-      await contactDao.insertContact(contactEntry);
+      if (existingIds.contains(c.id)) {
+        await contactDao.updateContactById(c.id, entry);
+        keptIds.add(c.id);
+      } else {
+        final newId = await contactDao.insertContact(entry);
+        keptIds.add(newId);
+      }
     }
+
+    // Deactivate any contacts removed from the form
+    await contactDao.deactivateContactsExcept(customerId, keptIds);
 
     contactValidationError = false;
     return true;
   }
+
+  // -------------------- Utils --------------------
 
   String? _nullIfBlank(String? s) {
     final t = s?.trim();
@@ -418,10 +505,12 @@ class WorkOrderFormController extends ChangeNotifier {
     siteProvinceController.dispose();
     sitePostalController.dispose();
     gpsLocationController.dispose();
+
     billingAddressController.dispose();
     billingCityController.dispose();
     billingProvinceController.dispose();
     billingPostalController.dispose();
+
     customerNotesController.dispose();
     super.dispose();
   }

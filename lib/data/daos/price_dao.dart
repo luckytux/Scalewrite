@@ -7,15 +7,81 @@ part 'price_dao.g.dart';
 
 class PriceCodes {
   static const labour           = 'labour';
-  static const overtime         = 'overtime';            // per hour
+  static const overtime         = 'overtime';
   static const testTruckFlat    = 'test_truck_flat';
   static const testTruckKm      = 'test_truck_km';
-  static const testTruckOnSite  = 'test_truck_on_site';  // per hour (canonical)
+  static const testTruckOnSite  = 'test_truck_on_site';
   static const serviceVehicleKm = 'service_vehicle_km';
-  static const techTravel       = 'tech_travel';         // per hour
-  static const miscPercent      = 'misc_percent';        // % of (labour + OT + travel)
+  static const techTravel       = 'tech_travel';
+  static const miscPercent      = 'misc_percent'; // % of (labour + OT + travel)
   static const parts            = 'parts';
   static const taxGst           = 'tax_gst';
+}
+
+enum PriceKind { money, percent }
+
+/// Integer-safe price view:
+/// - money: `value` = cents
+/// - percent: `value` = tenths of a percent (12.0% => 120)
+class PriceInfo {
+  final String unit;
+  final int value;
+  final PriceKind kind;
+  final bool active;
+
+  const PriceInfo({
+    required this.unit,
+    required this.value,
+    required this.kind,
+    this.active = true,
+  });
+
+  bool get isMoney => kind == PriceKind.money;
+  bool get isPercent => kind == PriceKind.percent;
+
+  /// For money kinds, returns cents.
+  int get cents {
+    if (!isMoney) throw StateError('Not a money price');
+    return value;
+  }
+
+  /// For percent kinds, returns tenths of a percent (bps10).
+  /// Example: 12.0% => 120
+  int get bps10 {
+    if (!isPercent) throw StateError('Not a percent price');
+    return value;
+  }
+
+  /// Human label, integer-safe (no doubles in state).
+  String formatted({String? qtyLabel}) {
+    if (isPercent) {
+      final pctStr = (bps10 / 10).toStringAsFixed(1); // 12.0
+      return '$pctStr%';
+    }
+    final dollars = (cents / 100).toStringAsFixed(2);
+    final qty = qtyLabel ?? _defaultQtyLabel(unit);
+    return '$qty @ \$$dollars / $unit';
+  }
+
+  static String _defaultQtyLabel(String unit) {
+    switch (unit) {
+      case 'hour': return 'hours';
+      case 'km':   return 'km';
+      case 'flat': return 'flat';
+      case 'each': return 'each';
+      default:     return unit;
+    }
+  }
+
+  /// Apply this percentage to a money amount (in cents), rounded to nearest cent.
+  /// Only valid when `isPercent == true`.
+  int applyPercentToCents(int baseCents) {
+    if (!isPercent) throw StateError('applyPercentToCents requires a percent price');
+    // bps10 is tenths of a percent => divide by 1000 to get decimal
+    // round to nearest cent:
+    final numerator = baseCents * bps10;
+    return (numerator + 500) ~/ 1000; // +500 for rounding
+  }
 }
 
 @DriftAccessor(tables: [Prices])
@@ -32,6 +98,41 @@ class PriceDao extends DatabaseAccessor<AppDatabase> with _$PriceDaoMixin {
 
   Future<Price?> getByCode(String code) =>
       (select(prices)..where((p) => p.code.equals(code))).getSingleOrNull();
+
+  /// Integer-safe getter:
+  /// - money: cents (int)
+  /// - percent: tenths-of-a-percent (int, e.g., 12.0% -> 120)
+  Future<PriceInfo?> getUnitPrice(String code) async {
+    final p = await getByCode(code);
+    if (p == null) return null;
+
+    if (p.unit.toLowerCase() == 'percent') {
+      // Store as tenths-of-a-percent to allow one decimal place.
+      final bps10 = (p.rate * 10).round(); // 12.0 -> 120
+      return PriceInfo(
+        unit: p.unit,
+        value: bps10,
+        kind: PriceKind.percent,
+        active: p.active,
+      );
+    } else {
+      // Money → cents
+      final cents = (p.rate * 100).round();
+      return PriceInfo(
+        unit: p.unit,
+        value: cents,
+        kind: PriceKind.money,
+        active: p.active,
+      );
+    }
+  }
+
+  /// Convenience: human label like "hours @ $127.00 / hour" or "12.0%"
+  Future<String> formatUnitPrice(String code, {String? qtyLabel}) async {
+    final info = await getUnitPrice(code);
+    if (info == null) return '';
+    return info.formatted(qtyLabel: qtyLabel);
+  }
 
   /// Upsert by UNIQUE `code`.
   Future<void> upsertByCode(PricesCompanion entry) async {
@@ -65,11 +166,8 @@ class PriceDao extends DatabaseAccessor<AppDatabase> with _$PriceDaoMixin {
       );
 
   // ---- Canonicalize / de-dupe legacy codes ----
-  // Merge/remove legacy codes so they don't show up in the admin list.
   static const Map<String, List<String>> _aliases = {
-    // e.g. we saw both spellings in some DBs:
     PriceCodes.testTruckOnSite: ['test_truck_onsite', 'tt_on_site', 'testtruck_on_site'],
-    // remove old "misc_expense" in favor of "misc_percent"
     PriceCodes.miscPercent: ['misc_expense', 'misc'],
   };
 
@@ -127,7 +225,6 @@ class PriceDao extends DatabaseAccessor<AppDatabase> with _$PriceDaoMixin {
       row(code: PriceCodes.testTruckOnSite,  desc: 'Test Truck - On Site (per hour)', unit: 'hour',    rate: 110.00),
       row(code: PriceCodes.serviceVehicleKm, desc: 'Service Vehicle - km',            unit: 'km',      rate: 1.30),
       row(code: PriceCodes.parts,            desc: 'Parts (each)',                    unit: 'each',    rate: 0.0),
-      // 🔹 Keep the code = misc_percent, but show user-friendly description:
       row(code: PriceCodes.miscPercent,      desc: 'Misc Material & Expense',         unit: 'percent', rate: 12.0),
       row(code: PriceCodes.taxGst,           desc: 'GST',                             unit: 'percent', rate: 5.0),
     ];
@@ -136,7 +233,6 @@ class PriceDao extends DatabaseAccessor<AppDatabase> with _$PriceDaoMixin {
       await upsertByCode(d);
     }
 
-    // Clean up any legacy codes so they disappear from the admin list.
     await canonicalizeAliases();
   }
 }

@@ -72,48 +72,108 @@ class ServiceReportFormController extends ChangeNotifier {
 
   ServiceReportFormController(this.ref);
 
-  void setWorkOrder(WorkOrder? wo) {
-    selectedWorkOrder = wo;
-    selectedScale = null;
+  /// Wipes all scale-related inputs back to safe defaults.
+  void _clearScaleFieldsToDefaults() {
+    // Text fields
+    scaleNotesController.clear();
+    indicatorMakeController.clear();
+    indicatorModelController.clear();
+    indicatorSerialController.clear();
+    indicatorApprovalCodeController.clear();
+
+    baseMakeController.clear();
+    baseModelController.clear();
+    baseSerialController.clear();
+    baseApprovalCodeController.clear();
+
+    capacityController.clear();
+    divisionController.clear();
+    loadCellsController.clear();
+    sectionsController.clear();
+    loadCellModelController.clear();
+    loadCellCapacityController.clear();
+
+    // Toggles & dropdown defaults
+    selectedScaleType = 'Other';
+    selectedSubtype = null;
+    customTypeDescription = null;
+    configuration = true;
+
+    // Units & prefixes defaults
+    indicatorPrefix = 'AM';
+    basePrefix = 'AM';
+    capacityUnit = 'kg';
+    loadCellCapacityUnit = 'lb';
+
+    // Legal fields
+    isLegalForTrade = false;
+    sealStatus = null;
+    inspectionResult = null;
+    inspectionExpiry = null;
+    inspectionExpiryController.clear();
+  }
+
+  /// Initialize a truly blank, editable service report (from Home).
+  void startNewBlankReport({int? customerId}) {
+    clear(); // clears global + scale fields
+    isCreatingNewScale = true; // editable via new-scale
+    editMode = false;
     notifyListeners();
   }
 
+  /// Called when a Work Order is selected (e.g., arriving from View WO).
+  void setWorkOrder(WorkOrder? wo) {
+    selectedWorkOrder = wo;
+    selectedScale = null;
+    isCreatingNewScale = true; // unlocks the form
+    editMode = false;
+    _clearScaleFieldsToDefaults(); // ✅ ensure clean slate for "Create New"
+    notifyListeners();
+  }
+
+  /// Choose an existing scale (null means "Create New Scale").
   void setScale(Scale? scale) {
     selectedScale = scale;
-    isCreatingNewScale = scale == null;
+    isCreatingNewScale = (scale == null);
 
-    if (scale != null) {
-      scaleNotesController.text = scale.notes ?? '';
-      selectedScaleType = scale.scaleType;
-      selectedSubtype = scale.scaleSubtype;
-      configuration = scale.configuration;
-
-      indicatorMakeController.text = scale.indicatorMake;
-      indicatorModelController.text = scale.indicatorModel;
-      indicatorSerialController.text = scale.indicatorSerial;
-      indicatorPrefix = scale.approvalPrefix;
-      indicatorApprovalCodeController.text = scale.approvalNumber;
-
-      baseMakeController.text = scale.baseMake ?? '';
-      baseModelController.text = scale.baseModel ?? '';
-      baseSerialController.text = scale.baseSerial ?? '';
-      basePrefix = scale.baseApprovalPrefix ?? 'AM';
-      baseApprovalCodeController.text = scale.baseApprovalNumber ?? '';
-
-      capacityController.text = scale.capacity.toString();
-      capacityUnit = scale.capacityUnit;
-      divisionController.text = scale.division.toString();
-      loadCellsController.text = scale.numberOfLoadCells.toString();
-      sectionsController.text = scale.numberOfSections.toString();
-      loadCellModelController.text = scale.loadCellModel;
-      loadCellCapacityController.text = scale.loadCellCapacity.toString();
-      loadCellCapacityUnit = scale.loadCellCapacityUnit;
-
-      isLegalForTrade = scale.legalForTrade;
-      sealStatus = scale.sealStatus;
-      inspectionResult = scale.inspectionResult;
-      setInspectionExpiry(scale.inspectionExpiry);
+    if (scale == null) {
+      // ✅ Switching back to "Create New" should clear everything
+      _clearScaleFieldsToDefaults();
+      notifyListeners();
+      return;
     }
+
+    // Populate from existing scale
+    scaleNotesController.text = scale.notes ?? '';
+    selectedScaleType = scale.scaleType;
+    selectedSubtype = scale.scaleSubtype;
+    configuration = scale.configuration;
+
+    indicatorMakeController.text = scale.indicatorMake;
+    indicatorModelController.text = scale.indicatorModel;
+    indicatorSerialController.text = scale.indicatorSerial;
+    indicatorPrefix = scale.approvalPrefix;
+    indicatorApprovalCodeController.text = scale.approvalNumber;
+
+    baseMakeController.text = scale.baseMake ?? '';
+    baseModelController.text = scale.baseModel ?? '';
+    baseSerialController.text = scale.baseSerial ?? '';
+    basePrefix = scale.baseApprovalPrefix ?? 'AM';
+    baseApprovalCodeController.text = scale.baseApprovalNumber ?? '';
+
+    capacityController.text = scale.capacity.toString();
+    capacityUnit = scale.capacityUnit;
+    divisionController.text = scale.division.toString();
+    loadCellsController.text = scale.numberOfLoadCells.toString();
+    sectionsController.text = scale.numberOfSections.toString();
+    loadCellModelController.text = scale.loadCellModel;
+    loadCellCapacityController.text = scale.loadCellCapacity.toString();
+    loadCellCapacityUnit = scale.loadCellCapacityUnit;
+
+    isLegalForTrade = scale.legalForTrade;
+    sealStatus = scale.sealStatus;
+    inspectionResult = scale.inspectionResult;
+    setInspectionExpiry(scale.inspectionExpiry);
 
     notifyListeners();
   }
@@ -123,9 +183,14 @@ class ServiceReportFormController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Toggle explicit "Create New Scale" mode.
   void setIsCreatingNewScale(bool value) {
     isCreatingNewScale = value;
-    if (!value) selectedScale = null;
+    if (value) {
+      // Turning ON new-scale mode clears old selection & fields
+      selectedScale = null;
+      _clearScaleFieldsToDefaults();
+    }
     notifyListeners();
   }
 
@@ -218,6 +283,7 @@ class ServiceReportFormController extends ChangeNotifier {
       return false;
     }
 
+    // Create a scale first if we’re in new-scale mode.
     if (selectedScale == null && isCreatingNewScale) {
       final newScale = ScalesCompanion(
         customerId: Value(selectedWorkOrder!.customerId),
@@ -241,7 +307,8 @@ class ServiceReportFormController extends ChangeNotifier {
         numberOfLoadCells: Value(int.tryParse(loadCellsController.text) ?? 0),
         numberOfSections: Value(int.tryParse(sectionsController.text) ?? 0),
         loadCellModel: Value(loadCellModelController.text),
-        loadCellCapacity: Value(double.tryParse(loadCellCapacityController.text) ?? 0),
+        loadCellCapacity:
+            Value(double.tryParse(loadCellCapacityController.text) ?? 0),
         loadCellCapacityUnit: Value(loadCellCapacityUnit),
         legalForTrade: Value(isLegalForTrade),
         sealStatus: Value(sealStatus),
@@ -289,31 +356,13 @@ class ServiceReportFormController extends ChangeNotifier {
     editMode = false;
     isCreatingNewScale = false;
     selectedServiceReportId = null;
-    scaleNotesController.clear();
+
+    // Report notes
     reportNotesController.clear();
-    isLegalForTrade = false;
-    inspectionExpiry = null;
-    sealStatus = null;
-    inspectionResult = null;
-    inspectionExpiryController.clear();
-    indicatorMakeController.clear();
-    indicatorModelController.clear();
-    indicatorSerialController.clear();
-    indicatorApprovalCodeController.clear();
-    baseMakeController.clear();
-    baseModelController.clear();
-    baseSerialController.clear();
-    baseApprovalCodeController.clear();
-    capacityController.clear();
-    divisionController.clear();
-    loadCellsController.clear();
-    sectionsController.clear();
-    loadCellModelController.clear();
-    loadCellCapacityController.clear();
-    selectedScaleType = 'Other';
-    selectedSubtype = null;
-    customTypeDescription = null;
-    configuration = true;
+
+    // Scale-specific
+    _clearScaleFieldsToDefaults();
+
     notifyListeners();
   }
 

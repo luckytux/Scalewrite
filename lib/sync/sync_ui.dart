@@ -30,10 +30,20 @@ class _SyncPreviewSheetState extends State<_SyncPreviewSheet> {
   dynamic _preview; // expects: workOrders, serviceReports, weightTests
   dynamic _payload; // expects: toPrettyJson()
 
+  // Controller for the JSON area's Scrollbar + ScrollView
+  late final ScrollController _jsonScrollCtrl;
+
   @override
   void initState() {
     super.initState();
+    _jsonScrollCtrl = ScrollController();
     _load();
+  }
+
+  @override
+  void dispose() {
+    _jsonScrollCtrl.dispose();
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -130,8 +140,10 @@ class _SyncPreviewSheetState extends State<_SyncPreviewSheet> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Scrollbar(
+                      controller: _jsonScrollCtrl,
                       thumbVisibility: true,
                       child: SingleChildScrollView(
+                        controller: _jsonScrollCtrl,
                         child: SelectableText(
                           _payload?.toPrettyJson() ?? '',
                           style: const TextStyle(fontFamily: 'monospace', fontSize: 12),

@@ -37,7 +37,7 @@ class SiteAddressSection extends ConsumerWidget {
           controller: controller.siteAddressController,
           label: 'Street Address',
           readOnly: !enabled,
-                ),
+        ),
         const SizedBox(height: 8),
         Row(
           children: [
@@ -47,7 +47,7 @@ class SiteAddressSection extends ConsumerWidget {
                 controller: controller.siteCityController,
                 label: 'City',
                 readOnly: !enabled,
-                            ),
+              ),
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -74,7 +74,6 @@ class SiteAddressSection extends ConsumerWidget {
                     : 'Format: A1A 1A1',
               ),
             ),
-
           ],
         ),
         const SizedBox(height: 8),
@@ -85,7 +84,7 @@ class SiteAddressSection extends ConsumerWidget {
               controller: controller.gpsLocationController,
               label: 'GPS Location (Optional)',
               readOnly: !enabled,
-                          suffixIcon: IconButton(
+              suffixIcon: IconButton(
                 icon: const Icon(Icons.location_on),
                 onPressed: () {
                   final gps = controller.gpsLocationController.text.trim();
@@ -122,43 +121,88 @@ class SiteAddressSection extends ConsumerWidget {
                       ),
                     );
 
-                    if (result is gm.LatLng || result is lm.LatLng) {
-                      final lat = result.latitude;
-                      final lng = result.longitude;
+                    // Accept either google_maps_flutter.LatLng or latlong2.LatLng
+                    final coords = _coerceLatLng(result);
+                    if (coords != null) {
+                      final lat = coords.$1;
+                      final lng = coords.$2;
+
                       controller.gpsLocationController.text =
                           '${lat.toStringAsFixed(6)},${lng.toStringAsFixed(6)}';
 
-                      final placemarks = await placemarkFromCoordinates(lat, lng);
-                      if (placemarks.isNotEmpty) {
-                        final place = placemarks.first;
+                      // Reverse-geocode safely (desktop/web can throw)
+                      try {
+                        final placemarks = await placemarkFromCoordinates(lat, lng);
+                        if (placemarks.isNotEmpty) {
+                          final place = placemarks.first;
 
-                        Future<void> maybeOverwrite(TextEditingController ctrl, String label, String? newVal) async {
-                          if (newVal == null || newVal.trim().isEmpty) return;
-                          if (ctrl.text.trim().isEmpty) {
-                            ctrl.text = newVal;
-                          } else {
-                            final confirm = await showDialog<bool>(
-                              context: context,
-                              builder: (_) => AlertDialog(
-                                title: Text('Overwrite $label?'),
-                                content: Text('Detected "$newVal" for $label. Overwrite existing value "${ctrl.text}"?'),
-                                actions: [
-                                  TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('No')),
-                                  TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Yes')),
-                                ],
-                              ),
-                            );
-                            if (confirm == true) ctrl.text = newVal;
+                          Future<void> maybeOverwrite(
+                            TextEditingController ctrl,
+                            String label,
+                            String? newVal,
+                          ) async {
+                            if (newVal == null || newVal.trim().isEmpty) return;
+                            if (ctrl.text.trim().isEmpty) {
+                              ctrl.text = newVal;
+                            } else {
+                              final confirm = await showDialog<bool>(
+                                context: context,
+                                builder: (_) => AlertDialog(
+                                  title: Text('Overwrite $label?'),
+                                  content: Text(
+                                    'Detected "$newVal" for $label. Overwrite existing value "${ctrl.text}"?',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context, false),
+                                      child: const Text('No'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context, true),
+                                      child: const Text('Yes'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                              if (confirm == true) ctrl.text = newVal;
+                            }
                           }
+
+                          await maybeOverwrite(
+                            controller.siteAddressController,
+                            'Street Address',
+                            place.street,
+                          );
+                          await maybeOverwrite(
+                            controller.siteCityController,
+                            'City',
+                            place.locality,
+                          );
+                          await maybeOverwrite(
+                            controller.siteProvinceController,
+                            'Province',
+                            place.administrativeArea,
+                          );
+                          await maybeOverwrite(
+                            controller.sitePostalController,
+                            'Postal Code',
+                            place.postalCode,
+                          );
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('GPS location used to detect address.')),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('No address found for these coordinates.')),
+                          );
                         }
-
-                        await maybeOverwrite(controller.siteAddressController, 'Street Address', place.street);
-                        await maybeOverwrite(controller.siteCityController, 'City', place.locality);
-                        await maybeOverwrite(controller.siteProvinceController, 'Province', place.administrativeArea);
-                        await maybeOverwrite(controller.sitePostalController, 'Postal Code', place.postalCode);
-
+                      } catch (_) {
+                        // Platform not supported / permissions / network error.
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('GPS location used to detect address.')),
+                          const SnackBar(
+                            content: Text('Reverse geocoding not available; saved GPS only.'),
+                          ),
                         );
                       }
                     } else if (result != null) {
@@ -184,6 +228,18 @@ class SiteAddressSection extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  /// Coerce either google_maps_flutter.LatLng or latlong2.LatLng into (lat, lng).
+  /// Returns null if the result is neither type.
+  (double, double)? _coerceLatLng(dynamic result) {
+    if (result is gm.LatLng) {
+      return (result.latitude, result.longitude);
+    }
+    if (result is lm.LatLng) {
+      return (result.latitude, result.longitude);
+    }
+    return null;
   }
 
   String? formatGpsCoordinates(String input) {

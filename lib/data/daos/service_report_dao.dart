@@ -1,4 +1,3 @@
-// File: lib/data/daos/service_report_dao.dart
 import 'package:drift/drift.dart';
 import '../database.dart';
 import '../tables/service_reports.dart';
@@ -12,9 +11,28 @@ class ServiceReportDao extends DatabaseAccessor<AppDatabase>
     with _$ServiceReportDaoMixin {
   ServiceReportDao(super.db);
 
+  // --- Inserts / Updates ---
+
   Future<int> insertReport(ServiceReportsCompanion entry) {
     return into(serviceReports).insert(entry);
   }
+
+  Future<bool> updateReportById(int id, ServiceReportsCompanion entry) {
+    return (update(serviceReports)..where((t) => t.id.equals(id)))
+        .write(entry)
+        .then((rows) => rows > 0);
+  }
+
+  /// Find an existing report for a (workOrderId, scaleId) pair.
+  Future<ServiceReport?> findByWorkOrderAndScale(
+      int workOrderId, int scaleId) {
+    final q = select(serviceReports)
+      ..where((t) => t.workOrderId.equals(workOrderId))
+      ..where((t) => t.scaleId.equals(scaleId));
+    return q.getSingleOrNull();
+  }
+
+  // --- Reads / Streams ---
 
   Future<List<ServiceReport>> getAllReports() {
     return select(serviceReports).get();
@@ -33,7 +51,8 @@ class ServiceReportDao extends DatabaseAccessor<AppDatabase>
         .get();
   }
 
-  Future<List<ServiceReportWithScale>> getReportsWithScaleByWorkOrder(int workOrderId) async {
+  Future<List<ServiceReportWithScale>> getReportsWithScaleByWorkOrder(
+      int workOrderId) async {
     final query = select(serviceReports).join([
       innerJoin(scales, scales.id.equalsExp(serviceReports.scaleId)),
     ])..where(serviceReports.workOrderId.equals(workOrderId));

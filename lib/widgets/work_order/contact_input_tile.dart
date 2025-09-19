@@ -29,18 +29,37 @@ class ContactInputTile extends StatefulWidget {
 }
 
 class _ContactInputTileState extends State<ContactInputTile> {
-  late final TextEditingController _nameController;
-  late final TextEditingController _phoneController;
-  late final TextEditingController _emailController;
-  late final TextEditingController _notesController;
+  late TextEditingController _nameController;
+  late TextEditingController _phoneController;
+  late TextEditingController _emailController;
+  late TextEditingController _notesController;
 
   @override
   void initState() {
     super.initState();
+    _initControllers();
+  }
+
+  void _initControllers() {
     _nameController = TextEditingController(text: widget.contact.name);
     _phoneController = TextEditingController(text: _formatPhone(widget.contact.phone ?? ''));
     _emailController = TextEditingController(text: widget.contact.email ?? '');
     _notesController = TextEditingController(text: widget.contact.notes ?? '');
+  }
+
+  // ⭐ If this tile gets reused for a different contact (because of reordering),
+  //    refresh the controllers so fields stay in sync with the new contact.
+  @override
+  void didUpdateWidget(covariant ContactInputTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.contact.id != widget.contact.id) {
+      _nameController.dispose();
+      _phoneController.dispose();
+      _emailController.dispose();
+      _notesController.dispose();
+      _initControllers();
+      setState(() {}); // ensure rebuild with new controller texts
+    }
   }
 
   void _handleUpdate() {
@@ -108,7 +127,6 @@ class _ContactInputTileState extends State<ContactInputTile> {
                     },
                   ),
                 ),
-
                 const SizedBox(width: 12),
                 Expanded(
                   child: RoundedTextField(

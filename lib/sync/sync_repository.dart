@@ -1,14 +1,29 @@
 // File: lib/sync/sync_repository.dart
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:drift/drift.dart' as drift;
 
 import '../data/database.dart';
 import '../providers/drift_providers.dart';
 import 'sync_models.dart';
 
-/// Simple API facade (stubbed for now). Swap with real HTTP later.
+/// ---- Toggle / configuration -------------------------------------------------
+
+/// Flip this to `true` when you want to POST to a server instead of just logging.
+const bool kUseHttpSync = false;
+
+/// Change this when you have a central server or when testing on device/emulator.
+/// - Windows app on same PC as server: http://localhost:8080
+/// - Android emulator:                  http://10.0.2.2:8080
+/// - Android phone on same LAN:         http://<PC-LAN-IP>:8080
+final syncBaseUrlProvider = Provider<String>((ref) => 'http://localhost:8080');
+
+/// ---- API facades ------------------------------------------------------------
+
 abstract class SyncApi {
   Future<bool> send(SyncPayload payload);
 }
@@ -17,13 +32,51 @@ abstract class SyncApi {
 class DebugLogSyncApi implements SyncApi {
   @override
   Future<bool> send(SyncPayload payload) async {
-    debugPrint('🛰️ PUSH PAYLOAD:\n${payload.toPrettyJson()}');
-    await Future<void>.delayed(const Duration(milliseconds: 400));
+    debugPrint('🛰️ PUSH PAYLOAD (debug only):\n${payload.toPrettyJson()}');
+    await Future<void>.delayed(const Duration(milliseconds: 300));
     return true;
   }
 }
 
-final syncApiProvider = Provider<SyncApi>((ref) => DebugLogSyncApi());
+/// Basic HTTP client using dart:io HttpClient (no extra dependency).
+/// Expects a POST /sync/push that returns 2xx on success.
+class HttpSyncApi implements SyncApi {
+  final String baseUrl;
+  HttpSyncApi(this.baseUrl);
+
+  @override
+  Future<bool> send(SyncPayload payload) async {
+    final uri = Uri.parse('$baseUrl/sync/push');
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 10);
+    try {
+      final req = await client.postUrl(uri);
+      req.headers.set(HttpHeaders.contentTypeHeader, 'application/json');
+      req.add(utf8.encode(jsonEncode(payload.toJson())));
+      final resp = await req.close();
+      if (resp.statusCode >= 200 && resp.statusCode < 300) return true;
+
+      final body = await resp.transform(utf8.decoder).join();
+      debugPrint('❌ Sync server responded ${resp.statusCode}: $body');
+      return false;
+    } catch (e) {
+      debugPrint('❌ Sync HTTP error: $e');
+      return false;
+    } finally {
+      client.close(force: true);
+    }
+  }
+}
+
+/// Pick Debug or HTTP based on the toggle above.
+final syncApiProvider = Provider<SyncApi>((ref) {
+  if (kUseHttpSync) {
+    final baseUrl = ref.watch(syncBaseUrlProvider);
+    return HttpSyncApi(baseUrl);
+    }
+  return DebugLogSyncApi();
+});
+
+/// ---- Repository -------------------------------------------------------------
 
 class SyncRepository {
   final AppDatabase db;
@@ -73,66 +126,40 @@ class SyncRepository {
     );
   }
 
-  /// Build the JSON we will push (WO, SR, WT only).
+  /// Build the JSON we will push (WO, SR, WT only), including ALL columns via `SELECT *`.
   Future<SyncPayload> buildPayload() async {
-    // WorkOrders (unsynced)
-    final unsyncedWOs = await (db.select(db.workOrders)
-          ..where((t) => t.synced.equals(false)))
+    // WorkOrders (unsynced) — SELECT *
+    final woRows = await db
+        .customSelect('SELECT * FROM work_orders WHERE synced = 0')
         .get();
+    final workOrders = woRows.map((r) => _jsonifyRow(r.data)).toList();
 
-    // ServiceReports (unsynced)
-    final unsyncedSRs = await (db.select(db.serviceReports)
-          ..where((t) => t.synced.equals(false)))
+    // ServiceReports (unsynced) — SELECT *
+    final srRows = await db
+        .customSelect('SELECT * FROM service_reports WHERE synced = 0')
         .get();
+    final serviceReports = srRows.map((r) => _jsonifyRow(r.data)).toList();
 
-    // WeightTests for those unsynced ServiceReports
-    final srIds = unsyncedSRs.map((s) => s.id).toList();
-    final relatedWTs = srIds.isEmpty
-        ? <WeightTest>[]
-        : await (db.select(db.weightTests)
-              ..where((t) => t.serviceReportId.isIn(srIds)))
-            .get();
+    // WeightTests for those unsynced ServiceReports — SELECT *
+    final srIds = serviceReports
+        .map((m) => m['id'])
+        .whereType<int>()
+        .toList(growable: false);
 
-    // Map rows -> JSON
-    final woMaps = unsyncedWOs.map((w) {
-      return {
-        'id': w.id,
-        'customerId': w.customerId,
-        'workOrderNumber': w.workOrderNumber,
-        'siteAddress': w.siteAddress,
-        'siteCity': w.siteCity,
-        'siteProvince': w.siteProvince,
-        'sitePostalCode': w.sitePostalCode,
-        'gpsLocation': w.gpsLocation,
-        'billingAddress': w.billingAddress,
-        'billingCity': w.billingCity,
-        'billingProvince': w.billingProvince,
-        'billingPostalCode': w.billingPostalCode,
-        'customerNotes': w.customerNotes,
-      };
-    }).toList();
-
-    final srMaps = unsyncedSRs.map((s) {
-      return {
-        'id': s.id,
-        'workOrderId': s.workOrderId,
-        'scaleId': s.scaleId,
-        'notes': s.notes,
-      };
-    }).toList();
-
-    // Keep WeightTests minimal (don’t assume extra columns).
-    final wtMaps = relatedWTs.map((t) {
-      return {
-        'id': t.id,
-        'serviceReportId': t.serviceReportId,
-      };
-    }).toList();
+    List<Map<String, Object?>> weightTests = const [];
+    if (srIds.isNotEmpty) {
+      final idList = srIds.join(',');
+      final wtRows = await db
+          .customSelect(
+              'SELECT * FROM weight_tests WHERE service_report_id IN ($idList)')
+          .get();
+      weightTests = wtRows.map((r) => _jsonifyRow(r.data)).toList();
+    }
 
     return SyncPayload(
-      workOrders: woMaps,
-      serviceReports: srMaps,
-      weightTests: wtMaps,
+      workOrders: workOrders,
+      serviceReports: serviceReports,
+      weightTests: weightTests,
     );
   }
 
@@ -148,23 +175,45 @@ class SyncRepository {
     // Mark the pushed records as synced (WO + SR).
     await db.transaction(() async {
       // Work Orders
-      final woIds = payload.workOrders.map((m) => m['id'] as int).toList();
+      final woIds = payload.workOrders
+          .map((m) => m['id'])
+          .whereType<int>()
+          .toList(growable: false);
       if (woIds.isNotEmpty) {
-        await (db.update(db.workOrders)
-              ..where((t) => t.id.isIn(woIds)))
+        await (db.update(db.workOrders)..where((t) => t.id.isIn(woIds)))
             .write(const WorkOrdersCompanion(synced: drift.Value(true)));
       }
+
       // Service Reports
-      final srIds = payload.serviceReports.map((m) => m['id'] as int).toList();
+      final srIds = payload.serviceReports
+          .map((m) => m['id'])
+          .whereType<int>()
+          .toList(growable: false);
       if (srIds.isNotEmpty) {
-        await (db.update(db.serviceReports)
-              ..where((t) => t.id.isIn(srIds)))
+        await (db.update(db.serviceReports)..where((t) => t.id.isIn(srIds)))
             .write(const ServiceReportsCompanion(synced: drift.Value(true)));
       }
       // WeightTests: no synced flag; nothing to update here.
     });
 
     return true;
+  }
+
+  // ---- helpers ---------------------------------------------------------------
+
+  /// Make row JSON-safe: DateTime -> ISO, blobs -> base64, others unchanged.
+  Map<String, Object?> _jsonifyRow(Map<String, Object?> raw) {
+    final out = <String, Object?>{};
+    raw.forEach((k, v) {
+      if (v is DateTime) {
+        out[k] = v.toIso8601String();
+      } else if (v is Uint8List) {
+        out[k] = base64Encode(v);
+      } else {
+        out[k] = v;
+      }
+    });
+    return out;
   }
 }
 

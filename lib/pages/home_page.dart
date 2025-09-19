@@ -14,7 +14,7 @@ import 'package:scalewrite_v2/providers/test_data_loader_provider.dart';
 import 'package:scalewrite_v2/providers/customer_list_provider.dart';
 import 'package:scalewrite_v2/providers/auth_provider.dart';
 
-// ⬇️ NEW: sync preview UI
+// ⬇️ Sync preview UI
 import 'package:scalewrite_v2/sync/sync_ui.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -58,7 +58,9 @@ class _HomePageState extends ConsumerState<HomePage> {
                     ref.invalidate(customerListProvider);
 
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(result ? '✅ Test Data Loaded' : '❌ Failed to Load')),
+                      SnackBar(
+                        content: Text(result ? '✅ Test Data Loaded' : '❌ Failed to Load'),
+                      ),
                     );
                   },
                   icon: const Icon(Icons.refresh),
@@ -131,6 +133,15 @@ class _HomePageState extends ConsumerState<HomePage> {
                       MaterialPageRoute(builder: (_) => const ViewWorkOrdersPage()),
                     ),
                   ),
+
+                  // ⬇️ NEW: Big, obvious sync tile
+                  _buildTileButton(
+                    context,
+                    icon: Icons.sync,
+                    label: 'Sync Now',
+                    onPressed: () => showSyncPreviewSheet(context, ref),
+                  ),
+
                   if (isAdmin)
                     _buildTileButton(
                       context,

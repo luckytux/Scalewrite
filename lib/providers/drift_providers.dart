@@ -13,12 +13,13 @@ import '../data/daos/weight_test_dao.dart';
 import '../data/daos/work_order_with_customer_dao.dart';
 import '../data/daos/user_dao.dart';
 import '../data/daos/inventory_dao.dart';
-import '../data/daos/price_dao.dart'; // ✅ Added
+import '../data/daos/price_dao.dart';
+import '../data/daos/work_order_billing_dao.dart'; // NEW
 
-// ✅ Create a singleton instance of AppDatabase
+// Singleton database instance
 final _singletonDb = AppDatabase();
 
-/// Provides the singleton Drift database
+/// Provides the singleton Drift database.
 final databaseProvider = Provider<AppDatabase>((ref) => _singletonDb);
 
 /// Individual DAO providers
@@ -58,12 +59,15 @@ final inventoryDaoProvider = Provider<InventoryDao>(
   (ref) => ref.read(databaseProvider).inventoryDao,
 );
 
-/// ✅ NEW: Price DAO provider
 final priceDaoProvider = Provider<PriceDao>(
   (ref) => ref.read(databaseProvider).priceDao,
 );
 
-/// (Optional) Stream of active prices for easy UI wiring
+final workOrderBillingDaoProvider = Provider<WorkOrderBillingDao>(
+  (ref) => ref.read(databaseProvider).workOrderBillingDao,
+);
+
+/// Optional: stream of active prices for easy UI wiring.
 final activePricesStreamProvider = StreamProvider.autoDispose(
   (ref) => ref.watch(priceDaoProvider).watchActive(),
 );

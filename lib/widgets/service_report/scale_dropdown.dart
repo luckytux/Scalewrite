@@ -23,37 +23,63 @@ class ScaleDropdown extends ConsumerWidget {
     return FutureBuilder<List<Scale>>(
       future: ref.read(scaleDaoProvider).getScalesForCustomer(customerId),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox(
+            height: 56,
+            child: Center(child: CircularProgressIndicator()),
+          );
         }
 
-        final scales = snapshot.data!;
-        final dropdownItems = [
-          ...scales.map(
-            (s) => DropdownMenuItem<Scale?>(
-              value: s,
-              child: Text('${s.scaleType} - ${s.indicatorModel} (${s.indicatorSerial})'),
+        if (snapshot.hasError) {
+          return InputDecorator(
+            decoration: InputDecoration(
+              labelText: 'Scale',
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              filled: true,
+              fillColor: Colors.red.shade50,
             ),
-          ),
-          const DropdownMenuItem<Scale?>(
+            child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.red)),
+          );
+        }
+
+        final scales = snapshot.data ?? <Scale>[];
+
+        // Build entries: all scales + "Create New"
+        final entries = <DropdownMenuEntry<Scale?>>[
+          for (final s in scales)
+            DropdownMenuEntry<Scale?>(
+              value: s,
+              label: '${s.scaleType} - ${s.indicatorModel} (${s.indicatorSerial})',
+            ),
+          const DropdownMenuEntry<Scale?>(
             value: null,
-            child: Text('➕ Create New Scale'),
+            label: '➕ Create New Scale',
           ),
         ];
 
+        // Find currently selected Scale object by id (so identity matches an entry)
         Scale? selectedScale;
-        try {
-          selectedScale = scales.firstWhere((s) => s.id == selectedScaleId);
-        } catch (_) {
-          selectedScale = null;
+        if (selectedScaleId != null) {
+          for (final s in scales) {
+            if (s.id == selectedScaleId) {
+              selectedScale = s;
+              break;
+            }
+          }
         }
 
-        return DropdownButtonFormField<Scale?>(
-          value: selectedScale,
-          items: dropdownItems,
-          onChanged: (value) {
-            final controller = ref.read(serviceReportFormProvider.notifier);
+        final fill = Colors.teal.shade50;
+
+        return DropdownMenu<Scale?>(
+          // replaces: value:
+          initialSelection: selectedScale,
+          // replaces: items:
+          dropdownMenuEntries: entries,
+          // replaces: onChanged:
+          onSelected: (Scale? value) {
+            final controller = ref.read(serviceReportFormProvider);
             if (value == null) {
+              // user chose "Create New"
               controller.setIsCreatingNewScale(true);
               onChanged(null);
             } else {
@@ -61,12 +87,24 @@ class ScaleDropdown extends ConsumerWidget {
               onChanged(value);
             }
           },
-          decoration: InputDecoration(
-            labelText: 'Scale',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          label: const Text('Scale'),
+          inputDecorationTheme: InputDecorationTheme(
             filled: true,
-            fillColor: Colors.teal.shade50,
+            fillColor: fill,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
+          menuStyle: MenuStyle(
+            shape: WidgetStatePropertyAll(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+          // Arrow keys & type-to-search work out of the box with DropdownMenu.
+          // You can also set width if desired:
+          // width: MediaQuery.of(context).size.width, // optional
         );
       },
     );

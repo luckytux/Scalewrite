@@ -17,17 +17,26 @@ class ContactListSection extends ConsumerWidget {
       children: [
         const Text('Contacts', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         const SizedBox(height: 8),
+
+        // ⭐ Give each row a stable key so reordering (after "Make Main") doesn't scramble state.
         ...controller.contacts.map((contact) => Padding(
+              key: ValueKey('contact-pad-${contact.id}'),
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: ContactInputTile(
+                key: ValueKey('contact-${contact.id}'), // <- important
                 contact: contact,
                 isMain: contact.isMain,
                 readOnly: controller.contactsReadOnly,
-                onMakeMain: controller.contactsReadOnly ? null : () => controller.makeMainContact(contact),
-                onRemove: controller.contactsReadOnly ? () {} : () => controller.removeContact(contact),
+                onMakeMain: controller.contactsReadOnly
+                    ? null
+                    : () => controller.makeMainContact(contact),
+                onRemove: controller.contactsReadOnly
+                    ? () {}
+                    : () => controller.removeContact(contact),
                 onUpdate: (updated) => controller.updateContact(updated),
               ),
             )),
+
         if (controller.contactValidationError)
           const Padding(
             padding: EdgeInsets.only(top: 4, left: 8),
@@ -36,6 +45,7 @@ class ContactListSection extends ConsumerWidget {
               style: TextStyle(color: Colors.red, fontSize: 13),
             ),
           ),
+
         const SizedBox(height: 8),
         Align(
           alignment: Alignment.centerLeft,

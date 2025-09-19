@@ -1,5 +1,6 @@
-// File: lib/widgets/service_report/base_section.dart
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../common/arrow_dropdown_button.dart';
 
 class BaseSection extends StatelessWidget {
   final TextEditingController makeController;
@@ -10,6 +11,7 @@ class BaseSection extends StatelessWidget {
   final TextEditingController approvalCodeController;
   final String? Function(String?)? approvalCodeValidator;
   final bool editable;
+  final int orderBase;
 
   const BaseSection({
     super.key,
@@ -21,7 +23,10 @@ class BaseSection extends StatelessWidget {
     required this.approvalCodeController,
     this.approvalCodeValidator,
     this.editable = true,
+    this.orderBase = 100,
   });
+
+  static const _fieldHeight = 56.0;
 
   @override
   Widget build(BuildContext context) {
@@ -30,43 +35,76 @@ class BaseSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildTextField('Base Make', makeController, fillColor),
+        FocusTraversalOrder(
+          order: NumericFocusOrder(orderBase + 0),
+          child: _buildTextField('Base Make', makeController, fillColor),
+        ),
         const SizedBox(height: 10),
-        _buildTextField('Base Model', modelController, fillColor),
+        FocusTraversalOrder(
+          order: NumericFocusOrder(orderBase + 1),
+          child: _buildTextField('Base Model', modelController, fillColor),
+        ),
         const SizedBox(height: 10),
-        _buildTextField('Base Serial Number', serialController, fillColor),
+        FocusTraversalOrder(
+          order: NumericFocusOrder(orderBase + 2),
+          child: _buildTextField('Base Serial Number', serialController, fillColor),
+        ),
         const SizedBox(height: 10),
         Row(
           children: [
             Expanded(
-              child: DropdownButtonFormField<String>(
-                value: prefixValue,
-                items: ['AM', 'SWA']
-                    .map((p) => DropdownMenuItem(value: p, child: Text(p)))
-                    .toList(),
-                onChanged: editable ? onPrefixChanged : null,
-                decoration: InputDecoration(
-                  labelText: 'Base Approval Prefix (AM/SWA)',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  filled: true,
-                  fillColor: fillColor,
+              child: FocusTraversalOrder(
+                order: NumericFocusOrder(orderBase + 3),
+                child: SizedBox(
+                  height: _fieldHeight,
+                  child: ArrowDropdownButton<String>(
+                    selected: prefixValue,
+                    onChanged: editable ? onPrefixChanged : null,
+                    enabled: editable,
+                    items: const ['AM', 'SWA']
+                        .map<DropdownMenuItem<String>>(
+                          (p) => DropdownMenuItem<String>(
+                            value: p,
+                            child: Text(p),
+                          ),
+                        )
+                        .toList(),
+                    decoration: InputDecoration(
+                      labelText: 'Base Approval Prefix (AM/SWA)',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      filled: true,
+                      fillColor: fillColor,
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 16,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: _buildTextField(
-                'Base Approval Number',
-                approvalCodeController,
-                fillColor,
-                requiredField: false,
-                validator: approvalCodeValidator ?? (value) {
-                  debugPrint('🔍 Validating Base Approval Number: "$value"');
-                  if (!editable) return null;
-                  if (value == null || value.isEmpty) return null;
-                  if (!RegExp(r'^\d{4}$').hasMatch(value)) return 'Must be 4 digits';
-                  return null;
-                },
+              child: FocusTraversalOrder(
+                order: NumericFocusOrder(orderBase + 4),
+                child: _buildTextField(
+                  'Base Approval Number',
+                  approvalCodeController,
+                  fillColor,
+                  requiredField: false,
+                  validator: approvalCodeValidator ??
+                      (value) {
+                        if (!editable) return null;
+                        if (value == null || value.isEmpty) return null;
+                        if (!RegExp(r'^\d{4}$').hasMatch(value)) {
+                          return 'Must be 4 digits';
+                        }
+                        return null;
+                      },
+                ),
               ),
             ),
           ],
@@ -82,15 +120,26 @@ class BaseSection extends StatelessWidget {
     bool requiredField = true,
     String? Function(String?)? validator,
   }) {
+    final isApproval = label.contains('Approval');
     return TextFormField(
       controller: controller,
       readOnly: !editable,
-      keyboardType: label.contains('Approval') ? TextInputType.number : TextInputType.text,
+      textInputAction: TextInputAction.next,
+      keyboardType: isApproval ? TextInputType.number : TextInputType.text,
+      inputFormatters: isApproval
+          ? <TextInputFormatter>[
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(4),
+            ]
+          : null,
       decoration: InputDecoration(
         labelText: label,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         filled: true,
         fillColor: fillColor,
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        constraints: const BoxConstraints(minHeight: 56), // ← key line
       ),
       validator: validator ??
           (requiredField

@@ -11,8 +11,15 @@ part 'work_order_dao.g.dart';
 class WorkOrderDao extends DatabaseAccessor<AppDatabase> with _$WorkOrderDaoMixin {
   WorkOrderDao(super.db);
 
-  Future<int> insertWorkOrder(WorkOrdersCompanion entry) =>
-      into(workOrders).insert(entry);
+  Future<int> insertWorkOrder(WorkOrdersCompanion entry) {
+    // Ensure lastModified is stamped on insert unless caller explicitly set it.
+    final withStamp = entry.copyWith(
+      lastModified: entry.lastModified.present
+          ? entry.lastModified
+          : Value(DateTime.now()),
+    );
+    return into(workOrders).insert(withStamp);
+  }
 
   Future<List<WorkOrder>> getAllWorkOrders() =>
       (select(workOrders)..orderBy([(w) => OrderingTerm.desc(w.id)])).get();
@@ -25,7 +32,7 @@ class WorkOrderDao extends DatabaseAccessor<AppDatabase> with _$WorkOrderDaoMixi
     return (select(workOrders)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
   }
 
-  // 🛠 PATCH: Existing WorkOrder model version (keep it)
+  // Existing WorkOrder model updater (kept); stamps lastModified.
   Future<void> updateWorkOrderFromModel(WorkOrder updated) async {
     await (update(workOrders)..where((w) => w.id.equals(updated.id))).write(
       WorkOrdersCompanion(
@@ -49,9 +56,10 @@ class WorkOrderDao extends DatabaseAccessor<AppDatabase> with _$WorkOrderDaoMixi
     );
   }
 
-  // 🛠 PATCH: New Companion version for form saving
+  // Companion-based updater used by the form; always stamps lastModified.
   Future<void> updateWorkOrder(int id, WorkOrdersCompanion entry) async {
-    await (update(workOrders)..where((w) => w.id.equals(id))).write(entry);
+    final withStamp = entry.copyWith(lastModified: Value(DateTime.now()));
+    await (update(workOrders)..where((w) => w.id.equals(id))).write(withStamp);
   }
 
   Future<WorkOrder?> getMostRecentForCustomer(int customerId) {
@@ -83,7 +91,7 @@ class WorkOrderDao extends DatabaseAccessor<AppDatabase> with _$WorkOrderDaoMixi
     }).get();
   }
 
-  // ✅ NEW METHOD: Used in main.dart to determine if seed is needed
+  // Used in main.dart to determine if seed is needed
   Future<int> countWorkOrders() async {
     final query = selectOnly(workOrders)..addColumns([workOrders.id.count()]);
     final row = await query.getSingle();

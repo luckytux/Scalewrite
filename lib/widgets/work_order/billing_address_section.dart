@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:scalewrite_v2/providers/work_order_form_provider.dart';
 import 'package:scalewrite_v2/utils/formatters.dart';
 import 'package:scalewrite_v2/widgets/common/rounded_text_field.dart';
+// ✅ use the normalized dropdown
 import 'package:scalewrite_v2/widgets/work_order/province_dropdown.dart';
 
 class BillingAddressSection extends ConsumerWidget {
@@ -33,7 +34,7 @@ class BillingAddressSection extends ConsumerWidget {
           controller: controller.billingAddressController,
           label: 'Street Address',
           readOnly: !enabled,
-                ),
+        ),
         const SizedBox(height: 8),
         Row(
           children: [
@@ -43,7 +44,7 @@ class BillingAddressSection extends ConsumerWidget {
                 controller: controller.billingCityController,
                 label: 'City',
                 readOnly: !enabled,
-                            ),
+              ),
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -70,7 +71,6 @@ class BillingAddressSection extends ConsumerWidget {
                     : 'Format: A1A 1A1',
               ),
             ),
-
           ],
         ),
       ],
