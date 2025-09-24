@@ -25,22 +25,24 @@ class IPOChecklistPage extends ConsumerStatefulWidget {
 }
 
 class _IPOChecklistPageState extends ConsumerState<IPOChecklistPage> {
+  /// sectionTitle -> (item -> checked)
   late Map<String, Map<String, bool>> checklistState;
 
   @override
   void initState() {
     super.initState();
+    // Default all items to TRUE; we only persist exceptions (false) on save.
     checklistState = {
-      for (var section in widget.sections)
+      for (final section in widget.sections)
         section.title: {
-          for (var item in section.items) item: false,
+          for (final item in section.items) item: true,
         }
     };
   }
 
   void _toggleAllInSection(String sectionTitle, bool value) {
     setState(() {
-      checklistState[sectionTitle]?.updateAll((key, _) => value);
+      checklistState[sectionTitle]?.updateAll((_, __) => value);
     });
   }
 
@@ -50,22 +52,43 @@ class _IPOChecklistPageState extends ConsumerState<IPOChecklistPage> {
     });
   }
 
+  /// Build a dotted-path list for items explicitly FALSE:
+  /// e.g. ["Trade Approval & Verification.Device is sealed (NoA, STP-4)", ...]
+  List<String> _collectFalseMarkers(Map<String, Map<String, bool>> state) {
+    final out = <String>[];
+    state.forEach((section, items) {
+      items.forEach((item, checked) {
+        if (checked == false) {
+          out.add('$section.$item');
+        }
+      });
+    });
+    return out;
+  }
+
   Future<void> _saveChecklist() async {
     final db = ref.read(databaseProvider);
 
+    final exceptions = _collectFalseMarkers(checklistState);
+
+    final payload = <String, dynamic>{
+      'schemaVersion': 1,
+      'template': widget.ipoType,
+      'completed': true,
+      'exceptions': exceptions, // empty list if everything stayed true
+      'ts': DateTime.now().toIso8601String(),
+    };
+
     await db.serviceReportDao.updateIpoState(
       reportId: widget.serviceReportId,
-      ipoStateJson: {
-        widget.ipoType: checklistState,
-      },
+      ipoStateJson: payload,
     );
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Checklist saved.')),
-      );
-      Navigator.of(context).pop();
-    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Inspection checklist saved.')),
+    );
+    Navigator.of(context).pop(); // back to the Service Report page
   }
 
   @override
@@ -77,7 +100,7 @@ class _IPOChecklistPageState extends ConsumerState<IPOChecklistPage> {
         children: [
           ...widget.sections.map((section) {
             final items = checklistState[section.title] ?? {};
-            final allChecked = items.values.every((val) => val);
+            final allChecked = items.isNotEmpty && items.values.every((v) => v);
 
             return Card(
               margin: const EdgeInsets.symmetric(vertical: 8),
@@ -90,7 +113,8 @@ class _IPOChecklistPageState extends ConsumerState<IPOChecklistPage> {
                       children: [
                         Checkbox(
                           value: allChecked,
-                          onChanged: (val) => _toggleAllInSection(section.title, val ?? false),
+                          onChanged: (val) =>
+                              _toggleAllInSection(section.title, val ?? false),
                         ),
                         Expanded(
                           child: Text(
@@ -105,13 +129,15 @@ class _IPOChecklistPageState extends ConsumerState<IPOChecklistPage> {
                     ),
                     const SizedBox(height: 4),
                     ...section.items.map((item) {
-                      final checked = checklistState[section.title]?[item] ?? false;
+                      final checked =
+                          checklistState[section.title]?[item] ?? true;
                       return CheckboxListTile(
                         contentPadding: EdgeInsets.zero,
                         title: Text(item),
                         value: checked,
                         controlAffinity: ListTileControlAffinity.leading,
-                        onChanged: (val) => _toggleItem(section.title, item, val ?? false),
+                        onChanged: (val) =>
+                            _toggleItem(section.title, item, val ?? true),
                       );
                     }),
                   ],

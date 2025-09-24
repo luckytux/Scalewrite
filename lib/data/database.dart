@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart'; // DB under AppData
+import 'package:bcrypt/bcrypt.dart'; // <-- NEW: to hash default admin password
 import './json_converter.dart';
 
 // Tables
@@ -103,8 +105,12 @@ class AppDatabase extends _$AppDatabase {
           }
           // v7: contacts created_at / updated_at columns
           if (from < 7) {
-            try { await migrator.addColumn(contacts, contacts.createdAt); } catch (_) {}
-            try { await migrator.addColumn(contacts, contacts.updatedAt); } catch (_) {}
+            try {
+              await migrator.addColumn(contacts, contacts.createdAt);
+            } catch (_) {}
+            try {
+              await migrator.addColumn(contacts, contacts.updatedAt);
+            } catch (_) {}
           }
           // v8: enforce uniqueness for ServiceReports (work_order_id, scale_id)
           if (from < 8) {
@@ -220,7 +226,6 @@ class AppDatabase extends _$AppDatabase {
                 WHERE id = NEW.id;
               END;
             ''');
-
           } catch (e) {
             print('⚠️ contacts self-heal/normalize failed: $e');
           }
@@ -235,6 +240,13 @@ class AppDatabase extends _$AppDatabase {
             print('⚠️ ensure unique idx on service_reports failed: $e');
           }
 
+          // ✅ Mandatory admin user seed (idempotent, safe for upgrades/fresh installs)
+          try {
+            await _ensureAdminUserExists(this);
+          } catch (e) {
+            print('⚠️ ensure admin user failed: $e');
+          }
+
           // Prices seed/normalize
           await priceDao.ensureDefaultPrices();
           await priceDao.canonicalizeAliases();
@@ -247,11 +259,83 @@ LazyDatabase _openConnection([String? overridePath]) {
   return LazyDatabase(() async {
     final dbPath = overridePath ?? await _defaultPath();
     print('📂 SQLite DB Path: $dbPath');
+
+    // Optional breadcrumb so EXE launches are debuggable without a console
+    try {
+      final supportDir = await getApplicationSupportDirectory();
+      final logDir = Directory(p.join(supportDir.path, 'ScaleWrite_v2', 'logs'));
+      await logDir.create(recursive: true);
+      final f = File(p.join(logDir.path, 'startup.log'));
+      await f.writeAsString('DB path: $dbPath\n', mode: FileMode.append);
+    } catch (_) {}
+
     return NativeDatabase(File(dbPath));
   });
 }
 
 Future<String> _defaultPath() async {
-  final dir = Directory.current;
-  return p.join(dir.path, 'scalewrite.sqlite');
+  // Per-user writable folder
+  final supportDir = await getApplicationSupportDirectory();
+  final appDir = Directory(p.join(supportDir.path, 'ScaleWrite_v2'));
+  await appDir.create(recursive: true);
+  return p.join(appDir.path, 'scalewrite.sqlite');
+}
+
+/// Ensures there is at least one admin user, and that it has a valid password.
+/// Default password is "password" (bcrypt, random salt).
+Future<void> _ensureAdminUserExists(AppDatabase db) async {
+  // If any admin exists, do nothing.
+  final hasAdmin = await db.customSelect(
+    'SELECT id FROM users WHERE is_admin = 1 LIMIT 1;',
+    readsFrom: {db.users},
+  ).getSingleOrNull();
+  if (hasAdmin != null) return;
+
+  // Precompute a default hash once (random salt each run is fine).
+  final defaultHash = BCrypt.hashpw('password', BCrypt.gensalt()); // <-- DEFAULT
+
+  // If uid='admin' exists, promote + fill blanks (including password if missing/blank).
+  final adminRow = await db.customSelect(
+    "SELECT id, uid_number, password_hash FROM users WHERE uid = 'admin' LIMIT 1;",
+    readsFrom: {db.users},
+  ).getSingleOrNull();
+
+  if (adminRow != null) {
+    final id = adminRow.data['id'] as int;
+    final pwHash = (adminRow.data['password_hash'] as String?) ?? '';
+    final needsPw = pwHash.trim().isEmpty;
+
+    await db.customStatement(
+      '''
+      UPDATE users
+      SET
+        is_admin = 1,
+        email = COALESCE(NULLIF(email, ''), ?),
+        display_name = COALESCE(NULLIF(display_name, ''), ?),
+        uid_number = COALESCE(uid_number, ?),
+        password_hash = CASE WHEN ? = 1 THEN ? ELSE password_hash END
+      WHERE id = ?;
+      ''',
+      [
+        'admin@local',
+        'Administrator',
+        999,
+        needsPw ? 1 : 0,
+        defaultHash,
+        id,
+      ],
+    );
+    print('👤 Promoted existing uid=admin to admin.${needsPw ? " (Set default password)" : ""}');
+    return;
+  }
+
+  // Otherwise insert a brand new admin row with default password hash.
+  await db.customStatement(
+    '''
+    INSERT INTO users (uid, uid_number, email, display_name, password_hash, is_admin)
+    VALUES (?, ?, ?, ?, ?, 1);
+    ''',
+    ['admin', 999, 'admin@local', 'Administrator', defaultHash],
+  );
+  print('👤 Seeded admin user (uid=admin, email=admin@local, default password).');
 }

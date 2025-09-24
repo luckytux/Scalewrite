@@ -2,8 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/database.dart';            // brings in the Drift data class `Price`
-import 'drift_providers.dart';            // priceDaoProvider, workOrderBillingDaoProvider (your DAO)
+import '../data/database.dart';                  // Drift data class `Price`
+import 'drift_providers.dart';                   // priceDaoProvider, workOrderBillingDaoProvider
 import '../data/daos/price_dao.dart' as pricing; // for PriceCodes
 
 final workOrderBillingProvider =
@@ -17,19 +17,16 @@ class WorkOrderBillingController extends ChangeNotifier {
 
   int? workOrderId;
 
-  // Quantities entered by the user
-  final labourHours = TextEditingController(text: '0');
-  final overtimeHours = TextEditingController(text: '0');
-  final techTravelHours = TextEditingController(text: '0');
-  final testTruckOnSiteHours = TextEditingController(text: '0');
-  final testTruckFlat = TextEditingController(text: '0');
-  final testTruckKm = TextEditingController(text: '0');
-  final serviceVehicleKm = TextEditingController(text: '0');
+  // Quantities entered by the user (blank by default; blank → 0.0 in math)
+  final labourHours = TextEditingController();
+  final overtimeHours = TextEditingController();
+  final techTravelHours = TextEditingController();
+  final testTruckOnSiteHours = TextEditingController();
+  final testTruckFlat = TextEditingController();
+  final testTruckKm = TextEditingController();
+  final serviceVehicleKm = TextEditingController();
 
-  /// If you want this editable by the user. Otherwise you can seed from defaults.
-  final miscMaterialsPct = TextEditingController(text: '0');
-
-  // Unit prices pulled from PriceDao (Drift data class `Price`)
+  // Unit prices (snapshots) from PriceDao
   Price? pLabour;
   Price? pOvertime;
   Price? pTechTravel;
@@ -37,13 +34,16 @@ class WorkOrderBillingController extends ChangeNotifier {
   Price? pTestTruckKm;
   Price? pServiceVehicleKm;
   Price? pTestTruckFlat;
-  Price? pMiscPercent;
 
   // ---- Helpers ----
   double _num(TextEditingController c) => double.tryParse(c.text.trim()) ?? 0.0;
   double _rate(Price? p) => p?.rate ?? 0.0;
   String _unit(Price? p) => p?.unit ?? '';
   String _rateStr(Price? p) => _rate(p).toStringAsFixed(2);
+  String _resolveUnit(Price? p, {String? fallback}) {
+    final u = _unit(p);
+    return u.isNotEmpty ? u : (fallback ?? '');
+  }
 
   Future<void> init(int woId) async {
     workOrderId = woId;
@@ -56,115 +56,106 @@ class WorkOrderBillingController extends ChangeNotifier {
     pTestTruckKm      = await prices.getByCode(pricing.PriceCodes.testTruckKm);
     pServiceVehicleKm = await prices.getByCode(pricing.PriceCodes.serviceVehicleKm);
     pTestTruckFlat    = await prices.getByCode(pricing.PriceCodes.testTruckFlat);
-    pMiscPercent      = await prices.getByCode(pricing.PriceCodes.miscPercent);
-
-    // Optionally seed misc % from the table default if the field is 0
-    final currentPct = double.tryParse(miscMaterialsPct.text.trim()) ?? 0.0;
-    if (currentPct == 0.0 && pMiscPercent != null) {
-      // Store with 1 decimal if it looks like a percent value
-      miscMaterialsPct.text = pMiscPercent!.rate.toStringAsFixed(1);
-    }
 
     notifyListeners();
   }
 
-  /// Save all entered quantities as upserted charge lines.
-  /// Expects a DAO available via `workOrderBillingDaoProvider` with:
-  ///   upsertCharge({
-  ///     required int workOrderId,
-  ///     required String code,
-  ///     required String label,
-  ///     required double quantity,
-  ///     required double unitPrice,
-  ///   })
-  Future<bool> save() async {
-    if (workOrderId == null) return false;
+  Future<void> _upsertIfNonZero({
+    required String code,
+    required String label,
+    required double quantity,
+    required double unitPrice,
+    String? unit,
+  }) async {
+    if (workOrderId == null) return;
+    if (quantity <= 0) return; // 👈 skip zero writes
     final dao = ref.read(workOrderBillingDaoProvider);
-
-    // LABOUR
     await dao.upsertCharge(
       workOrderId: workOrderId!,
+      code: code,
+      label: label,
+      quantity: quantity,
+      unitPrice: unitPrice,
+      unit: unit,
+    );
+  }
+
+  /// Save all entered quantities as upserted charge lines.
+  /// Skips any line whose quantity parses to 0 or blank.
+  Future<bool> save() async {
+    if (workOrderId == null) return false;
+
+    // LABOUR
+    final labourUnit = _resolveUnit(pLabour, fallback: 'hour');
+    await _upsertIfNonZero(
       code: pricing.PriceCodes.labour,
-      label: 'Labour (${_unit(pLabour)} @ \$${_rateStr(pLabour)})',
+      label: 'Labour ($labourUnit @ \$${_rateStr(pLabour)})',
       quantity: _num(labourHours),
       unitPrice: _rate(pLabour),
+      unit: labourUnit,
     );
 
     // OVERTIME
-    await dao.upsertCharge(
-      workOrderId: workOrderId!,
+    final otUnit = _resolveUnit(pOvertime, fallback: 'hour');
+    await _upsertIfNonZero(
       code: pricing.PriceCodes.overtime,
-      label: 'Overtime (${_unit(pOvertime)} @ \$${_rateStr(pOvertime)})',
+      label: 'Overtime ($otUnit @ \$${_rateStr(pOvertime)})',
       quantity: _num(overtimeHours),
       unitPrice: _rate(pOvertime),
+      unit: otUnit,
     );
 
     // TECH TRAVEL
-    await dao.upsertCharge(
-      workOrderId: workOrderId!,
+    final travelUnit = _resolveUnit(pTechTravel, fallback: 'hour');
+    await _upsertIfNonZero(
       code: pricing.PriceCodes.techTravel,
-      label: 'Technician Travel (${_unit(pTechTravel)} @ \$${_rateStr(pTechTravel)})',
+      label: 'Technician Travel ($travelUnit @ \$${_rateStr(pTechTravel)})',
       quantity: _num(techTravelHours),
       unitPrice: _rate(pTechTravel),
+      unit: travelUnit,
     );
 
     // TEST TRUCK - ON SITE
-    await dao.upsertCharge(
-      workOrderId: workOrderId!,
+    final ttOnSiteUnit = _resolveUnit(pTestTruckOnSite, fallback: 'hour');
+    await _upsertIfNonZero(
       code: pricing.PriceCodes.testTruckOnSite,
-      label:
-          'Test Truck - On Site (${_unit(pTestTruckOnSite)} @ \$${_rateStr(pTestTruckOnSite)})',
+      label: 'Test Truck - On Site ($ttOnSiteUnit @ \$${_rateStr(pTestTruckOnSite)})',
       quantity: _num(testTruckOnSiteHours),
       unitPrice: _rate(pTestTruckOnSite),
+      unit: ttOnSiteUnit,
     );
 
     // TEST TRUCK - FLAT
-    await dao.upsertCharge(
-      workOrderId: workOrderId!,
+    final ttFlatUnit = _resolveUnit(pTestTruckFlat, fallback: 'flat');
+    await _upsertIfNonZero(
       code: pricing.PriceCodes.testTruckFlat,
       label: 'Test Truck - Flat',
       quantity: _num(testTruckFlat),
       unitPrice: _rate(pTestTruckFlat),
+      unit: ttFlatUnit,
     );
 
     // TEST TRUCK - KM
-    await dao.upsertCharge(
-      workOrderId: workOrderId!,
+    final ttKmUnit = _resolveUnit(pTestTruckKm, fallback: 'km');
+    await _upsertIfNonZero(
       code: pricing.PriceCodes.testTruckKm,
-      label:
-          'Test Truck - km (${_unit(pTestTruckKm)} @ \$${_rateStr(pTestTruckKm)})',
+      label: 'Test Truck - km ($ttKmUnit @ \$${_rateStr(pTestTruckKm)})',
       quantity: _num(testTruckKm),
       unitPrice: _rate(pTestTruckKm),
+      unit: ttKmUnit,
     );
 
     // SERVICE VEHICLE - KM
-    await dao.upsertCharge(
-      workOrderId: workOrderId!,
+    final svKmUnit = _resolveUnit(pServiceVehicleKm, fallback: 'km');
+    await _upsertIfNonZero(
       code: pricing.PriceCodes.serviceVehicleKm,
-      label:
-          'Service Vehicle - km (${_unit(pServiceVehicleKm)} @ \$${_rateStr(pServiceVehicleKm)})',
+      label: 'Service Vehicle - km ($svKmUnit @ \$${_rateStr(pServiceVehicleKm)})',
       quantity: _num(serviceVehicleKm),
       unitPrice: _rate(pServiceVehicleKm),
+      unit: svKmUnit,
     );
 
-    // MISC MATERIALS & EXPENSE (percent of labour + OT + travel)
-    final labourAmt = _num(labourHours) * _rate(pLabour);
-    final otAmt = _num(overtimeHours) * _rate(pOvertime);
-    final travelAmt = _num(techTravelHours) * _rate(pTechTravel);
-    final base = labourAmt + otAmt + travelAmt;
-
-    final pct = double.tryParse(miscMaterialsPct.text.trim()) ??
-        (pMiscPercent?.rate ?? 0.0);
-    final miscAmt = base * (pct / 100.0);
-
-    await dao.upsertCharge(
-      workOrderId: workOrderId!,
-      code: pricing.PriceCodes.miscPercent, // canonical code
-      label:
-          'Misc Materials & Expense (${pct.toStringAsFixed(1)}% of labour + OT + travel)',
-      quantity: 1.0,      // single line
-      unitPrice: miscAmt, // total amount
-    );
+    // 👇 Intentionally no "Misc Materials & Expense" line per your request.
 
     return true;
   }
@@ -178,7 +169,6 @@ class WorkOrderBillingController extends ChangeNotifier {
     testTruckFlat.dispose();
     testTruckKm.dispose();
     serviceVehicleKm.dispose();
-    miscMaterialsPct.dispose();
     super.dispose();
   }
 }

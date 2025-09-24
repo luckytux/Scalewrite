@@ -1,0 +1,116 @@
+2025-09-22T10:30:08.286337  main() entered
+2025-09-22T10:30:08.290344  DB instance acquired
+2025-09-22T10:30:08.375367  debug: 🌱 No data found, seeding DB...
+2025-09-22T10:30:08.448994  Uncaught zone error: SqliteException(2067): while executing statement, UNIQUE constraint failed: users.uid, constraint failed (code 2067)
+  Causing statement: INSERT INTO "users" ("uid_number", "uid", "email", "display_name", "password_hash", "is_admin") VALUES (?, ?, ?, ?, ?, ?), parameters: 1000, admin, info@southernscaleco.com, Admin, $2a$10$woRZez3quN8QV8j9V.jgKO9vnOfs/NCSrVhof3461Q1GdfGphUGmK, 1
+2025-09-22T10:30:08.458997  #0      throwException (package:sqlite3/src/implementation/exception.dart:95)
+#1      StatementImplementation._execute (package:sqlite3/src/implementation/statement.dart:109)
+#2      StatementImplementation.executeWith (package:sqlite3/src/implementation/statement.dart:289)
+#3      CommonPreparedStatement.execute (package:sqlite3/src/statement.dart:81)
+#4      Sqlite3Delegate.runWithArgsSync (package:drift/src/sqlite3/database.dart:149)
+#5      _NativeDelegate.runInsert.<anonymous closure> (package:drift/native.dart:426)
+#6      new Future.sync (dart:async/future.dart:315)
+#7      _NativeDelegate.runInsert (package:drift/native.dart:425)
+#8      _BaseExecutor.runInsert.<anonymous closure> (package:drift/src/runtime/executor/helpers/engines.dart:106)
+#9      _BaseExecutor._synchronized (package:drift/src/runtime/executor/helpers/engines.dart:62)
+#10     _BaseExecutor.runInsert (package:drift/src/runtime/executor/helpers/engines.dart:103)
+#11     LazyDatabase.runInsert (package:drift/src/utils/lazy_database.dart:91)
+#12     InsertStatement.insert.<anonymous closure> (package:drift/src/runtime/query_builder/statements/insert.dart:74)
+#13     DatabaseConnectionUser.doWhenOpened.<anonymous closure> (package:drift/src/runtime/api/connection_user.dart:171)
+#14     _rootRunUnary (dart:async/zone.dart:1538)
+#15     _CustomZone.runUnary (dart:async/zone.dart:1429)
+<asynchronous suspension>
+#16     InsertStatement.insert (package:drift/src/runtime/query_builder/statements/insert.dart:73)
+<asynchronous suspension>
+#17     UserDao.insertUser (package:scalewrite_v2/data/daos/user_dao.dart:63)
+<asynchronous suspension>
+#18     seedUsers (package:scalewrite_v2/dev/seed_users.dart:27)
+<asynchronous suspension>
+#19     _initializeSeedIfNeeded (package:scalewrite_v2/main.dart:123)
+<asynchronous suspension>
+#20     main.<anonymous closure> (package:scalewrite_v2/main.dart:102)
+<asynchronous suspension>
+#21     main (package:scalewrite_v2/main.dart:97)
+<asynchronous suspension>
+
+2025-09-22T10:41:01.009659  main() entered
+2025-09-22T10:41:01.012005  DB instance acquired
+2025-09-22T10:41:01.095090  debug: 🌱 No data found, seeding DB...
+): while executing statement, UNIQUE constraint failed: users.uid, constraint failed (code 2067)
+  Causing statement: INSERT INTO "users" ("uid_number", "uid", "email", "display_name", "password_hash", "is_admin") VALUES (?, ?, ?, ?, ?, ?), parameters: 1000, admin, info@southernscaleco.com, Admin, $2a$10$lp8LJvLeMRW5fHGBssxOT.8iAUdTnot6mzaCyoQXqYWvOFPknjmgG, 1
+2025-09-22T10:41:01.170608  #0      throwException (package:sqlite3/src/implementation/exception.dart:95)
+#1      StatementImplementation._execute (package:sqlite3/src/implementation/statement.dart:109)
+#2      StatementImplementation.executeWith (package:sqlite3/src/implementation/statement.dart:289)
+#3      CommonPreparedStatement.execute (package:sqlite3/src/statement.dart:81)
+#4      Sqlite3Delegate.runWithArgsSync (package:drift/src/sqlite3/database.dart:149)
+#5      _NativeDelegate.runInsert.<anonymous closure> (package:drift/native.dart:426)
+#6      new Future.sync (dart:async/future.dart:315)
+#7      _NativeDelegate.runInsert (package:drift/native.dart:425)
+#8      _BaseExecutor.runInsert.<anonymous closure> (package:drift/src/runtime/executor/helpers/engines.dart:106)
+#9      _BaseExecutor._synchronized (package:drift/src/runtime/executor/helpers/engines.dart:62)
+#10     _BaseExecutor.runInsert (package:drift/src/runtime/executor/helpers/engines.dart:103)
+#11     LazyDatabase.runInsert (package:drift/src/utils/lazy_database.dart:91)
+#12     InsertStatement.insert.<anonymous closure> (package:drift/src/runtime/query_builder/statements/insert.dart:74)
+#13     DatabaseConnectionUser.doWhenOpened.<anonymous closure> (package:drift/src/runtime/api/connection_user.dart:171)
+#14     _rootRunUnary (dart:async/zone.dart:1538)
+#15     _CustomZone.runUnary (dart:async/zone.dart:1429)
+<asynchronous suspension>
+#16     InsertStatement.insert (package:drift/src/runtime/query_builder/statements/insert.dart:73)
+<asynchronous suspension>
+#17     UserDao.insertUser (package:scalewrite_v2/data/daos/user_dao.dart:63)
+<asynchronous suspension>
+#18     seedUsers (package:scalewrite_v2/dev/seed_users.dart:27)
+<asynchronous suspension>
+#19     _initializeSeedIfNeeded (package:scalewrite_v2/main.dart:123)
+<asynchronous suspension>
+#20     main.<anonymous closure> (package:scalewrite_v2/main.dart:102)
+<asynchronous suspension>
+#21     main (package:scalewrite_v2/main.dart:97)
+<asynchronous suspension>
+
+2025-09-22T11:17:16.008806  main() entered
+2025-09-22T11:17:16.012076  DB instance acquired
+2025-09-22T11:17:16.104013  debug: 🌱 No data found, seeding DB...
+2025-09-22T11:17:18.292052  Uncaught zone error: SqliteException(2067): while executing statement, UNIQUE constraint failed: service_reports.work_order_id, service_reports.scale_id, constraint failed (code 2067)
+  Causing statement: INSERT INTO "service_reports" ("work_order_id", "scale_id", "report_type", "notes", "created_at", "complete", "synced") VALUES (?, ?, ?, ?, ?, ?, ?), parameters: 1, 1, Standard, notes specific to this visit, 1747292991, 0, 0
+2025-09-22T11:17:18.293054  #0      throwException (package:sqlite3/src/implementation/exception.dart:95)
+#1      StatementImplementation._execute (package:sqlite3/src/implementation/statement.dart:109)
+#2      StatementImplementation.executeWith (package:sqlite3/src/implementation/statement.dart:289)
+#3      CommonPreparedStatement.execute (package:sqlite3/src/statement.dart:81)
+#4      Sqlite3Delegate.runWithArgsSync (package:drift/src/sqlite3/database.dart:149)
+#5      _NativeDelegate.runInsert.<anonymous closure> (package:drift/native.dart:426)
+#6      new Future.sync (dart:async/future.dart:315)
+#7      _NativeDelegate.runInsert (package:drift/native.dart:425)
+#8      _BaseExecutor.runInsert.<anonymous closure> (package:drift/src/runtime/executor/helpers/engines.dart:106)
+#9      _BaseExecutor._synchronized (package:drift/src/runtime/executor/helpers/engines.dart:62)
+#10     _BaseExecutor.runInsert (package:drift/src/runtime/executor/helpers/engines.dart:103)
+#11     LazyDatabase.runInsert (package:drift/src/utils/lazy_database.dart:91)
+#12     InsertStatement.insert.<anonymous closure> (package:drift/src/runtime/query_builder/statements/insert.dart:74)
+#13     DatabaseConnectionUser.doWhenOpened.<anonymous closure> (package:drift/src/runtime/api/connection_user.dart:171)
+#14     _rootRunUnary (dart:async/zone.dart:1538)
+#15     _CustomZone.runUnary (dart:async/zone.dart:1429)
+<asynchronous suspension>
+#16     InsertStatement.insert (package:drift/src/runtime/query_builder/statements/insert.dart:73)
+<asynchronous suspension>
+#17     seedTestData (package:scalewrite_v2/dev/seed_test_data.dart:131)
+<asynchronous suspension>
+#18     _initializeSeedIfNeeded (package:scalewrite_v2/main.dart:124)
+<asynchronous suspension>
+#19     main.<anonymous closure> (package:scalewrite_v2/main.dart:102)
+<asynchronous suspension>
+#20     main (package:scalewrite_v2/main.dart:97)
+<asynchronous suspension>
+
+2025-09-22T14:32:36.109157  main() entered
+2025-09-22T14:32:36.111775  DB instance acquired
+2025-09-22T14:32:36.187209  Seeding check complete
+ta found. Skipping seed.
+2025-09-22T15:10:56.872018  main() entered
+2025-09-22T15:10:56.876694  DB instance acquired
+2025-09-22T15:10:56.957399  debug: 📦 Existing data found. Skipping seed.
+2025-09-22T15:25:19.509980  main() entered
+2025-09-22T15:25:19.511986  DB instance acquired
+2025-09-22T15:25:19.711673  debug: 🌱 No data found, seeding DB...
+2025-09-22T15:25:22.211014  Seeding check complete
+lete.
+2025-09-22T15:25:31.030851  debug: 🛠️ AdminPage is building...

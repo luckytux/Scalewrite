@@ -1,4 +1,3 @@
-// File: lib/data/daos/weight_test_dao.dart
 import 'package:drift/drift.dart';
 import '../database.dart';
 import '../tables/weight_tests.dart';
@@ -13,13 +12,17 @@ class WeightTestDao extends DatabaseAccessor<AppDatabase>
 
   // ---------- READ ----------
   Future<WeightTest?> getByServiceReportId(int serviceReportId) {
-    return (select(weightTests)..where((t) => t.serviceReportId.equals(serviceReportId)))
+    return (select(weightTests)
+          ..where((t) => t.serviceReportId.equals(serviceReportId)))
         .getSingleOrNull();
   }
 
+  // Live stream for a single SR's weight test
   Stream<WeightTest?> watchByServiceReportId(int serviceReportId) {
-    return (select(weightTests)..where((t) => t.serviceReportId.equals(serviceReportId)))
-        .watchSingleOrNull();
+    final q = select(weightTests)
+      ..where((t) => t.serviceReportId.equals(serviceReportId))
+      ..limit(1);
+    return q.watch().map((rows) => rows.isNotEmpty ? rows.first : null);
   }
 
   Future<List<WeightTest>> getAllTests() => select(weightTests).get();
@@ -44,7 +47,6 @@ class WeightTestDao extends DatabaseAccessor<AppDatabase>
   Future<bool> updateWeightTest(WeightTest test) async {
     return transaction(() async {
       final ok = await update(weightTests).replace(test);
-      // Use the row’s own SR id
       await _markServiceReportUnsynced(test.serviceReportId);
       return ok;
     });
@@ -86,7 +88,8 @@ class WeightTestDao extends DatabaseAccessor<AppDatabase>
   /// Delete by PK and mark that test’s parent SR as unsynced.
   Future<void> deleteWeightTest(int id) async {
     await transaction(() async {
-      final row = await (select(weightTests)..where((t) => t.id.equals(id))).getSingleOrNull();
+      final row =
+          await (select(weightTests)..where((t) => t.id.equals(id))).getSingleOrNull();
       await (delete(weightTests)..where((t) => t.id.equals(id))).go();
       final srId = row?.serviceReportId;
       if (srId != null) {

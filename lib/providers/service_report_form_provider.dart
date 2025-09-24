@@ -349,6 +349,46 @@ class ServiceReportFormController extends ChangeNotifier {
     return true;
   }
 
+  /// --- IPO checklist: compact marker save ---------------------------------
+
+  /// Collect dotted paths for any items explicitly `false` in a nested map.
+  List<String> _collectFalsePaths(Map<String, dynamic> map, [String prefix = '']) {
+    final out = <String>[];
+    map.forEach((k, v) {
+      final path = prefix.isEmpty ? k : '$prefix.$k';
+      if (v is bool) {
+        if (v == false) out.add(path);
+      } else if (v is Map<String, dynamic>) {
+        out.addAll(_collectFalsePaths(v, path));
+      }
+    });
+    return out;
+  }
+
+  /// Save a tiny IPO payload: template, completed, exceptions list, timestamp (+ optional note).
+  Future<void> saveIpoChecklistMarkers({
+    required String ipoType,
+    required Map<String, dynamic> raw,
+    String? note,
+  }) async {
+    if (selectedServiceReportId == null) return;
+
+    final exceptions = _collectFalsePaths(raw); // usually empty (all true)
+    final payload = <String, dynamic>{
+      'schemaVersion': 1,
+      'template': ipoType,
+      'completed': true,
+      'exceptions': exceptions,
+      'ts': DateTime.now().toIso8601String(),
+      if (note != null && note.trim().isNotEmpty) 'note': note.trim(),
+    };
+
+    await db.serviceReportDao.updateIpoState(
+      reportId: selectedServiceReportId!,
+      ipoStateJson: payload,
+    );
+  }
+
   void clear() {
     selectedWorkOrder = null;
     selectedScale = null;

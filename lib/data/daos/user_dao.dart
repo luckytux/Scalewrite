@@ -12,8 +12,15 @@ String hashPassword(String password) {
   return BCrypt.hashpw(password, BCrypt.gensalt());
 }
 
-bool verifyPassword(String password, String hashed) {
-  return BCrypt.checkpw(password, hashed);
+bool verifyPassword(String password, String? storedHash) {
+  // Never throw if the hash is missing/garbled
+  if (storedHash == null || storedHash.isEmpty) return false;
+  try {
+    return BCrypt.checkpw(password, storedHash);
+  } catch (_) {
+    // Malformed hash, treat as invalid
+    return false;
+  }
 }
 
 @DriftAccessor(tables: [Users])
@@ -21,8 +28,8 @@ class UserDao extends DatabaseAccessor<AppDatabase> with _$UserDaoMixin {
   UserDao(super.db);
 
   Future<AppUser?> loginWithCredentials(String uid, String password) async {
-    final user = await getUserByUid(uid);
-    if (user != null && verifyPassword(password, user.passwordHash ?? '')) {
+    final user = await getUserByUid(uid.trim());
+    if (user != null && verifyPassword(password, user.passwordHash)) {
       return user;
     }
     return null;

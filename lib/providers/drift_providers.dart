@@ -16,11 +16,16 @@ import '../data/daos/inventory_dao.dart';
 import '../data/daos/price_dao.dart';
 import '../data/daos/work_order_billing_dao.dart'; // NEW
 
-// Singleton database instance
-final _singletonDb = AppDatabase();
-
-/// Provides the singleton Drift database.
-final databaseProvider = Provider<AppDatabase>((ref) => _singletonDb);
+/// Provides the Drift database instance.
+/// Constructed lazily by Riverpod (no top-level singleton),
+/// and closed when the provider is disposed (useful for tests / hot restarts).
+final databaseProvider = Provider<AppDatabase>((ref) {
+  final db = AppDatabase();
+  ref.onDispose(() {
+    db.close();
+  });
+  return db;
+});
 
 /// Individual DAO providers
 final customerDaoProvider = Provider<CustomerDao>(

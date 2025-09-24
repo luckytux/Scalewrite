@@ -1,3 +1,4 @@
+// File: lib/data/daos/service_report_dao.dart
 import 'package:drift/drift.dart';
 import '../database.dart';
 import '../tables/service_reports.dart';
@@ -24,8 +25,7 @@ class ServiceReportDao extends DatabaseAccessor<AppDatabase>
   }
 
   /// Find an existing report for a (workOrderId, scaleId) pair.
-  Future<ServiceReport?> findByWorkOrderAndScale(
-      int workOrderId, int scaleId) {
+  Future<ServiceReport?> findByWorkOrderAndScale(int workOrderId, int scaleId) {
     final q = select(serviceReports)
       ..where((t) => t.workOrderId.equals(workOrderId))
       ..where((t) => t.scaleId.equals(scaleId));
@@ -64,6 +64,22 @@ class ServiceReportDao extends DatabaseAccessor<AppDatabase>
       final scale = row.readTable(scales);
       return ServiceReportWithScale(report: report, scale: scale);
     }).toList();
+  }
+
+  /// 🔴 NEW: Live stream of ServiceReports joined with Scales for a given Work Order.
+  Stream<List<ServiceReportWithScale>> watchReportsWithScaleByWorkOrder(
+      int workOrderId) {
+    final query = select(serviceReports).join([
+      innerJoin(scales, scales.id.equalsExp(serviceReports.scaleId)),
+    ])..where(serviceReports.workOrderId.equals(workOrderId));
+
+    return query.watch().map((rows) {
+      return rows.map((row) {
+        final report = row.readTable(serviceReports);
+        final scale = row.readTable(scales);
+        return ServiceReportWithScale(report: report, scale: scale);
+      }).toList();
+    });
   }
 
   Future<void> markReportComplete(int id) {

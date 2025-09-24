@@ -7,7 +7,10 @@ mixin _$WorkOrderBillingDaoMixin on DatabaseAccessor<AppDatabase> {
   $WorkOrdersTable get workOrders => attachedDatabase.workOrders;
   $WorkOrderChargesTable get workOrderCharges =>
       attachedDatabase.workOrderCharges;
+  $WorkOrderPartsTable get workOrderParts => attachedDatabase.workOrderParts;
   $CustomersTable get customers => attachedDatabase.customers;
   $InventoryItemsTable get inventoryItems => attachedDatabase.inventoryItems;
-  $WorkOrderPartsTable get workOrderParts => attachedDatabase.workOrderParts;
+  $UsersTable get users => attachedDatabase.users;
+  $InventoryTransactionsTable get inventoryTransactions =>
+      attachedDatabase.inventoryTransactions;
 }

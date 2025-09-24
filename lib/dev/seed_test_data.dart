@@ -2,40 +2,42 @@
 
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:flutter/material.dart'; // For WidgetsFlutterBinding
-import 'package:drift/drift.dart' show Value;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drift/drift.dart' show Value, InsertMode;
 
-import '../providers/drift_providers.dart'; // ✅ For databaseProvider
-import '../data/database.dart'; // For AppDatabase
+import '../data/database.dart'; // AppDatabase
 
 Future<void> seedTestData(AppDatabase db) async {
+  // If there are already work orders OR service reports, assume we've seeded.
+  final woExists = await (db.select(db.workOrders)..limit(1)).get();
+  final srExists = await (db.select(db.serviceReports)..limit(1)).get();
+  if (woExists.isNotEmpty || srExists.isNotEmpty) {
+    // Already seeded — bail out quietly.
+    return;
+  }
+
   final jsonString = await rootBundle.loadString('assets/test_data.json');
-  final Map<String, dynamic> data = jsonDecode(jsonString);
+  final Map<String, dynamic> data = jsonDecode(jsonString) as Map<String, dynamic>;
 
-  // Wipe related tables first
-  await db.delete(db.weightTests).go();
-  await db.delete(db.serviceReports).go();
-  await db.delete(db.scales).go();
-  await db.delete(db.workOrders).go();
-  await db.delete(db.contacts).go();
-  await db.delete(db.customers).go();
-
-  final Map<String, String> provinceMap = {
-    'Alberta': 'AB', 'British Columbia': 'BC', 'Saskatchewan': 'SK',
-    'Manitoba': 'MB', 'Ontario': 'ON', 'Quebec': 'QC',
-    'New Brunswick': 'NB', 'Nova Scotia': 'NS', 'Prince Edward Island': 'PE',
-    'Newfoundland and Labrador': 'NL', 'Yukon': 'YT',
-    'Northwest Territories': 'NT', 'Nunavut': 'NU'
+  // Province normalization
+  const provinceMap = <String, String>{
+    'Alberta': 'AB',
+    'British Columbia': 'BC',
+    'Saskatchewan': 'SK',
+    'Manitoba': 'MB',
+    'Ontario': 'ON',
+    'Quebec': 'QC',
+    'New Brunswick': 'NB',
+    'Nova Scotia': 'NS',
+    'Prince Edward Island': 'PE',
+    'Newfoundland and Labrador': 'NL',
+    'Yukon': 'YT',
+    'Northwest Territories': 'NT',
+    'Nunavut': 'NU',
   };
+  String abbrev(String? full) => provinceMap[full?.trim() ?? ''] ?? (full ?? '');
 
-  String abbrev(String? fullName) => provinceMap[fullName?.trim() ?? ''] ?? fullName ?? '';
+  final List customers = (data['customers'] as List?) ?? const [];
 
-  int scaleIndex = 1;
-  int workOrderIndex = 1;
-  int serviceReportIndex = 1;
-
-  final List customers = data['customers'] ?? [];
   for (final c in customers) {
     final customerId = await db.customerDao.insertCustomer(CustomersCompanion(
       businessName: Value(c['businessName'] ?? c['name'] ?? ''),
@@ -54,11 +56,12 @@ Future<void> seedTestData(AppDatabase db) async {
       synced: const Value(false),
     ));
 
-    for (final ct in c['contacts'] ?? []) {
+    // Contacts
+    for (final ct in (c['contacts'] as List?) ?? const []) {
       await db.contactDao.insertContact(ContactsCompanion(
         customerId: Value(customerId),
-        name: Value(ct['name']),
-        phone: Value(ct['phone']?.toString() ?? ''),
+        name: Value(ct['name'] ?? ''),
+        phone: Value((ct['phone'] ?? '').toString()),
         email: Value(ct['email'] ?? ''),
         notes: Value(ct['notes'] ?? ''),
         isMain: Value(ct['isMain'] ?? false),
@@ -68,8 +71,9 @@ Future<void> seedTestData(AppDatabase db) async {
       ));
     }
 
-    final insertedScaleIds = <int>[];
-    for (final sc in c['scales'] ?? []) {
+    // Scales (collect IDs to match service reports later)
+    final scaleIds = <int>[];
+    for (final sc in (c['scales'] as List?) ?? const []) {
       final scaleId = await db.scaleDao.insertScale(ScalesCompanion(
         customerId: Value(customerId),
         configuration: Value(sc['configuration']),
@@ -103,11 +107,11 @@ Future<void> seedTestData(AppDatabase db) async {
         deactivate: const Value(false),
         synced: const Value(true),
       ));
-      insertedScaleIds.add(scaleId);
-      scaleIndex++;
+      scaleIds.add(scaleId);
     }
 
-    for (final wo in c['workOrders'] ?? []) {
+    // Work orders (+ service reports + weight tests)
+    for (final wo in (c['workOrders'] as List?) ?? const []) {
       final woId = await db.workOrderDao.insertWorkOrder(WorkOrdersCompanion(
         customerId: Value(customerId),
         workOrderNumber: Value(wo['workOrderNumber']),
@@ -125,26 +129,54 @@ Future<void> seedTestData(AppDatabase db) async {
         synced: const Value(false),
         lastModified: Value(DateTime.tryParse(wo['lastModified'] ?? '') ?? DateTime.now()),
       ));
-      workOrderIndex++;
 
-      for (final sr in wo['serviceReports'] ?? []) {
-        final srId = await db.serviceReportDao.insertReport(ServiceReportsCompanion(
-          workOrderId: Value(woId),
-          scaleId: Value(insertedScaleIds.first),
-          reportType: Value(sr['reportType']),
-          notes: Value(sr['notes']),
-          createdAt: Value(DateTime.tryParse(sr['createdAt'] ?? '') ?? DateTime.now()),
-          complete: const Value(false),
-          synced: const Value(false),
-          ipoStateJson: sr['ipoStateJson'] != null
-              ? Value(sr['ipoStateJson'] as Map<String, dynamic>)
-              : const Value.absent(),
-        ));
-        serviceReportIndex++;
+      final srs = (wo['serviceReports'] as List?) ?? const [];
+      for (var i = 0; i < srs.length; i++) {
+        final sr = srs[i] as Map<String, dynamic>;
 
-        for (final wt in sr['weightTests'] ?? []) {
+        // Choose scale: JSON can provide 'scaleIndex' (0-based). Otherwise rotate across scaleIds.
+        int? chosenScaleId;
+        if (sr['scaleIndex'] is int &&
+            (sr['scaleIndex'] as int) >= 0 &&
+            (sr['scaleIndex'] as int) < scaleIds.length) {
+          chosenScaleId = scaleIds[sr['scaleIndex'] as int];
+        } else if (scaleIds.isNotEmpty) {
+          chosenScaleId = scaleIds[i % scaleIds.length];
+        }
+
+        // If no scales exist, skip SRs for this WO.
+        if (chosenScaleId == null) continue;
+        final int nonNullScaleId = chosenScaleId;
+
+        // Insert service report; ignore if (work_order_id, scale_id) already present.
+        final srId = await db.into(db.serviceReports).insert(
+          ServiceReportsCompanion(
+            workOrderId: Value(woId),
+            scaleId: Value(nonNullScaleId),
+            reportType: Value(sr['reportType']),
+            notes: Value(sr['notes']),
+            createdAt: Value(DateTime.tryParse(sr['createdAt'] ?? '') ?? DateTime.now()),
+            complete: const Value(false),
+            synced: const Value(false),
+            ipoStateJson: sr['ipoStateJson'] is Map<String, dynamic>
+                ? Value(sr['ipoStateJson'] as Map<String, dynamic>)
+                : const Value.absent(),
+          ),
+          mode: InsertMode.insertOrIgnore, // 👈 prevents unique-index crashes
+        );
+
+        // If insert was ignored (duplicate), fetch the existing row id via Drift query.
+        final existing = await (db.select(db.serviceReports)
+              ..where((t) => t.workOrderId.equals(woId))
+              ..where((t) => t.scaleId.equals(nonNullScaleId)))
+            .getSingleOrNull();
+
+        final effectiveSrId = srId == 0 ? (existing?.id ?? srId) : srId;
+
+        // Weight tests
+        for (final wt in (sr['weightTests'] as List?) ?? const []) {
           await db.weightTestDao.insertWeightTest(WeightTestsCompanion(
-            serviceReportId: Value(srId),
+            serviceReportId: Value(effectiveSrId),
             eccentricityType: Value(wt['eccentricityType']),
             eccentricityPoints: Value(wt['eccentricityPoints']),
             eccentricityDirections: Value(wt['eccentricityDirections']),
@@ -166,15 +198,4 @@ Future<void> seedTestData(AppDatabase db) async {
       }
     }
   }
-}
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  final container = ProviderContainer();
-  final db = container.read(databaseProvider); // Use the singleton instance
-
-  await seedTestData(db);
-  await db.close();
-
-  print('👋 Test data seeded.');
 }
