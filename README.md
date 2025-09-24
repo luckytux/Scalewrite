@@ -1,4 +1,4 @@
-# scalewrite_v2
+# scalewrite
 
 A new Flutter project.
 
