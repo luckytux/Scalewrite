@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:scalewrite_v2/providers/work_order_form_provider.dart';
-import 'package:scalewrite_v2/widgets/work_order/contact_input_tile.dart';
+import 'package:scalewrite/providers/work_order_form_provider.dart';
+import 'package:scalewrite/widgets/work_order/contact_input_tile.dart';
 
 class ContactListSection extends ConsumerWidget {
   const ContactListSection({super.key});

@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:scalewrite_v2/models/work_order_with_customer.dart';
-import 'package:scalewrite_v2/pages/create_work_order_page.dart';
-import 'package:scalewrite_v2/providers/drift_providers.dart';
+import 'package:scalewrite/models/work_order_with_customer.dart';
+import 'package:scalewrite/pages/create_work_order_page.dart';
+import 'package:scalewrite/providers/drift_providers.dart';
 
 class ViewUnsyncedWorkOrdersPage extends ConsumerWidget {
   const ViewUnsyncedWorkOrdersPage({super.key});

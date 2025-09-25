@@ -3,12 +3,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:scalewrite_v2/providers/service_report_form_provider.dart';
-import 'package:scalewrite_v2/pages/create_weight_test_page.dart';
-import 'package:scalewrite_v2/pages/home_page.dart';
+import 'package:scalewrite/providers/service_report_form_provider.dart';
+import 'package:scalewrite/pages/create_weight_test_page.dart';
+import 'package:scalewrite/pages/home_page.dart';
 
-import 'package:scalewrite_v2/providers/drift_providers.dart'; // databaseProvider, daos
-import 'package:scalewrite_v2/data/dao_shims/service_report_dao_shims.dart'; // getServiceReportById shim
+import 'package:scalewrite/providers/drift_providers.dart'; // databaseProvider, daos
+import 'package:scalewrite/data/dao_shims/service_report_dao_shims.dart'; // getServiceReportById shim
 
 class ServiceReportActionButtons extends ConsumerWidget {
   const ServiceReportActionButtons({super.key});

@@ -137,10 +137,12 @@ class ViewWorkOrdersPage extends ConsumerWidget {
                           final String? template =
                               ipoJson?['template'] as String?;
                           final List<String> exceptions =
-                              (ipoJson?['exceptions'] as List?)
-                                      ?.cast<String>() ??
+                              (ipoJson?['exceptions'] as List?)?.cast<String>() ??
                                   const <String>[];
-                          final bool hasIPO = template != null;
+
+                          // Derive availability from the SAME condition used later.
+                          final bool hasIPO =
+                              template != null && ipoChecklists.containsKey(template);
 
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,7 +233,8 @@ class ViewWorkOrdersPage extends ConsumerWidget {
                                               );
                                             },
                                             child: Text(
-                                              _weightTestSummary(test, report.scale),
+                                              _weightTestSummary(
+                                                  test, report.scale),
                                               style: const TextStyle(
                                                   color: Colors.blue),
                                             ),
@@ -247,11 +250,26 @@ class ViewWorkOrdersPage extends ConsumerWidget {
                                 child: hasIPO
                                     ? InkWell(
                                         onTap: () {
-                                          final String tpl = template!; // safe because hasIPO == true
+                                          // Re-check at tap time to satisfy analyzer & runtime.
+                                          final String? tpl = template;
+                                          if (tpl == null) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                    'IPO template not found'),
+                                              ),
+                                            );
+                                            return;
+                                          }
                                           final ipo = ipoChecklists[tpl];
                                           if (ipo == null) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              const SnackBar(content: Text('IPO template not found')),
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                    'IPO template not found'),
+                                              ),
                                             );
                                             return;
                                           }
@@ -259,8 +277,9 @@ class ViewWorkOrdersPage extends ConsumerWidget {
                                             context,
                                             MaterialPageRoute(
                                               builder: (_) => IPOChecklistPage(
-                                                ipoType: tpl, // non-nullable
-                                                serviceReportId: report.report.id,
+                                                ipoType: tpl,
+                                                serviceReportId:
+                                                    report.report.id,
                                                 ipoTitle: '$tpl — ${ipo.title}',
                                                 sections: ipo.sections,
                                               ),
@@ -282,9 +301,13 @@ class ViewWorkOrdersPage extends ConsumerWidget {
                                               ipoChecklists[defaultTemplate];
                                           if (ipo == null) {
                                             ScaffoldMessenger.of(context)
-                                                .showSnackBar(const SnackBar(
-                                                    content: Text(
-                                                        'Default IPO template not found')));
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Default IPO template not found',
+                                                ),
+                                              ),
+                                            );
                                             return;
                                           }
                                           Navigator.push(
@@ -337,7 +360,7 @@ List<(double test, double diff)> _packRows({
   required List<double?> tests,
   required List<double?> diffs,
 }) {
-  final out = <(double,double)>[];
+  final out = <(double, double)>[];
   final len = math.min(tests.length, diffs.length);
   for (var i = 0; i < len; i++) {
     final t = tests[i];
@@ -355,7 +378,7 @@ List<(double test, double diff)> _criticalAt({
 }) {
   if (rows.isEmpty || requiredMasses.isEmpty || division <= 0) return const [];
   final eps = division / 2.0;
-  final out = <(double,double)>[];
+  final out = <(double, double)>[];
   for (final r in rows) {
     final hit = requiredMasses.any((req) => (r.$1 - req).abs() <= eps);
     if (hit) out.add(r);
@@ -380,19 +403,47 @@ String _weightTestSummary(WeightTest t, Scale scale) {
       ? ' ${t.weightTestUnit!.trim()}'
       : '';
 
-  final division  = scale.division;   // e
-  final capacity  = scale.capacity;   // Max
-  final n         = countsFromCapacity(capacity: capacity, division: division);
+  final division = scale.division; // e
+  final capacity = scale.capacity; // Max
+  final n = countsFromCapacity(capacity: capacity, division: division);
   final scaleClass = inferScaleClass(division: division, n: n);
 
   // Pack rows
   final found = _packRows(
-    tests: [t.asFoundTest1, t.asFoundTest2, t.asFoundTest3, t.asFoundTest4, t.asFoundTest5, t.asFoundTest6],
-    diffs: [t.asFoundDiff1, t.asFoundDiff2, t.asFoundDiff3, t.asFoundDiff4, t.asFoundDiff5, t.asFoundDiff6],
+    tests: [
+      t.asFoundTest1,
+      t.asFoundTest2,
+      t.asFoundTest3,
+      t.asFoundTest4,
+      t.asFoundTest5,
+      t.asFoundTest6
+    ],
+    diffs: [
+      t.asFoundDiff1,
+      t.asFoundDiff2,
+      t.asFoundDiff3,
+      t.asFoundDiff4,
+      t.asFoundDiff5,
+      t.asFoundDiff6
+    ],
   );
   final left = _packRows(
-    tests: [t.asLeftTest1, t.asLeftTest2, t.asLeftTest3, t.asLeftTest4, t.asLeftTest5, t.asLeftTest6],
-    diffs: [t.asLeftDiff1, t.asLeftDiff2, t.asLeftDiff3, t.asLeftDiff4, t.asLeftDiff5, t.asLeftDiff6],
+    tests: [
+      t.asLeftTest1,
+      t.asLeftTest2,
+      t.asLeftTest3,
+      t.asLeftTest4,
+      t.asLeftTest5,
+      t.asLeftTest6
+    ],
+    diffs: [
+      t.asLeftDiff1,
+      t.asLeftDiff2,
+      t.asLeftDiff3,
+      t.asLeftDiff4,
+      t.asLeftDiff5,
+      t.asLeftDiff6
+    ],
   );
 
   // Required critical masses (class + e + capacity)
@@ -418,8 +469,9 @@ String _weightTestSummary(WeightTest t, Scale scale) {
   }
 
   // As-Found summary
-  final maxAF  = _maxAbsDiff(found);
-  final critAF = _criticalAt(rows: found, requiredMasses: requiredCrit, division: division);
+  final maxAF = _maxAbsDiff(found);
+  final critAF =
+      _criticalAt(rows: found, requiredMasses: requiredCrit, division: division);
   if (maxAF != null || critAF.isNotEmpty) {
     final segs = <String>[];
     if (maxAF != null) segs.add('maxΔ=${_fmt(maxAF)}');
@@ -430,8 +482,9 @@ String _weightTestSummary(WeightTest t, Scale scale) {
   }
 
   // As-Left summary
-  final maxAL  = _maxAbsDiff(left);
-  final critAL = _criticalAt(rows: left, requiredMasses: requiredCrit, division: division);
+  final maxAL = _maxAbsDiff(left);
+  final critAL =
+      _criticalAt(rows: left, requiredMasses: requiredCrit, division: division);
   if (maxAL != null || critAL.isNotEmpty) {
     final segs = <String>[];
     if (maxAL != null) segs.add('maxΔ=${_fmt(maxAL)}');

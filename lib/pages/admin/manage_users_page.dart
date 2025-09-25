@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:scalewrite_v2/providers/user_providers.dart';
-import 'package:scalewrite_v2/widgets/common/rounded_text_field.dart';
+import 'package:scalewrite/providers/user_providers.dart';
+import 'package:scalewrite/widgets/common/rounded_text_field.dart';
 
 class ManageUsersPage extends ConsumerWidget {
   const ManageUsersPage({super.key});
@@ -44,13 +44,24 @@ class ManageUsersPage extends ConsumerWidget {
                           IconButton(
                             icon: const Icon(Icons.refresh),
                             tooltip: 'Reset Password',
-                            onPressed: () => ref.read(userActionsProvider).resetPassword(user.uid),
-
+                            onPressed: () async {
+                              final actions = ref.read(userActionsProvider);
+                              await actions.resetPassword(user.uid);
+                              // Optional toast
+                              // ignore: use_build_context_synchronously
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Password reset for ${user.uid}')),
+                              );
+                            },
                           ),
                           IconButton(
                             icon: const Icon(Icons.delete),
                             tooltip: 'Delete User',
-                            onPressed: () => ref.read(userActionsProvider).deleteUser(user.id),
+                            onPressed: () async {
+                              final actions = ref.read(userActionsProvider);
+                              await actions.deleteUser(user.id);
+                              ref.invalidate(userListProvider);
+                            },
                           ),
                         ],
                       ),
@@ -72,7 +83,7 @@ class ManageUsersPage extends ConsumerWidget {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogCtx) => AlertDialog(
         title: const Text('Add New User'),
         content: StatefulBuilder(
           builder: (context, setState) => Column(
@@ -86,28 +97,57 @@ class ManageUsersPage extends ConsumerWidget {
                 value: isAdmin,
                 onChanged: (val) => setState(() => isAdmin = val ?? false),
                 title: const Text('Grant Admin Access'),
-              )
+                contentPadding: EdgeInsets.zero,
+                controlAffinity: ListTileControlAffinity.leading,
+              ),
             ],
           ),
         ),
         actions: [
           TextButton(
             child: const Text('Cancel'),
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.of(dialogCtx).pop(),
           ),
           ElevatedButton(
             child: const Text('Create'),
             onPressed: () async {
+              // Capture what we need from the *dialog* context BEFORE awaiting.
+              final nav = Navigator.of(dialogCtx);
+              final messenger = ScaffoldMessenger.of(dialogCtx);
+
+              final uid = uidController.text.trim();
+              final pwd = passwordController.text.trim();
+
+              if (uid.isEmpty || pwd.isEmpty) {
+                messenger.showSnackBar(
+                  const SnackBar(content: Text('User ID and Password are required')),
+                );
+                return;
+              }
+
               final actions = ref.read(userActionsProvider);
-              await actions.addUser(
-                uidController.text.trim(),
-                '${uidController.text.trim()}@example.com', // email
-                uidController.text.trim(),                 // display name
-                passwordController.text.trim(),
-                isAdmin,
-              );
-              Navigator.pop(context);
-              ref.invalidate(userListProvider);
+              try {
+                await actions.addUser(
+                  uid,
+                  '$uid@example.com', // email
+                  uid,                // display name
+                  pwd,
+                  isAdmin,
+                );
+
+                // Safe to use captured navigator after await; no async-gap context use.
+                if (nav.canPop()) nav.pop();
+                ref.invalidate(userListProvider);
+
+                // Optional toast after closing dialog; still OK via captured messenger.
+                messenger.showSnackBar(
+                  SnackBar(content: Text('Created user "$uid"')),
+                );
+              } catch (e) {
+                messenger.showSnackBar(
+                  SnackBar(content: Text('Failed to create user: $e')),
+                );
+              }
             },
           ),
         ],

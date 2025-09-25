@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:scalewrite_v2/data/database.dart';
+import 'package:scalewrite/data/database.dart';
 import '../common/rounded_text_field.dart';
 import 'package:drift/drift.dart' as drift;
 

@@ -1,7 +1,7 @@
 // File: lib/data/dao_shims/service_report_dao_shims.dart
 
-import 'package:scalewrite_v2/data/daos/service_report_dao.dart';
-import 'package:scalewrite_v2/data/database.dart';
+import 'package:scalewrite/data/daos/service_report_dao.dart';
+import 'package:scalewrite/data/database.dart';
 
 /// IDE-only shim so the analyzer can "see" these helpers even if older call sites exist.
 /// Safe to keep; if your DAO already has the same methods, the real ones win at compile time.

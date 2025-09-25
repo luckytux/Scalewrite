@@ -3,18 +3,16 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-
-import 'package:scalewrite_v2/pages/admin/price_admin_page.dart';
+import 'package:scalewrite/pages/admin/price_admin_page.dart';
 
 import 'data/database.dart';
 import 'dev/seed_inventory.dart';
 import 'dev/seed_test_data.dart';
-import 'dev/seed_users.dart';
 import 'pages/admin/admin_page.dart';
 import 'pages/admin/manage_inventory_page.dart';
 import 'pages/admin/manage_users_page.dart';
@@ -111,7 +109,7 @@ Future<void> main() async {
   }, (Object error, StackTrace stack) async {
     await _log('Uncaught zone error: $error');
     await _log(stack.toString());
-  });
+  }, zoneSpecification: zoneSpec); // ← hook the zoneSpec here
 }
 
 /// Seeds the database only if no work orders are found

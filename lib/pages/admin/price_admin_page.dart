@@ -5,9 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:intl/intl.dart';
 
-import 'package:scalewrite_v2/providers/drift_providers.dart';
-import 'package:scalewrite_v2/providers/auth_provider.dart' as auth;
-import 'package:scalewrite_v2/data/database.dart';
+import 'package:scalewrite/providers/drift_providers.dart';
+import 'package:scalewrite/providers/auth_provider.dart' as auth;
+import 'package:scalewrite/data/database.dart';
 
 class PriceAdminPage extends ConsumerWidget {
   const PriceAdminPage({super.key});

@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:scalewrite_v2/data/database.dart';
-import 'package:scalewrite_v2/providers/work_order_form_provider.dart';
+import 'package:scalewrite/data/database.dart';
+import 'package:scalewrite/providers/work_order_form_provider.dart';
 
 class CustomerDropdownSection extends ConsumerWidget {
   final List<Customer> customers;

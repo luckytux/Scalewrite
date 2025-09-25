@@ -4,18 +4,18 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:scalewrite_v2/pages/create_work_order_page.dart';
-import 'package:scalewrite_v2/pages/create_service_report_page.dart';
-import 'package:scalewrite_v2/pages/create_customer_page.dart';
-import 'package:scalewrite_v2/pages/view_work_orders_page.dart';
-import 'package:scalewrite_v2/pages/admin/admin_page.dart';
+import 'package:scalewrite/pages/create_work_order_page.dart';
+import 'package:scalewrite/pages/create_service_report_page.dart';
+import 'package:scalewrite/pages/create_customer_page.dart';
+import 'package:scalewrite/pages/view_work_orders_page.dart';
+import 'package:scalewrite/pages/admin/admin_page.dart';
 
-import 'package:scalewrite_v2/providers/test_data_loader_provider.dart';
-import 'package:scalewrite_v2/providers/customer_list_provider.dart';
-import 'package:scalewrite_v2/providers/auth_provider.dart';
+import 'package:scalewrite/providers/test_data_loader_provider.dart';
+import 'package:scalewrite/providers/customer_list_provider.dart';
+import 'package:scalewrite/providers/auth_provider.dart';
 
 // ⬇️ Sync preview UI
-import 'package:scalewrite_v2/sync/sync_ui.dart';
+import 'package:scalewrite/sync/sync_ui.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});

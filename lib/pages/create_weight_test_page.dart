@@ -129,7 +129,7 @@ class _CreateWeightTestPageState extends ConsumerState<CreateWeightTestPage> {
   Widget build(BuildContext context) {
     final state = ref.watch(weightTestFormProvider);
     final decimals = decimalsForDivision(widget.division);
-    String _fmt(double? v) => v == null ? '' : v.toStringAsFixed(decimals);
+    String fmt(double? v) => v == null ? '' : v.toStringAsFixed(decimals);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Create Weight Test')),
@@ -180,7 +180,7 @@ class _CreateWeightTestPageState extends ConsumerState<CreateWeightTestPage> {
               // Each section gets its own traversal group so Tab cycles locally.
               FocusTraversalGroup(
                 policy: OrderedTraversalPolicy(),
-                child: _buildSection(context, state, asLeft: false, fmt: _fmt),
+                child: _buildSection(context, state, asLeft: false, fmt: fmt),
               ),
               const Divider(height: 32),
               Row(
@@ -219,7 +219,7 @@ class _CreateWeightTestPageState extends ConsumerState<CreateWeightTestPage> {
                 ),
                 FocusTraversalGroup(
                   policy: OrderedTraversalPolicy(),
-                  child: _buildSection(context, state, asLeft: true, fmt: _fmt),
+                  child: _buildSection(context, state, asLeft: true, fmt: fmt),
                 ),
               ],
               const SizedBox(height: 24),
@@ -303,7 +303,7 @@ class _CreateWeightTestPageState extends ConsumerState<CreateWeightTestPage> {
     final unit = state.weightTestUnit;
     final decimals = decimalsForDivision(widget.division);
 
-    String _fmtNum(double? v) => v == null ? '—' : v.toStringAsFixed(decimals);
+    String fmtNum(double? v) => v == null ? '—' : v.toStringAsFixed(decimals);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -313,7 +313,7 @@ class _CreateWeightTestPageState extends ConsumerState<CreateWeightTestPage> {
           const SizedBox(height: 4),
           Text(
             'Suggested eccentricity load (25–35%): '
-            '${_fmtNum(_eccLow)}–${_fmtNum(_eccHigh)} $unit (kit & division aligned)',
+            '${fmtNum(_eccLow)}–${fmtNum(_eccHigh)} $unit (kit & division aligned)',
             style: TextStyle(color: Colors.grey.shade700, fontSize: 12),
           ),
         ],

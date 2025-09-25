@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:scalewrite_v2/data/database.dart';
-import 'package:scalewrite_v2/providers/drift_providers.dart';
+import 'package:scalewrite/data/database.dart';
+import 'package:scalewrite/providers/drift_providers.dart';
 
 class WorkOrderDropdown extends ConsumerWidget {
   final WorkOrder? selected;

@@ -3,11 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
-import 'package:scalewrite_v2/providers/work_order_form_provider.dart';
-import 'package:scalewrite_v2/utils/formatters.dart';
-import 'package:scalewrite_v2/widgets/common/rounded_text_field.dart';
+import 'package:scalewrite/providers/work_order_form_provider.dart';
+import 'package:scalewrite/utils/formatters.dart';
+import 'package:scalewrite/widgets/common/rounded_text_field.dart';
 // ✅ use the normalized dropdown
-import 'package:scalewrite_v2/widgets/work_order/province_dropdown.dart';
+import 'package:scalewrite/widgets/work_order/province_dropdown.dart';
 
 class BillingAddressSection extends ConsumerWidget {
   final bool enabled;

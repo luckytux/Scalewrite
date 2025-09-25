@@ -1,8 +1,23 @@
-build/
+# Flutter / Dart
 .dart_tool/
 .packages
 .flutter-plugins
-flutter_export_environment.sh
-windows/flutter/ephemeral/
+.flutter-plugins-dependencies
+.melos_tool/
+
+# Builds / installers
+build/
+dist/
+windows/runner/runner.log
+
+# Local data
+*.sqlite
+*.db
+*.log
+
+# OS junk
+.DS_Store
+Thumbs.db
+
 *.pdb
 *.dll

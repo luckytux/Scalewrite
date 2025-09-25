@@ -4,11 +4,13 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:drift/drift.dart' show Value;
+import 'package:drift/drift.dart' show Value, InsertMode;
+
 import '../data/database.dart';
 import '../providers/drift_providers.dart';
 
-final testDataLoaderProvider = ChangeNotifierProvider((ref) => TestDataLoader(ref));
+final testDataLoaderProvider =
+    ChangeNotifierProvider<TestDataLoader>((ref) => TestDataLoader(ref));
 
 class TestDataLoader extends ChangeNotifier {
   final Ref ref;
@@ -16,7 +18,7 @@ class TestDataLoader extends ChangeNotifier {
 
   TestDataLoader(this.ref);
 
-  final Map<String, String> _provinceMap = {
+  final Map<String, String> _provinceMap = const {
     'Alberta': 'AB',
     'British Columbia': 'BC',
     'Saskatchewan': 'SK',
@@ -32,7 +34,8 @@ class TestDataLoader extends ChangeNotifier {
     'Nunavut': 'NU'
   };
 
-  String _abbrev(String? fullName) => _provinceMap[fullName?.trim() ?? ''] ?? fullName ?? '';
+  String _abbrev(String? fullName) =>
+      _provinceMap[fullName?.trim() ?? ''] ?? (fullName ?? '');
 
   Future<bool> loadTestData() async {
     loading = true;
@@ -40,9 +43,11 @@ class TestDataLoader extends ChangeNotifier {
 
     try {
       final jsonString = await rootBundle.loadString('assets/test_data.json');
-      final Map<String, dynamic> data = jsonDecode(jsonString);
+      final Map<String, dynamic> data =
+          jsonDecode(jsonString) as Map<String, dynamic>;
       final db = ref.read(databaseProvider);
 
+      // Clear relevant tables
       await db.delete(db.weightTests).go();
       await db.delete(db.serviceReports).go();
       await db.delete(db.scales).go();
@@ -50,13 +55,10 @@ class TestDataLoader extends ChangeNotifier {
       await db.delete(db.contacts).go();
       await db.delete(db.customers).go();
 
-      int scaleIndex = 1;
-      int workOrderIndex = 1;
-      int serviceReportIndex = 1;
-
-      final List customers = data['customers'] ?? [];
+      final List customers = (data['customers'] as List?) ?? const [];
       for (final c in customers) {
-        final customerId = await db.customerDao.insertCustomer(CustomersCompanion(
+        final customerId =
+            await db.customerDao.insertCustomer(CustomersCompanion(
           businessName: Value(c['businessName'] ?? c['name'] ?? ''),
           siteAddress: Value(c['siteAddress'] ?? ''),
           siteCity: Value(c['siteCity'] ?? ''),
@@ -64,8 +66,10 @@ class TestDataLoader extends ChangeNotifier {
           sitePostalCode: Value(c['sitePostalCode'] ?? ''),
           billingAddress: Value(c['billingAddress'] ?? c['siteAddress'] ?? ''),
           billingCity: Value(c['billingCity'] ?? c['siteCity'] ?? ''),
-          billingProvince: Value(_abbrev(c['billingProvince'] ?? c['siteProvince'])),
-          billingPostalCode: Value(c['billingPostalCode'] ?? c['sitePostalCode'] ?? ''),
+          billingProvince:
+              Value(_abbrev(c['billingProvince'] ?? c['siteProvince'])),
+          billingPostalCode:
+              Value(c['billingPostalCode'] ?? c['sitePostalCode'] ?? ''),
           gpsLocation: Value(c['gpsLocation'] ?? ''),
           notes: const Value(''),
           deactivate: const Value(false),
@@ -73,12 +77,12 @@ class TestDataLoader extends ChangeNotifier {
           synced: const Value(false),
         ));
 
-        final List contacts = c['contacts'] ?? [];
-        for (final ct in contacts) {
+        // Contacts
+        for (final ct in (c['contacts'] as List?) ?? const []) {
           await db.contactDao.insertContact(ContactsCompanion(
             customerId: Value(customerId),
-            name: Value(ct['name']),
-            phone: Value(ct['phone']?.toString() ?? ''),
+            name: Value(ct['name'] ?? ''),
+            phone: Value((ct['phone'] ?? '').toString()),
             email: Value(ct['email'] ?? ''),
             notes: Value(ct['notes'] ?? ''),
             isMain: Value(ct['isMain'] ?? false),
@@ -88,9 +92,9 @@ class TestDataLoader extends ChangeNotifier {
           ));
         }
 
-        final List scales = c['scales'] ?? [];
-        final List<int> insertedScaleIds = [];
-        for (final sc in scales) {
+        // Scales (collect IDs to link SRs)
+        final insertedScaleIds = <int>[];
+        for (final sc in (c['scales'] as List?) ?? const []) {
           final scaleId = await db.scaleDao.insertScale(ScalesCompanion(
             customerId: Value(customerId),
             configuration: Value(sc['configuration']),
@@ -113,11 +117,15 @@ class TestDataLoader extends ChangeNotifier {
             numberOfLoadCells: Value(sc['numberOfLoadCells']),
             numberOfSections: Value(sc['numberOfSections']),
             loadCellModel: Value(sc['loadCellModel']),
-            loadCellCapacity: Value((sc['loadCellCapacity'] as num?)?.toDouble() ?? 0),
+            loadCellCapacity:
+                Value((sc['loadCellCapacity'] as num?)?.toDouble() ?? 0),
             loadCellCapacityUnit: Value(sc['loadCellCapacityUnit']),
             notes: Value(sc['notes'] ?? ''),
             legalForTrade: Value(sc['legalForTrade'] ?? false),
-            inspectionExpiry: Value(DateTime.tryParse(sc['inspectionExpiry'] ?? '') ?? DateTime.now()),
+            inspectionExpiry: Value(
+              DateTime.tryParse(sc['inspectionExpiry'] ?? '') ??
+                  DateTime.now(),
+            ),
             sealStatus: Value(sc['sealStatus']),
             inspectionResult: Value(sc['inspectionResult']),
             auditFlag: const Value(false),
@@ -125,11 +133,10 @@ class TestDataLoader extends ChangeNotifier {
             synced: const Value(true),
           ));
           insertedScaleIds.add(scaleId);
-          scaleIndex++;
         }
 
-        final List workOrders = c['workOrders'] ?? [];
-        for (final wo in workOrders) {
+        // Work Orders (+ SRs + Weight Tests)
+        for (final wo in (c['workOrders'] as List?) ?? const []) {
           final woId = await db.workOrderDao.insertWorkOrder(WorkOrdersCompanion(
             customerId: Value(customerId),
             workOrderNumber: Value(wo['workOrderNumber']),
@@ -145,43 +152,66 @@ class TestDataLoader extends ChangeNotifier {
             customerNotes: Value(wo['customerNotes']),
             auditFlag: const Value(false),
             synced: const Value(false),
-            lastModified: Value(DateTime.tryParse(wo['lastModified'] ?? '') ?? DateTime.now()),
+            lastModified: Value(
+              DateTime.tryParse(wo['lastModified'] ?? '') ?? DateTime.now(),
+            ),
           ));
-          workOrderIndex++;
 
-          final List reports = wo['serviceReports'] ?? [];
-          for (final sr in reports) {
-            final srId = await db.serviceReportDao.insertReport(ServiceReportsCompanion(
-              workOrderId: Value(woId),
-              scaleId: Value(insertedScaleIds.first),
-              reportType: Value(sr['reportType']),
-              notes: Value(sr['notes']),
-              createdAt: Value(DateTime.tryParse(sr['createdAt'] ?? '') ?? DateTime.now()),
-              complete: const Value(false),
-              synced: const Value(false),
-            ));
-            serviceReportIndex++;
+          // If this customer has no scales, skip SRs for this WO.
+          if (insertedScaleIds.isEmpty) continue;
 
-            final List weightTests = sr['weightTests'] ?? [];
-            for (final wt in weightTests) {
+          for (final sr in (wo['serviceReports'] as List?) ?? const []) {
+            final srId = await db.into(db.serviceReports).insert(
+                  ServiceReportsCompanion(
+                    workOrderId: Value(woId),
+                    // pick the first scale for this customer
+                    scaleId: Value(insertedScaleIds.first),
+                    reportType: Value(sr['reportType']),
+                    notes: Value(sr['notes']),
+                    createdAt: Value(
+                      DateTime.tryParse(sr['createdAt'] ?? '') ??
+                          DateTime.now(),
+                    ),
+                    complete: const Value(false),
+                    synced: const Value(false),
+                  ),
+                  // avoid UNIQUE(work_order_id, scale_id) explosions on re-load
+                  mode: InsertMode.insertOrIgnore,
+                );
+
+            final effectiveSrId = srId; // no need to fetch; ok for seed utility
+
+            for (final wt in (sr['weightTests'] as List?) ?? const []) {
               await db.weightTestDao.insertWeightTest(WeightTestsCompanion(
-                serviceReportId: Value(srId),
+                serviceReportId: Value(effectiveSrId),
                 eccentricityType: Value(wt['eccentricityType']),
                 eccentricityPoints: Value(wt['eccentricityPoints']),
                 eccentricityDirections: Value(wt['eccentricityDirections']),
-                eccentricity1: Value((wt['eccentricity1'] as num?)?.toDouble() ?? 0),
-                eccentricity2: Value((wt['eccentricity2'] as num?)?.toDouble() ?? 0),
-                eccentricity3: Value((wt['eccentricity3'] as num?)?.toDouble() ?? 0),
-                eccentricity4: Value((wt['eccentricity4'] as num?)?.toDouble() ?? 0),
+                eccentricity1:
+                    Value((wt['eccentricity1'] as num?)?.toDouble() ?? 0),
+                eccentricity2:
+                    Value((wt['eccentricity2'] as num?)?.toDouble() ?? 0),
+                eccentricity3:
+                    Value((wt['eccentricity3'] as num?)?.toDouble() ?? 0),
+                eccentricity4:
+                    Value((wt['eccentricity4'] as num?)?.toDouble() ?? 0),
                 eccentricityError: Value(wt['eccentricityError']),
-                asFoundTest1: Value((wt['asFoundTest1'] as num?)?.toDouble() ?? 0),
-                asFoundRead1: Value((wt['asFoundRead1'] as num?)?.toDouble() ?? 0),
-                asFoundDiff1: Value((wt['asFoundDiff1'] as num?)?.toDouble() ?? 0),
-                asLeftTest1: Value((wt['asLeftTest1'] as num?)?.toDouble() ?? 0),
-                asLeftRead1: Value((wt['asLeftRead1'] as num?)?.toDouble() ?? 0),
-                asLeftDiff1: Value((wt['asLeftDiff1'] as num?)?.toDouble() ?? 0),
+                asFoundTest1:
+                    Value((wt['asFoundTest1'] as num?)?.toDouble() ?? 0),
+                asFoundRead1:
+                    Value((wt['asFoundRead1'] as num?)?.toDouble() ?? 0),
+                asFoundDiff1:
+                    Value((wt['asFoundDiff1'] as num?)?.toDouble() ?? 0),
+                asLeftTest1:
+                    Value((wt['asLeftTest1'] as num?)?.toDouble() ?? 0),
+                asLeftRead1:
+                    Value((wt['asLeftRead1'] as num?)?.toDouble() ?? 0),
+                asLeftDiff1:
+                    Value((wt['asLeftDiff1'] as num?)?.toDouble() ?? 0),
                 weightTestUnit: Value(wt['weightTestUnit']),
-                timestamp: Value(DateTime.tryParse(wt['timestamp'] ?? '') ?? DateTime.now()),
+                timestamp: Value(
+                  DateTime.tryParse(wt['timestamp'] ?? '') ?? DateTime.now(),
+                ),
               ));
             }
           }
@@ -193,7 +223,7 @@ class TestDataLoader extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e, stack) {
-      debugPrint('❌ Error loading test data: \$e');
+      debugPrint('❌ Error loading test data: $e');
       debugPrint(stack.toString());
       loading = false;
       notifyListeners();

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:scalewrite_v2/data/database.dart';
+import 'package:scalewrite/data/database.dart';
 
 /// Push-only sync for beta:
 /// - Pushes unsynced WorkOrders (parents)
